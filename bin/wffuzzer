@@ -1,0 +1,25 @@
+#!/usr/bin/python3
+
+# author: WatchDogOblivion
+# description: TODO
+# WatchDogs File Fuzzer a.k.a wffuzzer
+
+import traceback;
+
+from watchdogs.web import FileFuzzer;
+
+def __main__():
+    fuzzer = FileFuzzer();
+    try:
+        fuzzer.parseArgs();
+        fuzzer.setArguments();
+        fuzzer.parseFile();
+        fuzzer.processRequest();
+    except ValueError as ve:
+        print(ve);
+        print(fuzzer.parser.print_usage());
+    except Exception as e:
+        print(traceback.format_exc());
+        print(fuzzer.parser.print_usage());
+
+__main__();
