@@ -1,4 +1,4 @@
-## __This project was created to aggregate the custom scripts I wrote during my trials through OSCP, HTB, and VHL.__ ##
+### __This project was created to aggregate the custom scripts I wrote during my trials through OSCP, HTB, and VHL.__ ###
 
 ### *Either Installation approach below will work.* ###
 
@@ -46,19 +46,21 @@
         export PATH=$PATH:/path/to/project/offsec-python/bin
 
 #### Additional Info ####
-    For installation options above, if running multiple python versions, simply specify version in shell command
+    For installation options above, if running multiple python versions, simply specify the version in 
+    the shell command.
         python -m pip pipCommand package
         python2.7 -m pip pipCommand package
         python3 -m pip pipCommand package
 
 
 ### Sample module wffuzzer ###
-    The module wffuzzer is used for fuzzing requests using a file that contains all the request information.
+    The module wffuzzer is used for fuzzing requests using a file that contains all the request 
+    information.
     
-    All you need to do is intercept a request in burp suite, owasp zap, or any other interceptor application, and copy
-    and paste the contents to a file.
-    Then specify the file, and a fuzz file (the file containing the list of words that will replace the text in the request) 
-    after replacing the value string with the keyword FUZZ.
+    All you need to do is intercept a request in burp suite, owasp zap, or any other interceptor 
+    application and copy & paste the contents to a file.
+    Then specify the file, and a fuzz file (the file containing the list of words that will replace the 
+    text in the request) after replacing the value string with the keyword FUZZ.
 
     Example:
         In the browser, go to a page that allows a file upload.
@@ -80,7 +82,8 @@
             3. Content-Disposition: form-data; name="FileUpload1"; filename="postFile.txt" -> 
                Content-Disposition: form-data; name="FileUpload"; filename="postFile.FUZZ"
         
-        Run the script and use the flags to control filtering by length, status code, and text. Hide or display responses with a flag.
+        Run the script and use the flags to control filtering by length, status code, and/or text. 
+        Hide or display responses with a flag.
             wffuzzer -if testrest -rh 10.10.10.10 -pf postFile.txt -ff fuzzFile.txt                    
                 Fuzzing Request
                 Response status: 200 - Response length: 1115
@@ -96,7 +99,7 @@
                 Response status: 200 - Response length: 1115
                 Response status: 200 - Response length: 1115
                 Response status: 200 - Response length: 1110
-            
+```html
             wffuzzer -if testrest -rh 10.10.10.93 -pf postFile.txt -ff fuzzFile.txt -fl "1115" -sr
                 Fuzzing Request
                 Response body: 
@@ -111,5 +114,5 @@
                     </body>
                 </html>
                 Response status: 200 - Response length: 1110
-
+```
         If any help is required, the standard --help and -h is available for all flags and descriptions.
