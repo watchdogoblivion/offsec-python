@@ -1,0 +1,28 @@
+#!/usr/bin/python
+
+# author: WatchDogOblivion
+# description: TODO
+# WatchDogs Character Converter a.k.a wcharc
+
+import traceback;
+
+from watchdogs.io import CharacterConverter;
+
+def __main__():
+    cc = CharacterConverter();
+    try:
+        cc.parseArgs();
+        cc.setArguments();
+        cc.readLines();
+        if cc.outputFile:
+            cc.writeLines();
+        else:
+            cc.printLines();
+    except ValueError as ve:
+        print(ve);
+        print(cc.parser.print_usage());
+    except Exception as e:
+        print(traceback.format_exc());
+        print(cc.parser.print_usage());
+
+__main__();
