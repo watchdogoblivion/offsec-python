@@ -133,9 +133,9 @@ class EncodingViewer(File):
         parser = self.parser;
         required = parser.add_argument_group("Required arguments");
         required.add_argument("-if", "--input-file", required=True, help="Specify the input file to read from.", type=str, metavar="");
-        required.add_argument("-ef", "--encode-from", required=True, help="The encoding type to encode from.", type=int, metavar="");
+        required.add_argument("-ef", "--encode-from", required=True, help="The encoding type to encode from. This value must be a numerical value from the encoding list.", type=int, metavar="");
         parser.add_argument("-of", "--output-file", help="Specify the output file to write to.", type=str, metavar="");
-        parser.add_argument("-et", "--encode-to", help="The encoding type to encode to. Default is utf-8", type=int, metavar="", default=85);
+        parser.add_argument("-et", "--encode-to", help="The encoding type to encode to. This value must be a numerical value from the encoding list. Default is number 85 - utf-8", type=int, metavar="", default=85);
         parser.add_argument("-le", "--list-encodings", action="version", help="Conversion types.", version=self.getEncodings());
         parser.add_argument("-v", "--version", action="version", help="Show version", version="Encoding Viewer version: {}".format(EncodingViewer.VERSION));
         parser.add_argument("-h", "--help", action="help", help="Show this help message");

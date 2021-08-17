@@ -37,6 +37,8 @@ class FileFuzzer(File):
         self.filterIn = "";
         self.filterOut = "";
         self.showResponse = False;
+        self.showFuzz = False;
+        self.FuzzText = "";
         
     def __setattr__(self, name, value):
         super(FileFuzzer, self).__setattr__(name, value);
@@ -64,6 +66,7 @@ class FileFuzzer(File):
         parser.add_argument("-hp", "--http-proxy", help="Specify a proxy.", type=str, metavar="");
         parser.add_argument("-hs", "--https-proxy", help="Specify an ssl proxy", type=str, metavar="");
         parser.add_argument("-sr", "--show-response", action="store_true", help="Shows the response body");
+        parser.add_argument("-sf", "--show-fuzz", action="store_true", help="Shows the fuzz text used in the request");
         parser.add_argument("-v", "--version", action="version", help="Show version", version="File Fuzzer version: {}".format(FileFuzzer.VERSION));
         parser.add_argument("-h", "--help", action="help", help="Show this help message");
         self.args = parser.parse_args();
@@ -258,6 +261,8 @@ class FileFuzzer(File):
             return;
         
         responseString = "Response status: {} - Response length: {}".format(responseStatus, responseLength);
+        if(self.showFuzz):
+            responseString += " - Fuzz text: {}".format(self.FuzzText);
         if(self.showResponse):
             responseString = "\r\nResponse body: {}\r\n".format(responseSoup) + responseString;
         
@@ -283,6 +288,7 @@ class FileFuzzer(File):
                 attrKey = list(keys)[0];
                 key = self.fuzzLocator[list(keys)[0]];
                 self.swapFuzz(FUZZ, line.rstrip(), attrKey, key);
+                self.FuzzText = line.rstrip();
             self.sendRequest();
             self.swapFuzz(line.rstrip(), FUZZ, attrKey, key);
     
