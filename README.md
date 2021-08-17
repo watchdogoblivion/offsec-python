@@ -1,0 +1,1 @@
+# __This project was created to aggregate the custom scripts I wrote during my trials through OSCP, HTB, and VHL.__
