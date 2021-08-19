@@ -52,12 +52,14 @@ class FileFuzzer(File):
         self.parser = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter);
         parser = self.parser;
         required = parser.add_argument_group("Required arguments");
-        ifHelp = "Specify the input file to read from.\nWhen executing POST, always ensure there is a new line feed separating the body from the headers.\nIf fuzzing, the file must include exactly 1 'FUZZ' keyword.";
+        ifHelp = ("Specify the input file to read from.\nWhen executing POST, always ensure there is a new line feed separating the body from the headers."
+        "\nIf fuzzing, the file must include exactly 1 'FUZZ' keyword.");        
         required.add_argument("-if", "--input-file", required=True, help=ifHelp, type=str, metavar="request.txt");
         required.add_argument("-rh", "--rhost", required=True, help="Explictly specify the remote host.", type=str, metavar="127.0.0.1");
         parser.add_argument("-s", "--secure", action="store_true", help="Specifies https.");
         parser.add_argument("-of", "--output-file", help="Specify the output file to write to.", type=str, metavar="");
-        parser.add_argument("-pf", "--post-file", help="Specify a file to send in a POST request. This flag is for file uploads only and should not be used for other POST requests", type=str, metavar="");
+        parser.add_argument("-pf", "--post-file", help=("Specify a file to send in a POST request. This flag is for file uploads only and should not be used" 
+        "for other POST requests"), type=str, metavar="");        
         parser.add_argument("-ff", "--fuzz-file", help="Specify a file to fuzz with. If this is not specified, no fuzzing will occur", type=str, metavar="");
         parser.add_argument("-fl", "--filter-length", help="Filter OUT fuzzed responses by coma separated lengths", type=str, metavar="", default="");
         parser.add_argument("-fs", "--filter-status", help="Filter IN fuzzed responses by coma separated status codes", type=str, metavar="");
@@ -249,8 +251,10 @@ class FileFuzzer(File):
         responseSoup = BeautifulSoup(response.text, 'html.parser').prettify().rstrip();
         responseStatus = response.status_code;
         responseLength = "";
-        if(CONTENT_LENGTH in response.headers):
-            response.headers[CONTENT_LENGTH];
+        try:
+            responseLength = response.headers.get(CONTENT_LENGTH);
+        except:
+            print("An exception occurred trying to retrieve header {}".format(CONTENT_LENGTH));
         
         if(self.filterLength and responseLength in self.filterLength):
             return;
@@ -271,7 +275,7 @@ class FileFuzzer(File):
 
     def sendRequest(self):
         self.url = self.parseUrl(self.rhost, self.secure, self.info[ENDPOINT]);
-        
+
         req = requests.Request(self.info[METHOD],self.url,headers=self.headers,data=self.getBody());
         prepared = req.prepare();
         s = requests.Session();
@@ -282,16 +286,20 @@ class FileFuzzer(File):
     def fuzzRequest(self):
         fuzzFile = open(self.fuzzFile, "r");
         lines = fuzzFile.readlines();
-        
-        for line in lines:
-            keys = self.fuzzLocator.keys();
-            if(len(list(keys)) > 0):
-                attrKey = list(keys)[0];
-                key = self.fuzzLocator[list(keys)[0]];
-                self.swapFuzz(FUZZ, line.rstrip(), attrKey, key);
-                self.FuzzText = line.rstrip();
+        attrkeys = list(self.fuzzLocator.keys());
+
+        if(len(attrkeys) <= 0):
+            print("No FUZZ keyword located. Sending normal request.");
             self.sendRequest();
-            self.swapFuzz(line.rstrip(), FUZZ, attrKey, key);
+        else:
+            for line in lines:
+                self.FuzzText = line.rstrip();
+                attrKey = attrkeys[0];
+                key = self.fuzzLocator[attrKey];
+
+                self.swapFuzz(FUZZ, line.rstrip(), attrKey, key);
+                self.sendRequest();
+                self.swapFuzz(line.rstrip(), FUZZ, attrKey, key);
     
     def processRequest(self):
         if(len(self.fuzzLocator) > 0):

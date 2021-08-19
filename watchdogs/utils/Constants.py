@@ -5,7 +5,7 @@
 ########## General Constants ##########
 FILE_NAME = 'filename';
 NAME = 'name';
-FUZZ = "FUZZ";
+FUZZ = 'FUZZ';
 COLON = ':';
 SEMI_COLON=';';
 EQUAL = '=';
@@ -20,44 +20,49 @@ EMPTY='';
 RB='rb'
 FS='/';
 BS='\\';
+COMMA=','
+HASH='#'
 
 ########## Delimiters ##########
-D1 = " ::: ";
-D2 = ", ";
-D3 = " ";
-D4 = "#";
+D1 = ' : ';
+D2 = ' :: ';
+D3 = ' ::: ';
+D4='; '
+D5=' - '
+D6 = ', ';
+D7 = ' #';
 
 ########## HTTP(S) Request constants ##########
-CONTENT_TYPE = "Content-Type";
+CONTENT_TYPE = 'Content-Type';
 CONTENT_DISPOSITION = 'Content-Disposition';
 CONTENT_LENGTH='Content-Length';
-APPLICATION_JSON = "application/json";
-APPLICATION_ATOM_XML = "application/atom+xml";
-APPLICATION_FORM_URLENCODED = "application/x-www-form-urlencoded";
-APPLICATION_OCTET_STREAM = "application/octet-stream";
-APPLICATION_SVG_XML = "application/svg+xml";
-APPLICATION_XHTML_XML = "application/xhtml+xml";
-APPLICATION_XML = "application/xml";
-WILDCARD = "*";
-MULTIPART_FORM_DATA = "multipart/form-data";
-TEXT_HTML = "text/html";
-TEXT_PLAIN = "text/plain";
-TEXT_XML = "text/xml";
-BEARER = "Bearer ";
-BASIC = "Basic ";
-ACCEPT = "Accept";
-ST = "*/*";
+APPLICATION_JSON = 'application/json';
+APPLICATION_ATOM_XML = 'application/atom+xml';
+APPLICATION_FORM_URLENCODED = 'application/x-www-form-urlencoded';
+APPLICATION_OCTET_STREAM = 'application/octet-stream';
+APPLICATION_SVG_XML = 'application/svg+xml';
+APPLICATION_XHTML_XML = 'application/xhtml+xml';
+APPLICATION_XML = 'application/xml';
+WILDCARD = '*';
+MULTIPART_FORM_DATA = 'multipart/form-data';
+TEXT_HTML = 'text/html';
+TEXT_PLAIN = 'text/plain';
+TEXT_XML = 'text/xml';
+BEARER = 'Bearer ';
+BASIC = 'Basic ';
+ACCEPT = 'Accept';
+ST = '*/*';
 HTTP='http';
 HTTP_PROTOCOL='http://';
 HTTPS='https';
 HTTPS_PROTOCOL='https://'
 BOUNDARY='boundary';
-METHOD="method";
-ENDPOINT="endpoint";
+METHOD='method';
+ENDPOINT='endpoint';
 HOST='host';
-INFO="info";
-HEADER="header";
-BODY="body"
+INFO='info';
+HEADER='header';
+BODY='body'
 
 # Alphabet
 a='a';
