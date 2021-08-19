@@ -88,7 +88,6 @@ class FileFuzzer(File):
         isBody = False;
         length = len(lines);
         index = 0;
-
         while(index < length):
             line = lines[index].rstrip();
             boundaryString = BOUNDARY+EQUAL+DASH+DASH;
@@ -101,9 +100,9 @@ class FileFuzzer(File):
             elif(line == EMPTY and not isBody):
                 isBody = True;
                 setattr(self, fields[1], value);
-                index+=1;
                 value = "";
             elif(index+1 == length):
+                value += line+"\n";
                 setattr(self, fields[2], value);
                 index+=1;
                 break;
@@ -161,12 +160,12 @@ class FileFuzzer(File):
 
     def setFuzzLocator(self, *attrKeys):
         for attrKey in attrKeys:
-            if(HOST in attrKey):
-                value = getattr(self, attrKey);
+            value = getattr(self, attrKey);
+            if(type(value) == str):
                 if(FUZZ in value):
                     self.fuzzLocator[attrKey]=attrKey;
             else:
-                for k,v in getattr(self, attrKey).items():
+                for k,v in value.items():
                     if(type(v) == tuple and (FUZZ in v[0] or FUZZ in v[2])):
                         self.fuzzLocator[attrKey]=k;
                     elif(FUZZ in v):
@@ -249,7 +248,9 @@ class FileFuzzer(File):
     def handleResponse(self, response):
         responseSoup = BeautifulSoup(response.text, 'html.parser').prettify().rstrip();
         responseStatus = response.status_code;
-        responseLength = response.headers[CONTENT_LENGTH];
+        responseLength = "";
+        if(CONTENT_LENGTH in response.headers):
+            response.headers[CONTENT_LENGTH];
         
         if(self.filterLength and responseLength in self.filterLength):
             return;
