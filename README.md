@@ -71,17 +71,22 @@
         
         On the previous browser page, select the file to upload and begin the upload.
         Go back to burp suite and copy and paste the intercepted request to a file; anyname.txt
-        Place or Replace any ONE value string that you want to fuzz with the FUZZ word.
+        Place or Replace any value string that you want to fuzz with a FUZZ word ending with a number
+        starting from 1 i.e FUZZ1,FUZZ2,FUZZ3 for each word to be fuzzed.
 
             1. POST /upload.jsp HTTP/1.1 -> 
-               POST FUZZ/upload.jsp HTTP/1.1
+               POST FUZZ1/upload.jsp HTTP/1.1
 
             2. Content-Type: text/plain -> 
-               Content-Type: FUZZ
+               Content-Type: FUZZ1
 
             3. Content-Disposition: form-data; name="FileUpload1"; filename="postFile.txt" -> 
-               Content-Disposition: form-data; name="FileUpload"; filename="postFile.FUZZ"
-        
+               Content-Disposition: form-data; name="FileUpload"; filename="FUZZ1.FUZZ2"
+        Ensure that the fuzz file contains the same amount of words per line as there are FUZZ words 
+        in the input file, separated by a delimiter of your choice (the default is a colon but you
+        can specify a delimiter). 
+        For example 3 above the fuzz file could contain: test:txt to replace FUZZ1.FUZZ2
+
         Run the script and use the flags to control filtering by length, status code, and/or text. 
         Hide or display responses with a flag.
             wffuzzer -if testrest -rh 10.10.10.10 -pf postFile.txt -ff fuzzFile.txt                    
@@ -106,7 +111,7 @@
                 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
                 <html xmlns="http://www.w3.org/1999/xhtml">
                     <body>
-                        <form action="transfer.aspx" enctype="multipart/form-data" id="form1" method="post" name="form1">
+                        <form action="upload.jsp" enctype="multipart/form-data" id="form1" method="post" name="form1">
                             <div>
                                 <span id="Label1" style="color:Green;">File uploaded successfully.</span>
                             </div>

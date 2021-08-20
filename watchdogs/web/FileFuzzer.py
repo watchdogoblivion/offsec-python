@@ -2,6 +2,7 @@
 # description: TODO
 # WatchDogs File Fuzzer
 
+import re;
 import argparse;
 import requests;
 from bs4 import BeautifulSoup;
@@ -30,8 +31,10 @@ class FileFuzzer(File):
         self.postFile = "";
         self.httpProxy = "";
         self.httpsProxy = "";
-        self.fuzzLocator = OrderedDict();
+        self.disableVerification = False;
+        self.fuzzLocators = OrderedDict();
         self.fuzzFile = "";
+        self.fuzzDelimiter = COLON;
         self.filterLength = "";
         self.filterStatus = "";
         self.filterIn = "";
@@ -66,7 +69,8 @@ class FileFuzzer(File):
         parser.add_argument("-fi", "--filter-in", help="Filters in and keeps the responses with the specified text", type=str, metavar="");
         parser.add_argument("-fo", "--filter-out", help="Filters out and removes the responses with the specified text", type=str, metavar="");
         parser.add_argument("-hp", "--http-proxy", help="Specify a proxy.", type=str, metavar="");
-        parser.add_argument("-hs", "--https-proxy", help="Specify an ssl proxy", type=str, metavar="");
+        parser.add_argument("-sp", "--https-proxy", help="Specify an ssl proxy", type=str, metavar="");
+        parser.add_argument("-dv", "--disable-verification", action="store_true", help="For https proxies, this flag will disable cert verification.", default=False);
         parser.add_argument("-sr", "--show-response", action="store_true", help="Shows the response body");
         parser.add_argument("-sf", "--show-fuzz", action="store_true", help="Shows the fuzz text used in the request");
         parser.add_argument("-v", "--version", action="version", help="Show version", version="File Fuzzer version: {}".format(FileFuzzer.VERSION));
@@ -157,21 +161,49 @@ class FileFuzzer(File):
                             self.body[name] = value;
                             break;
                         nextLine += filteredList[i+1];
+            if(not self.body):
+                print("Could not parse thw post file specified. Please ensure that the -pf flag is being used with a proper file upload request. If the "
+                "attempted request is not a file upload, then remove the -pf flag to send JSON or standard form data.");
+                exit();
         else:
             self.body = self.raw_body;
 
     def setFuzzLocator(self, *attrKeys):
+        """
+        This method stores the locations of the FUZZ keywords in the fuzzlocator.
+        The fuzzlocator is an ordered dictionary that stores the FileFuzzer attributes as
+        in its nested keys
+        The value of those key attributes, store the value of the corresponding FileFuzzer attribute value.
+        This way the values can be accessed and modified directly later on without knowing the exact name.
+        """
+
+        locators = self.fuzzLocators;
         for attrKey in attrKeys:
             value = getattr(self, attrKey);
+            reg = r'FUZZ([0-9])*';
+            itrCount = 0;
+
+            if(not locators.get(attrKey)):
+                locators[attrKey] = ([], itrCount);
             if(type(value) == str):
                 if(FUZZ in value):
-                    self.fuzzLocator[attrKey]=attrKey;
+                    occurenceIndicies = re.findall(reg,value);
+                    for index in occurenceIndicies:
+                        locators[attrKey][0].append((attrKey, index));
             else:
                 for k,v in value.items():
-                    if(type(v) == tuple and (FUZZ in v[0] or FUZZ in v[2])):
-                        self.fuzzLocator[attrKey]=k;
+                    if(type(v) == tuple and (FUZZ in v[0] or FUZZ in v[2])):                        
+                        count = 0;
+                        if(FUZZ in v[0]):
+                            occurenceIndicies = re.findall(reg,v[0]);
+                        if(FUZZ in v[2]):
+                            occurenceIndicies = re.findall(reg,v[2]);
+                        for index in occurenceIndicies:
+                            locators[attrKey][0].append((k, index));
                     elif(FUZZ in v):
-                        self.fuzzLocator[attrKey]=k;
+                        occurenceIndicies = re.findall(reg,v);
+                        for index in occurenceIndicies:
+                            locators[attrKey][0].append((k, index));
 
     def parseFile(self):
         inputFile = open(self.inputFile, "r");
@@ -205,22 +237,51 @@ class FileFuzzer(File):
             '\r\n'.join(body),
             '----------- Request End ------------'
         ));
-    
-    def swapFuzz(self, arg1, arg2, attrKey, key):
-        attrValue = getattr(self, attrKey);
-        if(type(attrValue) == str):
-            setattr(self, attrKey, attrValue.replace(arg1, arg2))
-            return;
 
-        value = attrValue[key];
-        if(type(value) == tuple):
-            if(arg1 in value[0]):
-                attrValue[key] = (value[0].replace(arg1, arg2), value[1], value[2]);
-            elif(arg1 in value[2]):
-                attrValue[key] = (value[0], value[1], value[2].replace(arg1, arg2));
-        else:
-            attrValue[key] = value.replace(arg1, arg2);
+    def reset(self, keys):
+        uniqueList = list(set(keys));
+        for attrKey in uniqueList:
+            self.fuzzLocators[attrKey] = (self.fuzzLocators[attrKey][0], 0);
 
+    def swapFuzz(self, substrings, keys, switch=False):
+        """
+        @substrings - A list representing each substring, that is a result of a string split. 
+                    The original string represents a single line in the fuzz file.
+        @keys - The fuzzlocator keys that point to the fuzz keyword top level locations. 
+                The nested values point directly to the values that contain the FUZZ keywords.
+        @switch - Dictates whether to swap the FUZZ keyword with the fuzz text or vice versa.
+        """
+
+        for index in range(len(substrings)):
+            arg1 = FUZZ + str(index+1);
+            arg2 = substrings[index].rstrip();
+
+            if(switch):
+                tmp = arg1;
+                arg1 = arg2;
+                arg2 = tmp;
+
+            attrKey = keys[index];
+            attrValue = getattr(self, attrKey);
+            if(type(attrValue) == str):
+                setattr(self, attrKey, attrValue.replace(arg1, arg2))
+                continue;
+            
+            attrKeysValue = self.fuzzLocators[attrKey];
+            attrKeysValueArray = attrKeysValue[0];
+            itrCount = attrKeysValue[1];
+
+            value = attrValue[attrKeysValueArray[itrCount][0]];
+            if(type(value) == tuple):
+                if(arg1 in value[0]):
+                    attrValue[attrKeysValueArray[itrCount][0]] = (value[0].replace(arg1, arg2), value[1], value[2]);
+                elif(arg1 in value[2]):
+                    attrValue[attrKeysValueArray[itrCount][0]] = (value[0], value[1], value[2].replace(arg1, arg2));
+            else:
+                attrValue[attrKeysValueArray[itrCount][0]]= value.replace(arg1, arg2);
+                
+            self.fuzzLocators[attrKey] = (attrKeysValueArray, itrCount+1);
+                
     def parseUrl(self, host, secure, endpoint=""):
         standardProtocol = HTTP;
         if(standardProtocol in host):
@@ -243,8 +304,8 @@ class FileFuzzer(File):
         proxies = {};
         if(self.httpProxy):
             proxies[HTTP] = self.parseUrl(self.httpProxy, False);
-        if(self.httpsProxy):
-            proxies[HTTPS] = self.parseUrl(self.httpProxy, True);
+        elif(self.httpsProxy):
+            proxies[HTTPS] = self.parseUrl(self.httpsProxy, True);
         return proxies;
     
     def handleResponse(self, response):
@@ -278,31 +339,42 @@ class FileFuzzer(File):
 
         req = requests.Request(self.info[METHOD],self.url,headers=self.headers,data=self.getBody());
         prepared = req.prepare();
-        s = requests.Session();
-        s.proxies = self.getProxies();
-        response = s.send(prepared);
+        session = requests.Session();
+        session.proxies = self.getProxies();
+        session.verify = not self.disableVerification;
+        response = session.send(prepared);
         self.handleResponse(response);
-   
+
+    def prepAttrKeys(self):
+        locators = self.fuzzLocators;
+        tmpDict = {};
+        for locator in locators:
+            for tup in locators[locator][0]:
+                tmpDict[tup[1]] = locator;
+        preparedKeys = list(OrderedDict(sorted(tmpDict.items())).values());
+        return preparedKeys;
+
     def fuzzRequest(self):
         fuzzFile = open(self.fuzzFile, "r");
         lines = fuzzFile.readlines();
-        attrkeys = list(self.fuzzLocator.keys());
+        keys = self.prepAttrKeys();
+        de = self.fuzzDelimiter;
 
-        if(len(attrkeys) <= 0):
+        if(len(keys) <= 0):
             print("No FUZZ keyword located. Sending normal request.");
             self.sendRequest();
         else:
             for line in lines:
                 self.FuzzText = line.rstrip();
-                attrKey = attrkeys[0];
-                key = self.fuzzLocator[attrKey];
-
-                self.swapFuzz(FUZZ, line.rstrip(), attrKey, key);
+                substrings = line.split(de);
+                self.reset(keys);
+                self.swapFuzz(substrings, keys);
                 self.sendRequest();
-                self.swapFuzz(line.rstrip(), FUZZ, attrKey, key);
+                self.reset(keys);
+                self.swapFuzz(substrings, keys, True);
     
     def processRequest(self):
-        if(len(self.fuzzLocator) > 0):
+        if(len(self.fuzzLocators) > 0):
             print("Fuzzing Request");
             self.fuzzRequest();
         else:
