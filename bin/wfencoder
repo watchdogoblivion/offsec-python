@@ -1,0 +1,28 @@
+#!/usr/bin/python
+
+# author: WatchDogOblivion
+# description: TODO
+# WatchDogs File Encoder a.k.a wfencoder
+
+import traceback;
+
+from watchdogs.io import FileEncoder;
+
+def __main__():
+    fe = FileEncoder();
+    try:
+        fe.parseArgs();
+        fe.setArguments();
+        fe.readLines();
+        if fe.outputFile:
+            fe.writeLines();
+        else:
+            fe.printLines();
+    except ValueError as ve:
+        print(ve);
+        print(fe.parser.print_usage());
+    except Exception as e:
+        print(traceback.format_exc());
+        print(fe.parser.print_usage());
+
+__main__();
