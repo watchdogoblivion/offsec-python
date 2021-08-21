@@ -19,29 +19,29 @@ class FileFuzzer(File):
     def __init__(self):
         self.requestFields = [];
         self.secure = False;
-        self.rhost = "";
-        self.raw_info = "";
-        self.raw_headers = "";
-        self.raw_body = "";
+        self.rhost = EMPTY;
+        self.raw_info = EMPTY;
+        self.raw_headers = EMPTY;
+        self.raw_body = EMPTY;
         self.info = OrderedDict();
-        self.url = "";
+        self.url = EMPTY;
         self.headers = OrderedDict();
-        self.boundary = "";
+        self.boundary = EMPTY;
         self.body = OrderedDict();
-        self.postFile = "";
-        self.httpProxy = "";
-        self.httpsProxy = "";
+        self.postFile = EMPTY;
+        self.httpProxy = EMPTY;
+        self.httpsProxy = EMPTY;
         self.disableVerification = False;
         self.fuzzLocators = OrderedDict();
-        self.fuzzFile = "";
+        self.fuzzFile = EMPTY;
         self.fuzzDelimiter = COLON;
-        self.filterLength = "";
-        self.filterStatus = "";
-        self.filterIn = "";
-        self.filterOut = "";
+        self.filterLength = EMPTY;
+        self.filterStatus = EMPTY;
+        self.filterIn = EMPTY;
+        self.filterOut = EMPTY;
         self.showResponse = False;
         self.showFuzz = False;
-        self.FuzzText = "";
+        self.FuzzText = EMPTY;
         
     def __setattr__(self, name, value):
         super(FileFuzzer, self).__setattr__(name, value);
@@ -60,16 +60,16 @@ class FileFuzzer(File):
         required.add_argument("-if", "--input-file", required=True, help=ifHelp, type=str, metavar="request.txt");
         required.add_argument("-rh", "--rhost", required=True, help="Explictly specify the remote host.", type=str, metavar="127.0.0.1");
         parser.add_argument("-s", "--secure", action="store_true", help="Specifies https.");
-        parser.add_argument("-of", "--output-file", help="Specify the output file to write to.", type=str, metavar="");
+        parser.add_argument("-of", "--output-file", help="Specify the output file to write to.", type=str, metavar=EMPTY);
         parser.add_argument("-pf", "--post-file", help=("Specify a file to send in a POST request. This flag is for file uploads only and should not be used" 
-        "for other POST requests"), type=str, metavar="");        
-        parser.add_argument("-ff", "--fuzz-file", help="Specify a file to fuzz with. If this is not specified, no fuzzing will occur", type=str, metavar="");
-        parser.add_argument("-fl", "--filter-length", help="Filter OUT fuzzed responses by coma separated lengths", type=str, metavar="", default="");
-        parser.add_argument("-fs", "--filter-status", help="Filter IN fuzzed responses by coma separated status codes", type=str, metavar="");
-        parser.add_argument("-fi", "--filter-in", help="Filters in and keeps the responses with the specified text", type=str, metavar="");
-        parser.add_argument("-fo", "--filter-out", help="Filters out and removes the responses with the specified text", type=str, metavar="");
-        parser.add_argument("-hp", "--http-proxy", help="Specify a proxy.", type=str, metavar="");
-        parser.add_argument("-sp", "--https-proxy", help="Specify an ssl proxy", type=str, metavar="");
+        "for other POST requests"), type=str, metavar=EMPTY);        
+        parser.add_argument("-ff", "--fuzz-file", help="Specify a file to fuzz with. If this is not specified, no fuzzing will occur", type=str, metavar=EMPTY);
+        parser.add_argument("-fl", "--filter-length", help="Filter OUT fuzzed responses by coma separated lengths", type=str, metavar=EMPTY, default="");
+        parser.add_argument("-fs", "--filter-status", help="Filter IN fuzzed responses by coma separated status codes", type=str, metavar=EMPTY);
+        parser.add_argument("-fi", "--filter-in", help="Filters in and keeps the responses with the specified text", type=str, metavar=EMPTY);
+        parser.add_argument("-fo", "--filter-out", help="Filters out and removes the responses with the specified text", type=str, metavar=EMPTY);
+        parser.add_argument("-hp", "--http-proxy", help="Specify a proxy.", type=str, metavar=EMPTY);
+        parser.add_argument("-sp", "--https-proxy", help="Specify an ssl proxy", type=str, metavar=EMPTY);
         parser.add_argument("-dv", "--disable-verification", action="store_true", help="For https proxies, this flag will disable cert verification.", default=False);
         parser.add_argument("-sr", "--show-response", action="store_true", help="Shows the response body");
         parser.add_argument("-sf", "--show-fuzz", action="store_true", help="Shows the fuzz text used in the request");
@@ -108,12 +108,12 @@ class FileFuzzer(File):
                 setattr(self, fields[1], value);
                 value = "";
             elif(index+1 == length):
-                value += line+"\n";
+                value += line+LFN;
                 setattr(self, fields[2], value);
                 index+=1;
                 break;
 
-            value += line+"\n";
+            value += line+LFN;
             index+=1;
 
     def parseInfo(self):
@@ -227,15 +227,24 @@ class FileFuzzer(File):
             headers.append(format.format(k, v));
         
         body = [];
-        for k, v in self.body.items():
-            body.append(format.format(k, v));
+        if(type(self.body) == str):
+            body.append(self.body);
+        else:
+            for k, v in self.body.items():
+                body.append(format.format(k, v));
 
-        print('\r\n{}\n{}\r\n{}\r\n{}\r\n{}\r\n'.format(
+        print('{}{}{}{}{}{}{}{}{}{}{}'.format(
+            LFRN,
             '-----------Request Start-----------',
-            '\r\n'.join(info),
-            '\r\n'.join(headers),
-            '\r\n'.join(body),
-            '----------- Request End ------------'
+            LFRN,
+            LFRN.join(info),
+            LFRN,
+            LFRN.join(headers),
+            LFRN,
+            LFRN.join(body),
+            LFRN,
+            '----------- Request End ------------',
+            LFRN
         ));
 
     def reset(self, keys):
@@ -282,7 +291,7 @@ class FileFuzzer(File):
                 
             self.fuzzLocators[attrKey] = (attrKeysValueArray, itrCount+1);
                 
-    def parseUrl(self, host, secure, endpoint=""):
+    def parseUrl(self, host, secure, endpoint=EMPTY):
         standardProtocol = HTTP;
         if(standardProtocol in host):
             return "{}{}".format(host, endpoint);
@@ -311,7 +320,7 @@ class FileFuzzer(File):
     def handleResponse(self, response):
         responseSoup = BeautifulSoup(response.text, 'html.parser').prettify().rstrip();
         responseStatus = response.status_code;
-        responseLength = "";
+        responseLength = EMPTY;
         try:
             responseLength = response.headers.get(CONTENT_LENGTH);
         except:
@@ -330,7 +339,7 @@ class FileFuzzer(File):
         if(self.showFuzz):
             responseString += " - Fuzz text: {}".format(self.FuzzText);
         if(self.showResponse):
-            responseString = "\r\nResponse body: {}\r\n".format(responseSoup) + responseString;
+            responseString = "{}Response body: {}{}".format(LFRN,responseSoup,LFRN) + responseString;
         
         print(responseString);
 

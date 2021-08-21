@@ -15,6 +15,7 @@ LINE_FEED_N='\n';
 LINE_FEED_R='\r';
 LFN='\n';
 LFR='\r';
+LFRN='\r\n';
 SPACE=' ';
 EMPTY='';
 RB='rb'

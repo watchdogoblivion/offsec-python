@@ -5,6 +5,7 @@
 import argparse;
 
 from watchdogs.io import File;
+from watchdogs.utils.Constants import *;
 
 class CharacterConverter(File):
 
@@ -12,8 +13,8 @@ class CharacterConverter(File):
 
     def __init__(self):
         super(CharacterConverter, self).__init__();
-        self.oldChar = "";
-        self.newChar = "";
+        self.oldChar = EMPTY;
+        self.newChar = EMPTY;
         self.incrementLine = False;
         self.incrementWord = False;
         self.upper = False;
@@ -23,7 +24,7 @@ class CharacterConverter(File):
         self.parser = argparse.ArgumentParser(add_help=False);
         parser = self.parser;
         required = parser.add_argument_group("Required arguments");
-        required.add_argument("-if", "--input-file", required=True, help="Specify the input file to read from.", type=str, metavar="");
+        required.add_argument("-if", "--input-file", required=True, help="Specify the input file to read from.", type=str, metavar=EMPTY);
         parser.add_argument("-of", "--output-file", help="Specify the output file to write to.", type=str, metavar="");
         parser.add_argument("-oc", "--old-char", help="Specify the character that will be replaced.", type=str, metavar="");
         parser.add_argument("-nc", "--new-char", help="Specify the character that will replace the old character.", type=str, metavar="");
@@ -47,14 +48,14 @@ class CharacterConverter(File):
                     line = line.replace(self.oldChar, "{}{}".format(str(inc), self.newChar));
                     inc+=1;
             elif(self.incrementWord and self.newChar):
-                words = line.split(" ");
+                words = line.split(SPACE);
                 wlength = len(words);
                 for w in range(wlength):
                     word = words[w];
                     if(word.find(self.oldChar) > -1):
                         words[w] = word.replace(self.oldChar, "{}{}".format(str(inc), self.newChar));
                         inc+=1;
-                line = " ".join(words);
+                line = SPACE.join(words);
             else:
                 line = line.replace(self.oldChar, self.newChar);
 

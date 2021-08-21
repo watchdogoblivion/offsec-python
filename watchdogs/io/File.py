@@ -5,13 +5,14 @@
 import os;
 
 from watchdogs.utils import StringUtility;
+from watchdogs.utils.Constants import *;
 
 class File(object):
     
     def __init__(self):
         super(File, self).__init__();
-        self.inputFile = '';
-        self.outputFile = '';
+        self.inputFile = EMPTY;
+        self.outputFile = EMPTY;
         self.lines = [];
         self.parser = None;
         self.args = None;
@@ -47,4 +48,4 @@ class File(object):
         lines = self.lines;
         length = len(lines);
         for i in range(length):
-            print(lines[i].replace("\n","")); 
+            print(lines[i].replace(LFN,EMPTY)); 

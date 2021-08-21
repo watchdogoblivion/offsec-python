@@ -2,32 +2,38 @@
 # description: TODO
 # WatchDogs Oracle Credentials Converter a.k.a woraclecc
 
-import argparse;
+import argparse
 
 from watchdogs.io import File;
+from watchdogs.utils.Constants import *;
 
 class OracleCredConverter(File):
 
     VERSION = "1.0";
 
+    UU = "uu";
+    UL = "ul";
+    LU = "lu";
+    LL = "ll";
+
     def __init__(self):
-        self.conversion = '';
+        self.conversion = EMPTY;
 
     def getConversions(self):
-        conversions = "Conversion types:";
-        conversions += "  uu   : First word uppered and second word uppered";
-        conversions += "  ul   : First word uppered and second word lowered";
-        conversions += "  lu   : First word lowered and second word uppered";
-        conversions += "  ll   : First word lowered and second word lowered";
+        conversions = "Conversion types:"+LFN;
+        conversions += "  {}   : First word uppered and second word uppered{}".format(OracleCredConverter.UU,LFN);
+        conversions += "  {}   : First word uppered and second word lowered{}".format(OracleCredConverter.UL,LFN);
+        conversions += "  {}   : First word lowered and second word uppered{}".format(OracleCredConverter.LU,LFN);
+        conversions += "  {}   : First word lowered and second word lowered".format(OracleCredConverter.LL,LFN);
         return conversions;
 
     def parseArgs(self):
-        self.parser = argparse.ArgumentParser(add_help=False);
+        self.parser = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter);
         parser = self.parser;
         required = parser.add_argument_group("Required arguments");
-        required.add_argument("-if", "--input-file", required=True, help="Specify the input file to read from.", type=str, metavar="");
-        parser.add_argument("-of", "--output-file", help="Specify the output file to write to.", type=str, metavar="");
-        parser.add_argument("-c", "--conversion", help="Specify the conversion type.", type=str, metavar="");
+        required.add_argument("-if", "--input-file", required=True, help="Specify the input file to read from.", type=str, metavar=EMPTY);
+        parser.add_argument("-of", "--output-file", help="Specify the output file to write to.", type=str, metavar=EMPTY);
+        parser.add_argument("-c", "--conversion", help="Specify the conversion type.", type=str, metavar=EMPTY);
         parser.add_argument("-lc", "--list-conversions", action="version", help="Conversion types.", version=self.getConversions());
         parser.add_argument("-v", "--version", action="version", help="Show version", version=" Oracle Credentials Converter version: {}".format(OracleCredConverter.VERSION));
         parser.add_argument("-h", "--help", action="help", help="Show this help message");
@@ -38,16 +44,16 @@ class OracleCredConverter(File):
         lines = openedFile.readlines();
         length = len(lines);
         for i in range(length):
-            de = "/";
-            line = "";
+            de = FS;
+            line = EMPTY;
             splitLines = lines[i].split(de);
-            if(self.conversion == "uu"):
+            if(self.conversion == OracleCredConverter.UU):
                 line = "{}{}{}".format(splitLines[0].upper(), de, splitLines[1].upper());
-            if(self.conversion == "ul"):
+            if(self.conversion == OracleCredConverter.UL):
                 line = "{}{}{}".format(splitLines[0].upper(), de, splitLines[1].lower());
-            if(self.conversion == "lu"):
+            if(self.conversion == OracleCredConverter.LU):
                 line = "{}{}{}".format(splitLines[0].lower(), de, splitLines[1].upper());
-            if(self.conversion == "ll"):
+            if(self.conversion == OracleCredConverter.LL):
                 line = "{}{}{}".format(splitLines[0].lower(), de, splitLines[1].lower());
             
             lines[i] = line;
