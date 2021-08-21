@@ -103,7 +103,7 @@ class FileFuzzer(File):
                 setattr(self, fields[0], line);
                 index+=1;
                 continue;
-            elif(line == EMPTY and not isBody):
+            elif((line == EMPTY and not isBody) or (index+1 == length and not isBody)):
                 isBody = True;
                 setattr(self, fields[1], value);
                 value = "";
@@ -339,8 +339,7 @@ class FileFuzzer(File):
         if(self.showFuzz):
             responseString += " - Fuzz text: {}".format(self.FuzzText);
         if(self.showResponse):
-            responseString = "{}Response body: {}{}".format(LFRN,responseSoup,LFRN) + responseString;
-        
+            responseString = "Response body: {}{}".format(LFRN,responseSoup.encode('utf-8'),LFRN) + responseString;
         print(responseString);
 
     def sendRequest(self):
