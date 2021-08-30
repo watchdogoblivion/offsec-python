@@ -29,12 +29,13 @@ class FileFuzzer(File):
         self.boundary = EMPTY;
         self.body = OrderedDict();
         self.postFile = EMPTY;
-        self.httpProxy = EMPTY;
-        self.httpsProxy = EMPTY;
-        self.disableVerification = False;
         self.fuzzLocators = OrderedDict();
         self.fuzzFile = EMPTY;
         self.fuzzDelimiter = COLON;
+        self.httpProxy = EMPTY;
+        self.httpsProxy = EMPTY;
+        self.disableVerification = False;
+        self.readTimeout = None;
         self.filterLength = EMPTY;
         self.filterStatus = EMPTY;
         self.filterIn = EMPTY;
@@ -64,13 +65,14 @@ class FileFuzzer(File):
         parser.add_argument("-pf", "--post-file", help=("Specify a file to send in a POST request. This flag is for file uploads only and should not be used" 
         "for other POST requests"), type=str, metavar=EMPTY);        
         parser.add_argument("-ff", "--fuzz-file", help="Specify a file to fuzz with. If this is not specified, no fuzzing will occur", type=str, metavar=EMPTY);
+        parser.add_argument("-hp", "--http-proxy", help="Specify a proxy.", type=str, metavar=EMPTY);
+        parser.add_argument("-sp", "--https-proxy", help="Specify an ssl proxy", type=str, metavar=EMPTY);
+        parser.add_argument("-dv", "--disable-verification", action="store_true", help="For https proxies, this flag will disable cert verification.", default=False);
+        parser.add_argument("-rt", "--read-timeout", help="Specify the requests read time out.", type=int, metavar=EMPTY, default=None);
         parser.add_argument("-fl", "--filter-length", help="Filter OUT fuzzed responses by coma separated lengths", type=str, metavar=EMPTY, default="");
         parser.add_argument("-fs", "--filter-status", help="Filter IN fuzzed responses by coma separated status codes", type=str, metavar=EMPTY);
         parser.add_argument("-fi", "--filter-in", help="Filters in and keeps the responses with the specified text", type=str, metavar=EMPTY);
         parser.add_argument("-fo", "--filter-out", help="Filters out and removes the responses with the specified text", type=str, metavar=EMPTY);
-        parser.add_argument("-hp", "--http-proxy", help="Specify a proxy.", type=str, metavar=EMPTY);
-        parser.add_argument("-sp", "--https-proxy", help="Specify an ssl proxy", type=str, metavar=EMPTY);
-        parser.add_argument("-dv", "--disable-verification", action="store_true", help="For https proxies, this flag will disable cert verification.", default=False);
         parser.add_argument("-sr", "--show-response", action="store_true", help="Shows the response body");
         parser.add_argument("-sf", "--show-fuzz", action="store_true", help="Shows the fuzz text used in the request");
         parser.add_argument("-v", "--version", action="version", help="Show version", version="File Fuzzer version: {}".format(FileFuzzer.VERSION));
@@ -350,7 +352,7 @@ class FileFuzzer(File):
         session = requests.Session();
         session.proxies = self.getProxies();
         session.verify = not self.disableVerification;
-        response = session.send(prepared);
+        response = session.send(prepared, timeout=self.readTimeout);
         self.handleResponse(response);
 
     def prepAttrKeys(self):
