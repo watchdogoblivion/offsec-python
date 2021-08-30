@@ -254,27 +254,23 @@ class FileFuzzer(File):
         for attrKey in uniqueList:
             self.fuzzLocators[attrKey] = (self.fuzzLocators[attrKey][0], 0);
 
-    def swapFuzz(self, substrings, keys, switch=False):
+    def swapFuzz(self, substrings, keys):
         """
         @substrings - A list representing each substring, that is a result of a string split. 
                     The original string represents a single line in the fuzz file.
         @keys - The fuzzlocator keys that point to the fuzz keyword top level locations. 
                 The nested values point directly to the values that contain the FUZZ keywords.
-        @switch - Dictates whether to swap the FUZZ keyword with the fuzz text or vice versa.
         """
 
+        originalValues = [];
         for index in range(len(substrings)):
             arg1 = FUZZ + str(index+1);
             arg2 = substrings[index].rstrip();
 
-            if(switch):
-                tmp = arg1;
-                arg1 = arg2;
-                arg2 = tmp;
-
             attrKey = keys[index];
             attrValue = getattr(self, attrKey);
             if(type(attrValue) == str):
+                originalValues.append((attrValue,None));
                 setattr(self, attrKey, attrValue.replace(arg1, arg2))
                 continue;
             
@@ -285,14 +281,44 @@ class FileFuzzer(File):
             value = attrValue[attrKeysValueArray[itrCount][0]];
             if(type(value) == tuple):
                 if(arg1 in value[0]):
+                    originalValues.append((value,0));
                     attrValue[attrKeysValueArray[itrCount][0]] = (value[0].replace(arg1, arg2), value[1], value[2]);
                 elif(arg1 in value[2]):
+                    originalValues.append((value,2));
                     attrValue[attrKeysValueArray[itrCount][0]] = (value[0], value[1], value[2].replace(arg1, arg2));
             else:
+                originalValues.append((value,None));
                 attrValue[attrKeysValueArray[itrCount][0]]= value.replace(arg1, arg2);
                 
             self.fuzzLocators[attrKey] = (attrKeysValueArray, itrCount+1);
+
+        return originalValues;
+
+    def swapBack(self, originalValues, keys):
+        for index in range(len(originalValues)):
+            originalValue = originalValues[index];
+
+            attrKey = keys[index];
+            attrValue = getattr(self, attrKey);
+            if(type(attrValue) == str):
+                setattr(self, attrKey, originalValue[0])
+                continue;
+            
+            attrKeysValue = self.fuzzLocators[attrKey];
+            attrKeysValueArray = attrKeysValue[0];
+            itrCount = attrKeysValue[1];
+
+            value = attrValue[attrKeysValueArray[itrCount][0]];
+            if(type(value) == tuple):
+                if(originalValue[1] == 0):
+                    attrValue[attrKeysValueArray[itrCount][0]] = (originalValue[0], value[1], value[2]);
+                elif(originalValue[1] == 2):
+                    attrValue[attrKeysValueArray[itrCount][0]] = (value[0], value[1], originalValue[0]);
+            else:
+                attrValue[attrKeysValueArray[itrCount][0]]= originalValue[0];
                 
+            self.fuzzLocators[attrKey] = (attrKeysValueArray, itrCount+1);
+
     def parseUrl(self, host, secure, endpoint=EMPTY):
         standardProtocol = HTTP;
         if(standardProtocol in host):
@@ -378,10 +404,10 @@ class FileFuzzer(File):
                 self.FuzzText = line.rstrip();
                 substrings = line.split(de);
                 self.reset(keys);
-                self.swapFuzz(substrings, keys);
+                originalValues = self.swapFuzz(substrings, keys);
                 self.sendRequest();
                 self.reset(keys);
-                self.swapFuzz(substrings, keys, True);
+                self.swapBack(originalValues, keys);
     
     def processRequest(self):
         if(len(self.fuzzLocators) > 0):
