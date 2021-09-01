@@ -2,6 +2,8 @@
 # description: TODO
 # WatchDogs Constants
 
+from typing import TypeVar;
+
 ########## General Constants ##########
 FILE_NAME = 'filename';
 NAME = 'name';
@@ -18,11 +20,12 @@ LFR='\r';
 LFRN='\r\n';
 SPACE=' ';
 EMPTY='';
-RB='rb'
+RB='rb';
 FS='/';
 BS='\\';
-COMMA=','
-HASH='#'
+COMMA=',';
+HASH='#';
+T = TypeVar('T');
 
 ########## Delimiters ##########
 D1 = ' : ';

@@ -8,8 +8,9 @@ setup(
     license="BSD 2-clause",
     packages=["watchdogs"],
     install_requires=[
-        "requests>=2.7",
-        "beautifulsoup4>=2.7",                     
+        "requests",
+        "beautifulsoup4",
+        "typing"
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",
