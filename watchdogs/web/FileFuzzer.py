@@ -17,7 +17,9 @@ from watchdogs.utils.Constants import *;
 class FileFuzzer(File, Common):
 
     VERSION = "1.0";
-    REGEX = r'FUZZ([0-9])*';
+    BOUNDLESS_REGEX = r'(?:FUZZ)($|[^0-9])';
+    BOUND_REGEX = r'FUZZ([0-9]+)';
+    DUPLICATE_MESSAGE = "INFO: Duplicate FUZZ keys detected. Note: FUZZ is treated as FUZZ1";
 
     def __init__(self):
         super(FileFuzzer, self).__init__();
@@ -176,49 +178,94 @@ class FileFuzzer(File, Common):
         else:
             self.body = self.raw_body;
 
-    def setFuzzLocator(self, *attrKeys):# type: (FileFuzzer, tuple) -> None
+    def getFuzzIndicies(self, *fuzzValues):# type: (FileFuzzer, str) -> list[int]
+        boundRegex = FileFuzzer.BOUND_REGEX;
+        fuzzIndicies = [];
+        for fuzzValue in fuzzValues:
+            if(fuzzValue):
+                fuzzIndicies += re.findall(boundRegex,fuzzValue);
+        return fuzzIndicies;
+
+    def getBoundlessFuzz(self, *fuzzValues):# type: (FileFuzzer, str) -> str
+        boundlessRegex = FileFuzzer.BOUNDLESS_REGEX;
+        for fuzzValue in fuzzValues:
+            boundlessArray = re.findall(boundlessRegex,fuzzValue);
+            if(boundlessArray):
+                if(len(boundlessArray) > 1):
+                    print(FileFuzzer.DUPLICATE_MESSAGE);
+                return fuzzValue;
+
+    def handleBoundless(self, boundlessFuzz, fuzzIndicies, attrValue, attrKey, aVI=None):
+        #type: (FileFuzzer, str, list[int], str | OrderedDict, str, AVI) -> None
+        if(boundlessFuzz):
+            boundlessRegex = FileFuzzer.BOUNDLESS_REGEX;
+            newValue = re.sub(boundlessRegex, FUZZ+SONE+REGEX_SUB, boundlessFuzz);
+            fuzzIndicies.append(SONE);
+            if(type(attrValue) == str):
+                setattr(self, attrKey, newValue);
+            elif(aVI):
+                aVIKey = aVI.getAVIKey();
+                aVIValue = aVI.getAVIValue();
+                fileName = aVI.getFileName();
+                contentType = aVI.getContentType();
+                if(type(aVIValue) == tuple):
+                    newTuple = None;
+                    if(fileName == boundlessFuzz):
+                        newTuple = (newValue, aVIValue[1], contentType);
+                    if(contentType == boundlessFuzz):
+                        newTuple = (fileName, aVIValue[1], newValue);
+                    if(newTuple):
+                        attrValue[aVIKey] = newTuple;
+                elif(type(aVIValue) == str):
+                    attrValue[aVIKey] = newValue;
+
+    def manageLocatorValues(self, fuzzIndicies, existingIndicies, locatorKey, locator):
+        #type: (FileFuzzer, list[int], list[int], str, FuzzLocator) -> None
+        if(len(fuzzIndicies) > 0):
+            for index in fuzzIndicies:
+                if(index in existingIndicies):
+                    print(FileFuzzer.DUPLICATE_MESSAGE);
+                container = LocatorContainer();
+                container.setLocatorKey(locatorKey);
+                container.setLocatorIndex(index);
+                locator.getLocatorContainers().append(container);
+                existingIndicies.append(container.getLocatorIndex());
+
+    def updateFuzzLocator(self, *attrKeys):# type: (FileFuzzer, str) -> None
         locators = self.fuzzLocators;
+        existingIndicies = [];
         for attrKey in attrKeys:
             attrValue = getattr(self, attrKey);
-            regex = FileFuzzer.REGEX;
-            itrCount = 0;
-            locator = getattr(locators, attrKey)#type: FuzzLocator
-
-            if(not getattr(locators, attrKey)):
-                locators[attrKey] = ([], itrCount);
+            locator = Cast._from(getattr(locators, attrKey), FuzzLocator);
             if(type(attrValue) == str):
-                if(FUZZ in attrValue):
-                    occurenceIndicies = re.findall(regex,attrValue);
-                    for index in occurenceIndicies:
-                        container = LocatorContainer();
-                        container.setLocatorKey(attrKey);
-                        container.setLocatorIndex(index);
-                        locator.getLocatorContainers().append(container);
-            else:
-                for key,value in attrValue.items():
-                    occurenceIndicies = [];
-                    if(type(value) == tuple and (FUZZ in value[0] or FUZZ in value[2])):
-                        if(FUZZ in value[0]):
-                            occurenceIndicies += re.findall(regex,value[0]);
-                        if(FUZZ in value[2]):
-                            occurenceIndicies += re.findall(regex,value[2]);
-                    elif(type(value) == str and FUZZ in value):
-                        occurenceIndicies = re.findall(regex,value);
-                    for index in occurenceIndicies:
-                        container = LocatorContainer();
-                        container.setLocatorKey(key);
-                        container.setLocatorIndex(index);
-                        locator.getLocatorContainers().append(container);
+                    fuzzIndicies = self.getFuzzIndicies(attrValue);
+                    boundlessFuzz = self.getBoundlessFuzz(attrValue);
+                    self.handleBoundless(boundlessFuzz, fuzzIndicies, attrValue, attrKey);
+                    self.manageLocatorValues(fuzzIndicies, existingIndicies, attrKey, locator);
+            elif(type(attrValue) == OrderedDict):
+                aVI = OrderedDict(attrValue).items();
+                for aVIKey,aVIValue in aVI:
+                    fuzzValue = fileName = contentType = EMPTY;
+                    if(type(aVIValue) == tuple):
+                        fileName = aVIValue[0];
+                        contentType = aVIValue[2];
+                    elif(type(aVIValue) == str):
+                        fuzzValue = aVIValue;
+                    fuzzIndicies = self.getFuzzIndicies(fuzzValue, fileName, contentType);
+                    boundlessFuzz = self.getBoundlessFuzz(fuzzValue, fileName, contentType);
+                    aVI = AVI(aVIKey, aVIValue, fileName, contentType);
+                    self.handleBoundless(boundlessFuzz, fuzzIndicies, attrValue, None, aVI);
+                    self.manageLocatorValues(fuzzIndicies, existingIndicies, aVIKey, locator);
 
     def parseFile(self):# type: (FileFuzzer) -> None
-        inputFile = open(self.inputFile, "r");
+        inputFile = open(self.inputFile, LR);
         lines = inputFile.readlines();
 
         self.setFields(lines);
         self.parseInfo();
         self.parseHeaders();
         self.parseBody();
-        self.setFuzzLocator(r+HOST, INFO, HEADER+s, BODY);
+        self.updateFuzzLocator(LR+HOST, INFO, HEADER+LS, BODY);
     
     def printRequest(self):# type: (FileFuzzer) -> None
         format = '{}: {}';
@@ -306,7 +353,7 @@ class FileFuzzer(File, Common):
         return proxies;
     
     def handleResponse(self, response):#type: (FileFuzzer, requests.models.Response) -> None
-        responseSoup = BeautifulSoup(response.text, 'html.parser').prettify().rstrip();
+        responseSoup = BeautifulSoup(response.text, HTML_PARSER).prettify().rstrip();
         responseStatus = response.status_code;
         responseLength = EMPTY;
         try:
@@ -327,7 +374,7 @@ class FileFuzzer(File, Common):
         if(self.showFuzz):
             responseString += " - Fuzz text: {}".format(self.FuzzText);
         if(self.showResponse):
-            responseString = "Response body: {}{}".format(LFRN,responseSoup.encode('utf-8'),LFRN) + responseString;
+            responseString = "Response body: {}{}".format(LFRN,responseSoup.encode(UTF8),LFRN) + responseString;
         print(responseString);
 
     def sendRequest(self):#type: (FileFuzzer) -> None
@@ -349,19 +396,22 @@ class FileFuzzer(File, Common):
             attrKey = fuzzHelper.getAttrKey();
             attrValue = getattr(self, attrKey);
             if(type(attrValue) == str):
-                setattr(self, attrKey, attrValue.replace(arg1, arg2))
+                setattr(self, attrKey, str(attrValue).replace(arg1, arg2))
                 continue;
             locatorKey = fuzzHelper.getLocatorKey();
             originalValue = attrValue[locatorKey];
             if(type(originalValue) == tuple):
-                if(arg1 in originalValue[0]):
-                    newValue = originalValue[0].replace(arg1, arg2);
-                    attrValue[locatorKey] = (newValue, originalValue[1], originalValue[2]);
-                elif(arg1 in originalValue[2]):
-                    newValue = originalValue[2].replace(arg1, arg2);
-                    attrValue[locatorKey] = (originalValue[0], originalValue[1], newValue);
+                fileName = str(originalValue[0]);
+                content = originalValue[1];
+                contentType = str(originalValue[2]);
+                if(arg1 in fileName):
+                    newValue = fileName.replace(arg1, arg2);
+                    attrValue[locatorKey] = (newValue, content, contentType);
+                elif(arg1 in contentType):
+                    newValue = contentType.replace(arg1, arg2);
+                    attrValue[locatorKey] = (fileName, content, newValue);
             else:
-                attrValue[locatorKey] = originalValue.replace(arg1, arg2);
+                attrValue[locatorKey] = str(originalValue).replace(arg1, arg2);
 
     def swapBack(self, fuzzHelpers):#type: (FileFuzzer, list[FuzzHelper]) -> None
         for fuzzHelper in fuzzHelpers:

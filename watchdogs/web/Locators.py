@@ -4,6 +4,38 @@
 
 from watchdogs.base import Common;
 
+class AVI(Common):
+    def __init__(self, aVIKey=None, aVIValue=None, fileName=None, contentType=None):
+        super(AVI, self).__init__();
+        self._aVIKey = aVIKey;
+        self._aVIValue = aVIValue;
+        self._fileName = fileName;
+        self._contentType = contentType;
+
+    def getAVIKey(self):#type: (AVI) -> str
+        return getattr(self, "_aVIKey");
+
+    def setAVIKey(self, value):#type: (AVI, str) -> None
+        setattr(self, "_aVIKey", value);
+
+    def getAVIValue(self):#type: (AVI) -> str | tuple
+        return getattr(self, "_aVIValue");
+
+    def setAVIValue(self, value):#type: (AVI, str | tuple) -> None
+        setattr(self, "_aVIValue", value);
+
+    def getFileName(self):#type: (AVI) -> str
+        return getattr(self, "_fileName");
+
+    def setFileName(self, value):#type: (AVI, str) -> None
+        setattr(self, "_fileName", value);
+
+    def getContentType(self):#type: (AVI) -> str
+        return getattr(self, "_contentType");
+
+    def setContentType(self, value):#type: (AVI, str) -> None
+        setattr(self, "_contentType", value);
+
 class LocatorContainer(Common):
 
     def __init__(self):
