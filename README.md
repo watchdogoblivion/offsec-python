@@ -73,21 +73,25 @@
         On the previous browser page, select the file to upload and begin the upload.
         Go back to burp suite and copy and paste the intercepted request to a file; anyname.txt
         Ensure that there is a blank line separating the headers and the body (if there is a body).
-        Place or Replace any value string that you want to fuzz with a FUZZ word ending with a number
-        starting from 1 i.e FUZZ1,FUZZ2,FUZZ3 for each word to be fuzzed.
+        Place or Replace any value string that you want to fuzz with a FUZZ word -
+        i.e FUZZ1,FUZZ2,FUZZ3. Note that FUZZ is treated as FUZZ1
 
             1. POST /upload.jsp HTTP/1.1 -> 
-               POST FUZZ1/upload.jsp HTTP/1.1
+               POST FUZZ/upload.jsp HTTP/1.1
 
             2. Content-Type: text/plain -> 
                Content-Type: FUZZ1
 
             3. Content-Disposition: form-data; name="FileUpload1"; filename="postFile.txt" -> 
-               Content-Disposition: form-data; name="FileUpload"; filename="FUZZ1.FUZZ2"
-        Ensure that the fuzz file contains the same amount of words per line as there are FUZZ words 
-        in the input file, separated by a delimiter of your choice (the default is a colon but you
-        can specify a delimiter). 
-        For example 3 above the fuzz file could contain: test:txt to replace FUZZ1.FUZZ2
+               Content-Disposition: form-data; name="FileUpload"; filename="FUZZ2.FUZZ1"
+
+        Ensure that the file with the words to substitute in (-ff --fuzz-file), has the same number
+        of words per line as the max FUZZ number - 
+        i.e 10 words per line if the max is FUZZ10 or 5 words per line if the max is FUZZ5.
+        Each word in the fuzz file should be separated by a delimiter (the default is a colon but 
+        you can specify a delimiter). 
+        For example 3 above the fuzz file could contain: 
+            test:txt to replace FUZZ2.FUZZ1 as txt.test
 
         Run the script and use the flags to control filtering by length, status code, and/or text. 
         Hide or display responses with a flag.
@@ -135,11 +139,11 @@
             On the previous browser page, enter the credentials and submit.
             Go back to burp suite and copy and paste the intercepted request to a file; anyname.txt
             Ensure that there is a blank line separating the headers and the body (if there is a body).
-            Place or Replace any value string that you want to fuzz with a FUZZ word ending with a number
-            starting from 1 i.e FUZZ1,FUZZ2,FUZZ3 for each word to be fuzzed.
+            Place or Replace any value string that you want to fuzz with a FUZZ word -
+            i.e FUZZ1,FUZZ2,FUZZ3. Note that FUZZ is treated as FUZZ1
 
                 1. username=admin&password=password -> 
-                    username=FUZZ1&password=FUZZ2
+                    username=FUZZ2&password=FUZZ
 
                 2. {"username":"admin","password":"password"} -> 
                     {"username":"FUZZ1","password":"FUZZ2"} 
@@ -147,11 +151,13 @@
                 3. Authorization: Basic YWRtaW46cGFzc3dvcmQ= ->
                     Authorization: Basic FUZZ1
 
-            Ensure that the fuzz file contains the same amount of words per line as there are FUZZ words 
-            in the input file, separated by a delimiter of your choice (the default is a colon but you
-            can specify a delimiter.). 
-            For example 1 above the fuzz file could contain: john:pass to respectively replace 
-            username=FUZZ1&password=FUZZ2
+            Ensure that the file with the words to substitute in (-ff --fuzz-file), has the same number
+            of words per line as the max FUZZ number - 
+            i.e 10 words per line if the max is FUZZ10 or 5 words per line if the max is FUZZ5.
+            Each word in the fuzz file should be separated by a delimiter (the default is a colon but 
+            you can specify a delimiter).
+            For example 1 above the fuzz file could contain: pass:john to replace: 
+            username=FUZZ2&password=FUZZ as username=john&password=pass
 
             For the basic auth example above, if you have a file of creds that need to be encoded, you can
             use the module wfencoder.
