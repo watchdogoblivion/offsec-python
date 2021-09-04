@@ -7,7 +7,7 @@ import argparse
 from collections import OrderedDict
 
 from watchdogs.io import File
-from watchdogs.utils.Constants import *
+from watchdogs.utils.Constants import (EMPTY, LFN)
 
 
 class EncodingViewer(File):

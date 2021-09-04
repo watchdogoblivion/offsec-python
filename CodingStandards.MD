@@ -68,6 +68,20 @@
     Additional reference:
     https://en.wikipedia.org/wiki/Self-documenting_code
 
+#### _Linting_ ####
+    Enforcing linting for code quality.
+
+    The IDE/Code editor is VSCode.
+
+    The library used is pylint:
+        /usr/bin/python -m pip install -U "pylint<2.0.0" --user
+
+    The configurations in the settings.json:
+        "python.linting.enabled": true,
+        "python.linting.lintOnSave": true,
+        "python.linting.pylintPath": "pylint",
+        "python.linting.pylintEnabled": true
+
 #### _Formatting_ ####
     I am enforcing a formatting standard.
     This way the code will always be readable and follow PEP standards.

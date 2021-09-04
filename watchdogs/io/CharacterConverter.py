@@ -5,7 +5,7 @@
 import argparse
 
 from watchdogs.io import File
-from watchdogs.utils.Constants import *
+from watchdogs.utils.Constants import (EMPTY, SPACE)
 
 
 class CharacterConverter(File):

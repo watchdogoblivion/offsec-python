@@ -34,5 +34,5 @@ class Cast(object):
         for objKey in objKeys:
           setattr(newinstance, objKey, getattr(obj, objKey))
       return newinstance
-    except AttributeError as ae:
+    except AttributeError:
       print(traceback.format_exc())

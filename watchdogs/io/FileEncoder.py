@@ -8,7 +8,7 @@ import argparse
 from collections import OrderedDict
 
 from watchdogs.io import File
-from watchdogs.utils.Constants import *
+from watchdogs.utils.Constants import (LFN, EMPTY, FS)
 
 
 class FileEncoder(File):

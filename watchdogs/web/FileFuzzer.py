@@ -12,7 +12,13 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder
 from watchdogs.io import File
 from watchdogs.web.Locators import *
 from watchdogs.utils import Cast
-from watchdogs.utils.Constants import *
+from watchdogs.utils.Constants import (
+  EMPTY, COLON, EQUAL, SEMI_COLON, LFN, BOUNDARY, DASH, SPACE, METHOD,
+  ENDPOINT, CONTENT_DISPOSITION, CONTENT_TYPE, FILE_NAME, DOUBLE_QUOTE,
+  NAME, RB, FUZZ, SONE, REGEX_SUB, LR, HOST, INFO, HEADER, LS, BODY,
+  LFRN, HTTP, HTTP_PROTOCOL, HTTPS_PROTOCOL, HTTPS, HTML_PARSER,
+  CONTENT_LENGTH, T, UTF8
+)
 
 
 class FileFuzzer(File, Common):
@@ -386,7 +392,7 @@ class FileFuzzer(File, Common):
     if (self.showFuzz):
       responseString += " - Fuzz text: {}".format(self.FuzzText)
     if (self.showResponse):
-      responseString = "Response body: {}{}".format(LFRN, responseSoup.encode(UTF8), LFRN) + responseString
+      responseString = "Response body: {}{}{}".format(LFRN, responseSoup.encode(UTF8), LFRN) + responseString
     print(responseString)
 
   def sendRequest(self):  #type: (FileFuzzer) -> None

@@ -6,7 +6,7 @@ import os
 from argparse import ArgumentParser, Namespace
 
 from watchdogs.utils import StringUtility
-from watchdogs.utils.Constants import *
+from watchdogs.utils.Constants import (EMPTY, LFN)
 
 
 class File(object):

@@ -18,7 +18,7 @@ def __main__():  #type: () -> None
   except ValueError as ve:
     print(ve)
     print(ev.parser.print_usage())
-  except Exception as e:
+  except Exception:
     print(traceback.format_exc())
     print(ev.parser.print_usage())
 
