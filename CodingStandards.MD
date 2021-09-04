@@ -68,6 +68,28 @@
     Additional reference:
     https://en.wikipedia.org/wiki/Self-documenting_code
 
+#### _Formatting_ ####
+    I am enforcing a formatting standard.
+    This way the code will always be readable and follow PEP standards.
+
+    The IDE/Code editor is VSCode.
+
+    The library used is yapf:
+        /usr/bin/python -m pip install -U yapf --user
+    
+    The configurations in the settings.json:
+        "python.defaultInterpreterPath": "/usr/bin/python",
+        "[python]": {
+            "editor.defaultFormatter": "ms-python.python"
+        },
+        "python.formatting.provider": "yapf",
+        "python.formatting.yapfArgs": [
+            "--style={BASED_ON_STYLE: google, COLUMN_LIMIT: 110, INDENT_WIDTH: 2, , SPLIT_BEFORE_NAMED_ASSIGNS= False}",
+        ]
+    
+    For markdown the following extension is used:
+        Markdown All in One
+
 #### _Custom_ ####
     I have explictly set the standard, that all methods should aim
     for no more than 30 lines of code unless absolutely neccessary.

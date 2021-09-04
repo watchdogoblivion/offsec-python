@@ -1,1 +1,1 @@
-from .Common import Common;
+from .Common import Common

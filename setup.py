@@ -2,28 +2,23 @@ from setuptools import setup
 
 setup(
     name="offsec-python",
-    version="0.0.1",    
+    version="0.0.1",
     description="A watchdogs python library",
     author="WatchDogOblivion",
     license="BSD 2-clause",
     packages=["watchdogs"],
-    install_requires=[
-        "requests",
-        "beautifulsoup4",
-        "typing"
-    ],
+    install_requires=["requests", "beautifulsoup4", "typing"],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Information Technology",
-        "License :: OSI Approved :: BSD License",  
-        "Operating System :: POSIX :: Linux",        
+        "License :: OSI Approved :: BSD License",
+        "Operating System :: POSIX :: Linux",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
     ],
 )
-
 """
 watchdogs.
 

@@ -4,21 +4,23 @@
 # description: TODO
 # WatchDogs Encoding Viewer a.k.a eviewer
 
-import traceback;
+import traceback
 
-from watchdogs.io import EncodingViewer;
+from watchdogs.io import EncodingViewer
 
-def __main__():#type: () -> None
-    ev = EncodingViewer();
-    try:
-        ev.parseArgs();
-        ev.setArguments();
-        ev.outputEncoding();
-    except ValueError as ve:
-        print(ve);
-        print(ev.parser.print_usage());
-    except Exception as e:
-        print(traceback.format_exc());
-        print(ev.parser.print_usage());
 
-__main__();
+def __main__():  #type: () -> None
+  ev = EncodingViewer()
+  try:
+    ev.parseArgs()
+    ev.setArguments()
+    ev.outputEncoding()
+  except ValueError as ve:
+    print(ve)
+    print(ev.parser.print_usage())
+  except Exception as e:
+    print(traceback.format_exc())
+    print(ev.parser.print_usage())
+
+
+__main__()

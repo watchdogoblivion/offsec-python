@@ -1,1 +1,1 @@
-from .FileFuzzer import FileFuzzer;
+from .FileFuzzer import FileFuzzer

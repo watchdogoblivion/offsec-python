@@ -1,2 +1,2 @@
-from .StringUtility import StringUtility;
-from .Cast import Cast;
+from .StringUtility import StringUtility
+from .Cast import Cast

@@ -4,25 +4,27 @@
 # description: TODO
 # WatchDogs Character Converter a.k.a wcharc
 
-import traceback;
+import traceback
 
-from watchdogs.io import CharacterConverter;
+from watchdogs.io import CharacterConverter
 
-def __main__():#type: () -> None
-    cc = CharacterConverter();
-    try:
-        cc.parseArgs();
-        cc.setArguments();
-        cc.readLines();
-        if cc.outputFile:
-            cc.writeLines();
-        else:
-            cc.printLines();
-    except ValueError as ve:
-        print(ve);
-        print(cc.parser.print_usage());
-    except Exception as e:
-        print(traceback.format_exc());
-        print(cc.parser.print_usage());
 
-__main__();
+def __main__():  #type: () -> None
+  cc = CharacterConverter()
+  try:
+    cc.parseArgs()
+    cc.setArguments()
+    cc.readLines()
+    if cc.outputFile:
+      cc.writeLines()
+    else:
+      cc.printLines()
+  except ValueError as ve:
+    print(ve)
+    print(cc.parser.print_usage())
+  except Exception as e:
+    print(traceback.format_exc())
+    print(cc.parser.print_usage())
+
+
+__main__()
