@@ -23,32 +23,32 @@ class FileFuzzer(File, Common):
 
     def __init__(self):
         super(FileFuzzer, self).__init__();
-        self.requestFields = [];
-        self.secure = False;
-        self.rhost = EMPTY;
-        self.raw_info = EMPTY;
-        self.raw_headers = EMPTY;
-        self.raw_body = EMPTY;
-        self.info = OrderedDict();
-        self.url = EMPTY;
-        self.headers = OrderedDict();
-        self.boundary = EMPTY;
-        self.body = OrderedDict();
-        self.postFile = EMPTY;
-        self.fuzzLocators = FuzzLocators();
-        self.fuzzFile = EMPTY;
-        self.fuzzDelimiter = COLON;
-        self.httpProxy = EMPTY;
-        self.httpsProxy = EMPTY;
-        self.disableVerification = False;
-        self.readTimeout = None;
-        self.filterLength = EMPTY;
-        self.filterStatus = EMPTY;
-        self.filterIn = EMPTY;
-        self.filterOut = EMPTY;
-        self.showResponse = False;
-        self.showFuzz = False;
-        self.FuzzText = EMPTY;
+        self.requestFields = [] #type: list[str]
+        self.secure = False #type: bool
+        self.rhost = EMPTY #type: str
+        self.raw_info = EMPTY #type: str
+        self.raw_headers = EMPTY #type: str
+        self.raw_body = EMPTY #type: str
+        self.info = OrderedDict() #type: OrderedDict
+        self.url = EMPTY #type: str
+        self.headers = OrderedDict() #type: OrderedDict
+        self.boundary = EMPTY #type: str
+        self.body = OrderedDict() #type: OrderedDict
+        self.postFile = EMPTY #type: str
+        self.fuzzLocators = FuzzLocators() #type: FuzzLocators
+        self.fuzzFile = EMPTY #type: str
+        self.fuzzDelimiter = COLON #type: str
+        self.httpProxy = EMPTY #type: str
+        self.httpsProxy = EMPTY #type: str
+        self.disableVerification = False #type: bool
+        self.readTimeout = None #type: int
+        self.filterLength = EMPTY #type: str
+        self.filterStatus = EMPTY #type: str
+        self.filterIn = EMPTY #type: str
+        self.filterOut = EMPTY #type: str
+        self.showResponse = False #type: bool
+        self.showFuzz = False #type: bool
+        self.FuzzText = EMPTY #type: str
         
     def __setattr__(self, name, value):#type: (FileFuzzer, str, T) -> T
         super(FileFuzzer, self).__setattr__(name, value);
@@ -61,30 +61,49 @@ class FileFuzzer(File, Common):
         return value;
 
     def parseArgs(self):#type: (FileFuzzer) -> None
+        rhHelp = "Explictly specify the remote host.";
+        ifHelp = ("Specify the input file to read from.\nWhen executing POST, always ensure there is a new line"
+        "feed separating the body from the headers.\nIf fuzzing, the file must include exactly 1 'FUZZ' keyword.");
+        sHelp = "Specifies https.";
+        ofHelp = "Specify the output file to write to.";
+        pfHelp = ("Specify a file to send in a POST request. This flag is for file uploads only and should not be"
+        "used for other POST requests");
+        ffHelp = "Specify a file to fuzz with. If this is not specified, no fuzzing will occur";
+        hpHelp = "Specify a proxy.";
+        spHelp = "Specify an ssl proxy";
+        dvHelp = "For https proxies, this flag will disable cert verification.";
+        rtHelp = "Specify the requests read time out.";
+        flHelp = "Filter OUT fuzzed responses by coma separated lengths";
+        fsHelp = "Filter IN fuzzed responses by coma separated status codes";
+        fiHelp = "Filters in and keeps the responses with the specified text";
+        foHelp = "Filters out and removes the responses with the specified text";
+        srHelp = "Shows the response body";
+        sfHelp = "Shows the fuzz text used in the request";
+        vHelp = "Show version";
+        hHelp = "Show this help message";
+        VERSION = "File Fuzzer version: {}".format(FileFuzzer.VERSION);
+
         self.parser = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter);
         parser = self.parser;
         required = parser.add_argument_group("Required arguments");
-        ifHelp = ("Specify the input file to read from.\nWhen executing POST, always ensure there is a new line feed separating the body from the headers."
-        "\nIf fuzzing, the file must include exactly 1 'FUZZ' keyword.");
-        required.add_argument("-rh", "--rhost", required=True, help="Explictly specify the remote host.", type=str, metavar="127.0.0.1");
+        required.add_argument("-rh", "--rhost", required=True, help=rhHelp, type=str, metavar="127.0.0.1");
         required.add_argument("-if", "--input-file", required=True, help=ifHelp, type=str, metavar="request.txt");
-        parser.add_argument("-s", "--secure", action="store_true", help="Specifies https.");
-        parser.add_argument("-of", "--output-file", help="Specify the output file to write to.", type=str, metavar=EMPTY);
-        parser.add_argument("-pf", "--post-file", help=("Specify a file to send in a POST request. This flag is for file uploads only and should not be used" 
-        "for other POST requests"), type=str, metavar=EMPTY);        
-        parser.add_argument("-ff", "--fuzz-file", help="Specify a file to fuzz with. If this is not specified, no fuzzing will occur", type=str, metavar=EMPTY);
-        parser.add_argument("-hp", "--http-proxy", help="Specify a proxy.", type=str, metavar=EMPTY);
-        parser.add_argument("-sp", "--https-proxy", help="Specify an ssl proxy", type=str, metavar=EMPTY);
-        parser.add_argument("-dv", "--disable-verification", action="store_true", help="For https proxies, this flag will disable cert verification.", default=False);
-        parser.add_argument("-rt", "--read-timeout", help="Specify the requests read time out.", type=int, metavar=EMPTY, default=None);
-        parser.add_argument("-fl", "--filter-length", help="Filter OUT fuzzed responses by coma separated lengths", type=str, metavar=EMPTY, default="");
-        parser.add_argument("-fs", "--filter-status", help="Filter IN fuzzed responses by coma separated status codes", type=str, metavar=EMPTY);
-        parser.add_argument("-fi", "--filter-in", help="Filters in and keeps the responses with the specified text", type=str, metavar=EMPTY);
-        parser.add_argument("-fo", "--filter-out", help="Filters out and removes the responses with the specified text", type=str, metavar=EMPTY);
-        parser.add_argument("-sr", "--show-response", action="store_true", help="Shows the response body");
-        parser.add_argument("-sf", "--show-fuzz", action="store_true", help="Shows the fuzz text used in the request");
-        parser.add_argument("-v", "--version", action="version", help="Show version", version="File Fuzzer version: {}".format(FileFuzzer.VERSION));
-        parser.add_argument("-h", "--help", action="help", help="Show this help message");
+        parser.add_argument("-s", "--secure", action="store_true", help=sHelp);
+        parser.add_argument("-of", "--output-file", help=ofHelp, type=str, metavar=EMPTY);
+        parser.add_argument("-pf", "--post-file", help=pfHelp, type=str, metavar=EMPTY);
+        parser.add_argument("-ff", "--fuzz-file", help=ffHelp, type=str, metavar=EMPTY);
+        parser.add_argument("-hp", "--http-proxy", help=hpHelp, type=str, metavar=EMPTY);
+        parser.add_argument("-sp", "--https-proxy", help=spHelp, type=str, metavar=EMPTY);
+        parser.add_argument("-dv", "--disable-verification", action="store_true", help=dvHelp, default=False);
+        parser.add_argument("-rt", "--read-timeout", help=rtHelp, type=int, metavar=EMPTY, default=None);
+        parser.add_argument("-fl", "--filter-length", help=flHelp, type=str, metavar=EMPTY, default=EMPTY);
+        parser.add_argument("-fs", "--filter-status", help=fsHelp, type=str, metavar=EMPTY);
+        parser.add_argument("-fi", "--filter-in", help=fiHelp, type=str, metavar=EMPTY);
+        parser.add_argument("-fo", "--filter-out", help=foHelp, type=str, metavar=EMPTY);
+        parser.add_argument("-sr", "--show-response", action="store_true", help=srHelp);
+        parser.add_argument("-sf", "--show-fuzz", action="store_true", help=sfHelp);
+        parser.add_argument("-v", "--version", action="version", help=vHelp, version=VERSION);
+        parser.add_argument("-h", "--help", action="help", help=hHelp);
         self.args = parser.parse_args();
     
     def setBoundary(self,line,boundaryString):#type: (str,str) -> None
@@ -172,8 +191,9 @@ class FileFuzzer(File, Common):
                             break;
                         nextLine += filteredList[i+1];
             if(not self.body):
-                print("Could not parse thw post file specified. Please ensure that the -pf flag is being used with a proper file upload request. If the "
-                "attempted request is not a file upload, then remove the -pf flag to send JSON or standard form data.");
+                print("Could not parse thw post file specified. Please ensure that the -pf flag is being used with"
+                " a proper file upload request. If the attempted request is not a file upload, then remove the -pf"
+                " flag to send JSON or standard form data.");
                 exit();
         else:
             self.body = self.raw_body;

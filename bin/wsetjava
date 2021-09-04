@@ -16,16 +16,17 @@ class WSetJava():
     JAVA_PATHS = {
         "java7":["/usr/lib/jvm/jdk1.7.0_80/bin/java","/usr/lib/jvm/jdk1.7.0_80/bin/javac"],
         "java8":["/usr/lib/jvm/jdk1.8.0_301/bin/java","/usr/lib/jvm/jdk1.8.0_301/bin/javac"],
-        "java11":["/usr/lib/jvm/java-11-openjdk-amd64/bin/java","/usr/lib/jvm/java-11-openjdk-amd64/bin/javac"]
+        "java11":["/usr/lib/jvm/java-11-openjdk-amd64/bin/java",
+            "/usr/lib/jvm/java-11-openjdk-amd64/bin/javac"]
     }
 
     def __init__(self):
-        self.set = None;
-        self.parser = None;
-        self.args = None;
+        self.set = None #type: str
+        self.parser = None #type: argparse.ArgumentParser
+        self.args = None #type: argparse.Namespace
     
     @staticmethod
-    def toCamel(string,char="_"):
+    def toCamel(string,char="_"):#type: (str, str) -> str
         camel = "";
         strings = string.split(char);
         length = len(strings);
@@ -38,7 +39,7 @@ class WSetJava():
         return camel;
 
     @staticmethod
-    def naturalOrdering(string):
+    def naturalOrdering(string):#type: (str) -> list[str]
         specArray = []
         stringArray = re.split(r'(\d+)', string);
         for s in stringArray:
@@ -48,7 +49,7 @@ class WSetJava():
                 specArray.append(s);
         return specArray;
 
-    def getJavaAlts(self):
+    def getJavaAlts(self):#type: (WSetJava) -> str
         de = "  ";
         javaAlts = subprocess.check_output("update-alternatives --list java", shell=True);
         javacAlts = subprocess.check_output("update-alternatives --list javac", shell=True);
@@ -58,7 +59,7 @@ class WSetJava():
 
         return "Java Alternatives:\n{}\n{}".format(javaAlts, javacAlts.rstrip());
     
-    def getJavaPaths(self):
+    def getJavaPaths(self):#type: (WSetJava) -> str
         javaPaths = WSetJava.JAVA_PATHS;
         javaPathsString = "";
 
@@ -68,43 +69,62 @@ class WSetJava():
             
         return javaPathsString;
 
-    def getJavaVersion(self):
+    def getJavaVersion(self):#type: (WSetJava) -> str
         return subprocess.check_output("java -version", stderr=subprocess.STDOUT, shell=True);
 
-    def getInfo(self):
-        return """To ensure the script works properly, check the JAVA_PATHS flag to ensure that they are pointing to the correct directories. If not, update them."""
+    def getInfo(self):#type: (WSetJava) -> str
+        return ("To ensure the script works properly, check the JAVA_PATHS flag to ensure that they are"
+        " pointing to the correct directories. \nIf not, update them.");
 
-    def parseArgs(self):
+    def parseArgs(self):#type: (WSetJava) -> None
+        S_HELP = "Specify the java version to set, like so - java$(version). Example: java11";
+        JA_HELP = "List Java alts";
+        JP_HELP = "Shows the values of the java paths added to the JAVA_PATHS field in this script.";
+        JV_HELP = "Show java version";
+        V_HELP = "Show script version";
+        H_HELP = "Show this help message";
+        I_HELP = "Displays additional info about the script";
+        ALTS = "{}".format(self.getJavaAlts());
+        PATHS = "{}".format(self.getJavaPaths());
+        J_VERSION = "Java version: {}".format(self.getJavaVersion());
+        VERSION = "Set Java version: {}".format(WSetJava.VERSION);
+        INFO = "{}".format(self.getInfo())
+
         self.parser = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter);
         parser = self.parser;
         required = parser.add_argument_group("Required arguments",);
-        required.add_argument("-s", "--set", required=True, help="Specify the java version to set, like so - java$(version). Example: java11", type=str, metavar="");
-        parser.add_argument("-ja", "--java-alts", action="version", help="List Java alts", version="{}".format(self.getJavaAlts()));
-        parser.add_argument("-jp", "--java-paths", action="version", help="Shows the values of the java paths added to the JAVA_PATHS field in this script.", version="{}".format(self.getJavaPaths()));
-        parser.add_argument("-jv", "--java-version", action="version", help="Show java version", version="Java version: {}".format(self.getJavaVersion()));
-        parser.add_argument("-v", "--version", action="version", help="Show script version", version="Set Java version: {}".format(WSetJava.VERSION));
-        parser.add_argument("-h", "--help", action="help", help="Show this help message");
-        parser.add_argument("-i", "--info", action="version", help="Displays additional info about the script", version="{}".format(self.getInfo()));
+        required.add_argument("-s", "--set", required=True, help=S_HELP, type=str, metavar="");
+        parser.add_argument("-ja", "--java-alts", action="version", help=JA_HELP, version=ALTS);
+        parser.add_argument("-jp", "--java-paths", action="version", help= JP_HELP, version=PATHS);
+        parser.add_argument("-jv", "--java-version", action="version", help=JV_HELP, version=J_VERSION);
+        parser.add_argument("-v", "--version", action="version", help=V_HELP, version=VERSION);
+        parser.add_argument("-h", "--help", action="help", help=H_HELP);
+        parser.add_argument("-i", "--info", action="version", help=I_HELP, version=INFO);
         self.args = parser.parse_args();
 
-    def setArguments(self):
+    def setArguments(self):#type: (WSetJava) -> None
         args = self.args;
         vargs = vars(args);
         for varg in vargs:
             setattr(self, WSetJava.toCamel(varg), vargs[varg]);
         
-    def setJava(self):
-        print("Setting version: {}".format(self.set));
-        installJava = "sudo update-alternatives --install '/usr/bin/java' 'java' '{}' 0".format(WSetJava.JAVA_PATHS[self.set][0]);
-        installJavac = "sudo update-alternatives --install '/usr/bin/javac' 'javac' '{}' 0".format(WSetJava.JAVA_PATHS[self.set][1]);
-        setJava = "sudo update-alternatives --set java {}".format(WSetJava.JAVA_PATHS[self.set][0]);
-        setJavac = "sudo update-alternatives --set javac {}".format(WSetJava.JAVA_PATHS[self.set][1]);
+    def setJava(self):#type: (WSetJava) -> None
+        javaVersion = self.set;
+        print("Setting version: {}".format(javaVersion));
+        javaPath = WSetJava.JAVA_PATHS[javaVersion][0];
+        javacPath = WSetJava.JAVA_PATHS[javaVersion][1];
+
+        sudoCommand = "sudo update-alternatives ";
+        installJava = "{}--install '/usr/bin/java' 'java' '{}' 0".format(sudoCommand, javaPath);
+        installJavac = "{}--install '/usr/bin/javac' 'javac' '{}' 0".format(sudoCommand, javacPath);
+        setJava = "{}--set java {}".format(sudoCommand, javaPath);
+        setJavac = "{}--set javac {}".format(sudoCommand, javacPath);
         for command in [installJava, installJavac, setJava, setJavac]:
             print("Executing comand: {}".format(command));
             print(subprocess.check_output("{}".format(command), stderr=subprocess.STDOUT, shell=True));
 
 
-def __main__():
+def __main__():#type: () -> None
     wsj = WSetJava();
     try:
         wsj.parseArgs();

@@ -21,31 +21,41 @@ class FileEncoder(File):
 
     def __init__(self):
         super(FileEncoder, self).__init__();
-        self.b64Encode = False;
-        self.urlEncode = None;
+        self.b64Encode = False #type: bool
+        self.urlEncode = None #type: str
     
-    def getEncodingOptions(self):
+    def getEncodingOptions(self):#type: (FileEncoder) -> None
         options = FileEncoder.URL_ENCODING_OPTIONS;
         optionsString = "Encoding options:"+LFN;
         for k,v in options.items():
             optionsString += "  {}) {}{}".format(k,v,LFN);
         return optionsString;
 
-    def parseArgs(self):
+    def parseArgs(self):#type: (FileEncoder) -> None
+        IF_HELP = "Specify the input file to read from.";
+        OF_HELP = "Specify the output file to write to.";
+        BE_HELP = "Specify if you want to perform base64 encoding. Enabled by default";
+        UE_HELP = "Specify if you want to perform url encoding. Look at flag -uo/ue-options for arguments";
+        UO_HELP = "Show url encoding options";
+        V_HELP = "Show version";
+        H_HELP = "Show this help message";
+        ENCODINGS = "{}".format(self.getEncodingOptions());
+        VERSION = "Character Converter version: {}".format(FileEncoder.VERSION);
+
         self.parser = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter);
         parser = self.parser;
         required = parser.add_argument_group("Required arguments");
-        required.add_argument("-if", "--input-file", required=True, help="Specify the input file to read from.", type=str, metavar=EMPTY);
-        parser.add_argument("-of", "--output-file", help="Specify the output file to write to.", type=str, metavar=EMPTY);
-        parser.add_argument("-be", "--b64-encode", action="store_true", help="Specify if you want to perform base64 encoding. Enabled by default", default=False);
-        parser.add_argument("-ue", "--url-encode", help="Specify if you want to perform url encoding. Look at flag -uo/ue-options for arguments");
-        parser.add_argument("-uo", "--ue-options", action="version", help="Show url encoding options", version="{}".format(self.getEncodingOptions()));
-        parser.add_argument("-v", "--version", action="version", help="Show version", version="Character Converter version: {}".format(FileEncoder.VERSION));
-        parser.add_argument("-h", "--help", action="help", help="Show this help message");
+        required.add_argument("-if", "--input-file", required=True, help=IF_HELP, type=str, metavar=EMPTY);
+        parser.add_argument("-of", "--output-file", help=OF_HELP, type=str, metavar=EMPTY);
+        parser.add_argument("-be", "--b64-encode", action="store_true", help=BE_HELP, default=False);
+        parser.add_argument("-ue", "--url-encode", help=UE_HELP, type=str, metavar=EMPTY);
+        parser.add_argument("-uo", "--ue-options", action="version", help=UO_HELP, version=ENCODINGS);
+        parser.add_argument("-v", "--version", action="version", help=V_HELP, version=VERSION);
+        parser.add_argument("-h", "--help", action="help", help=H_HELP);
         self.args = parser.parse_args();
 
         
-    def readLines(self):
+    def readLines(self):#type: (FileEncoder) -> None
         openedFile = open(self.inputFile, "r");
         lines = openedFile.readlines();
         length = len(lines);

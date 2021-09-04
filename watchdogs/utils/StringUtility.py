@@ -3,31 +3,33 @@
 # WatchDogs String Utility
 
 import re;
+from typing import Any;
 
 class StringUtility(object):
 
     @staticmethod
-    def strTobool(s, customArray=None):
+    def strTobool(s, customArray=None):#type: (str, list[str]) -> bool
         if customArray:
             return s.lower() in customArray;
         return s.lower() in ("yes", "y", "true", "t");
     
     @staticmethod
-    def handleType(convertTo, convertFrom, boolArray=None):
+    def handleType(convertTo, convertFrom, boolArray=None):#type: (Any, Any, list[bool]) -> Any
         typeTo = str(type(convertTo));
         typeFrom = type(convertFrom);
+        converted = convertFrom;
 
         if not typeTo == typeFrom:
             if typeTo.find("int") > -1:
-                convertFrom = int(convertFrom);
+                converted = int(convertFrom);
             elif typeTo.find("str") > -1:
-                convertFrom = str(convertFrom);
+                converted = str(convertFrom);
             elif typeTo.find("bool") > -1:
-                convertFrom = StringUtility.strTobool(convertFrom, boolArray);
-        return convertFrom;
+                converted = StringUtility.strTobool(convertFrom, boolArray);
+        return converted;
     
     @staticmethod
-    def toCamel(string,char="_"):
+    def toCamel(string,char="_"):#type: (str, str) -> str
         camel = "";
         strings = string.split(char);
         length = len(strings);
@@ -40,14 +42,14 @@ class StringUtility(object):
         return camel;
     
     @staticmethod
-    def sanitize(string, dic):
+    def sanitize(string, dic):#type: (str, dict[str,str]) -> str
         cleansed = "";
-        for k,v in dic.iteritems():
+        for k,v in dic.items():
             cleansed = string.replace(k,v);
         return cleansed;
     
     @staticmethod
-    def naturalOrdering(string):
+    def naturalOrdering(string):#type: (str) -> list
         specArray = []
         stringArray = re.split(r'(\d+)', string);
         for s in stringArray:

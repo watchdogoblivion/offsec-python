@@ -8,7 +8,7 @@ import traceback;
 
 from watchdogs.web import FileFuzzer;
 
-def __main__():
+def __main__():#type: () -> None
     fuzzer = FileFuzzer();
     try:
         fuzzer.parseArgs();

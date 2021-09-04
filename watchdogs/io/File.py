@@ -3,6 +3,7 @@
 # WatchDogs Character Converter
 
 import os;
+from argparse import ArgumentParser, Namespace;
 
 from watchdogs.utils import StringUtility;
 from watchdogs.utils.Constants import *;
@@ -11,13 +12,13 @@ class File(object):
     
     def __init__(self):
         super(File, self).__init__();
-        self.inputFile = EMPTY;
-        self.outputFile = EMPTY;
-        self.lines = [];
-        self.parser = None;
-        self.args = None;
+        self.inputFile = EMPTY #type: str
+        self.outputFile = EMPTY #type: str
+        self.lines = [] #type: list[str]
+        self.parser = None #type: ArgumentParser
+        self.args = None #type: Namespace
     
-    def parseArgs(self):
+    def parseArgs(self):#type: (File) -> None
         """
         Override Method
             Example:
@@ -31,20 +32,20 @@ class File(object):
                 self.args = parser.parse_args();
         """;
 
-    def setArguments(self):
+    def setArguments(self):#type: (File) -> None
         args = self.args;
         vargs = vars(args);
         for varg in vargs:
             setattr(self, StringUtility.toCamel(varg), vargs[varg]);
     
-    def writeLines(self):
+    def writeLines(self):#type: (File) -> None
         if not os.path.isfile(self.outputFile):
             print("File does not exist. Creating file in order to perform write operation.");
         openedFile = open(self.outputFile, "w");
         openedFile.writelines(self.lines);
         openedFile.close();
 
-    def printLines(self):
+    def printLines(self):#type: (File) -> None
         lines = self.lines;
         length = len(lines);
         for i in range(length):

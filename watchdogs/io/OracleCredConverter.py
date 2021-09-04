@@ -17,29 +17,42 @@ class OracleCredConverter(File):
     LL = "ll";
 
     def __init__(self):
-        self.conversion = EMPTY;
+        self.conversion = EMPTY #type: str
 
-    def getConversions(self):
-        conversions = "Conversion types:"+LFN;
-        conversions += "  {}   : First word uppered and second word uppered{}".format(OracleCredConverter.UU,LFN);
-        conversions += "  {}   : First word uppered and second word lowered{}".format(OracleCredConverter.UL,LFN);
-        conversions += "  {}   : First word lowered and second word uppered{}".format(OracleCredConverter.LU,LFN);
-        conversions += "  {}   : First word lowered and second word lowered".format(OracleCredConverter.LL,LFN);
+    def getConversions(self):#type: (OracleCredConverter) -> str
+        uppered = "uppered";
+        lowered = "lowered";
+        base = "  {}   : First word {} and second word {}{}";
+        conversions = "Conversion types:{}".format(LFN);
+
+        conversions += base.format(OracleCredConverter.UU,uppered,uppered,LFN);
+        conversions += base.format(OracleCredConverter.UL,uppered,lowered,LFN);
+        conversions += base.format(OracleCredConverter.LU,lowered,uppered,LFN);
+        conversions += base.format(OracleCredConverter.LL,lowered,lowered,LFN);
         return conversions;
 
-    def parseArgs(self):
+    def parseArgs(self):#type: (OracleCredConverter) -> None
+        IF_HELP = "Specify the input file to read from.";
+        OF_HELP = "Specify the output file to write to.";
+        C_HELP = "Specify the conversion type.";
+        LC_HELP = "Conversion types.";
+        V_HELP = "Show version";
+        H_HELP = "Show this help message";
+        CONVERSIONS = self.getConversions();
+        VERSION = " Oracle Credentials Converter version: {}".format(OracleCredConverter.VERSION);
+
         self.parser = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter);
         parser = self.parser;
         required = parser.add_argument_group("Required arguments");
-        required.add_argument("-if", "--input-file", required=True, help="Specify the input file to read from.", type=str, metavar=EMPTY);
-        parser.add_argument("-of", "--output-file", help="Specify the output file to write to.", type=str, metavar=EMPTY);
-        parser.add_argument("-c", "--conversion", help="Specify the conversion type.", type=str, metavar=EMPTY);
-        parser.add_argument("-lc", "--list-conversions", action="version", help="Conversion types.", version=self.getConversions());
-        parser.add_argument("-v", "--version", action="version", help="Show version", version=" Oracle Credentials Converter version: {}".format(OracleCredConverter.VERSION));
-        parser.add_argument("-h", "--help", action="help", help="Show this help message");
+        required.add_argument("-if", "--input-file", required=True, help=IF_HELP, type=str, metavar=EMPTY);
+        parser.add_argument("-of", "--output-file", help=OF_HELP, type=str, metavar=EMPTY);
+        parser.add_argument("-c", "--conversion", help=C_HELP, type=str, metavar=EMPTY);
+        parser.add_argument("-lc", "--list-conversions", action="version", help=LC_HELP, version=CONVERSIONS);
+        parser.add_argument("-v", "--version", action="version", help=V_HELP, version=VERSION);
+        parser.add_argument("-h", "--help", action="help", help=H_HELP);
         self.args = parser.parse_args();
 
-    def readLines(self):
+    def readLines(self):#type: (OracleCredConverter) -> None
         openedFile = open(self.inputFile, "r");
         lines = openedFile.readlines();
         length = len(lines);

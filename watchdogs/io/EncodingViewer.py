@@ -119,38 +119,51 @@ class EncodingViewer(File):
 
     def __init__(self):
         super(EncodingViewer, self).__init__();
-        self.encodeFrom = -1;
-        self.encodeTo = 85;
+        self.encodeFrom = -1 #type: int
+        self.encodeTo = 85 #type: int
     
-    def getEncodings(self):
+    def getEncodings(self):#type: (EncodingViewer) -> str
         encodings = EncodingViewer.ENCODINGS;
         encodingString = "Encodings:"+LFN;
         for k,v in encodings.items():
             encodingString += "  {}) {}{}".format(k,v,LFN);
         return encodingString;
         
-    def parseArgs(self):
+    def parseArgs(self):#type: (EncodingViewer) -> None
+        IF_HELP = "Specify the input file to read from.";
+        EF_HELP = ("The encoding type to encode from. This value must be a numerical value from the encoding"
+            " list.");
+        OF_HELP = "Specify the output file to write to.";
+        ET_HELP = ("The encoding type to encode to. This value must be a numerical value from the encoding"
+            "list. Default is number 85 - utf-8");
+        LE_HELP = "Conversion types.";
+        V_HELP = "Show version";
+        H_HELP = "Show this help message";
+        ENCODINGS = self.getEncodings();
+        VERSION = "Encoding Viewer version: {}".format(EncodingViewer.VERSION);
+
         self.parser = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter);
         parser = self.parser;
         required = parser.add_argument_group("Required arguments");
-        required.add_argument("-if", "--input-file", required=True, help="Specify the input file to read from.", type=str, metavar=EMPTY);
-        required.add_argument("-ef", "--encode-from", required=True, help="The encoding type to encode from. This value must be a numerical value from the encoding list.", type=int, metavar=EMPTY);
-        parser.add_argument("-of", "--output-file", help="Specify the output file to write to.", type=str, metavar=EMPTY);
-        parser.add_argument("-et", "--encode-to", help="The encoding type to encode to. This value must be a numerical value from the encoding list. Default is number 85 - utf-8", type=int, metavar=EMPTY, default=85);
-        parser.add_argument("-le", "--list-encodings", action="version", help="Conversion types.", version=self.getEncodings());
-        parser.add_argument("-v", "--version", action="version", help="Show version", version="Encoding Viewer version: {}".format(EncodingViewer.VERSION));
-        parser.add_argument("-h", "--help", action="help", help="Show this help message");
+        required.add_argument("-if", "--input-file", required=True, help=IF_HELP, type=str, metavar=EMPTY);
+        required.add_argument("-ef", "--encode-from", required=True, help=EF_HELP, type=int, metavar=EMPTY);
+        parser.add_argument("-of", "--output-file", help=OF_HELP, type=str, metavar=EMPTY);
+        parser.add_argument("-et", "--encode-to", help=ET_HELP, type=int, metavar=EMPTY, default=85);
+        parser.add_argument("-le", "--list-encodings", action="version", help=LE_HELP, version=ENCODINGS);
+        parser.add_argument("-v", "--version", action="version", help=V_HELP, version=VERSION);
+        parser.add_argument("-h", "--help", action="help", help=H_HELP);
         self.args = parser.parse_args();
 
-    def writeEncoding(self, command):
+    def writeEncoding(self, command):#type: (EncodingViewer, str) -> None
         if not os.path.isfile(self.outputFile):
             print("File does not exist. Creating file in order to perform write operation.");
         redirect = " > {}".format(self.outputFile);
         os.system(command + redirect);
 
-    def outputEncoding(self):
+    def outputEncoding(self):#type: (EncodingViewer) -> None
         encodings = EncodingViewer.ENCODINGS;
-        command = "iconv -f {} -t {}//translit {}".format(encodings[self.encodeFrom], encodings[self.encodeTo], self.inputFile);
+        command = "iconv -f {} -t {}//translit {}".format(encodings[self.encodeFrom],
+            encodings[self.encodeTo], self.inputFile);
         print("Command: {}".format(command));
         if self.outputFile:
             self.writeEncoding(command);
