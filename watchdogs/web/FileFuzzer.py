@@ -68,51 +68,53 @@ class FileFuzzer(File, Common):
     return value
 
   def parseArgs(self):  #type: (FileFuzzer) -> None
-    rhHelp = "Explictly specify the remote host."
-    ifHelp = (
+    RH_HELP = "Explictly specify the remote host."
+    IF_HELP = (
         "Specify the input file to read from.\nWhen executing POST, always ensure there is a new line"
         "feed separating the body from the headers.\nIf fuzzing, the file must include exactly 1 'FUZZ' keyword."
     )
-    sHelp = "Specifies https."
-    ofHelp = "Specify the output file to write to."
-    pfHelp = ("Specify a file to send in a POST request. This flag is for file uploads only and should not be"
+    S_HELP = "Specifies https."
+    OF_HELP = "Specify the output file to write to."
+    PF_HELP = ("Specify a file to send in a POST request. This flag is for file uploads only and should not be"
               "used for other POST requests")
-    ffHelp = "Specify a file to fuzz with. If this is not specified, no fuzzing will occur"
-    hpHelp = "Specify a proxy."
-    spHelp = "Specify an ssl proxy"
-    dvHelp = "For https proxies, this flag will disable cert verification."
-    rtHelp = "Specify the requests read time out."
-    flHelp = "Filter OUT fuzzed responses by coma separated lengths"
-    fsHelp = "Filter IN fuzzed responses by coma separated status codes"
-    fiHelp = "Filters in and keeps the responses with the specified text"
-    foHelp = "Filters out and removes the responses with the specified text"
-    srHelp = "Shows the response body"
-    sfHelp = "Shows the fuzz text used in the request"
-    vHelp = "Show version"
-    hHelp = "Show this help message"
+    FF_HELP = "Specify a file to fuzz with. If this is not specified, no fuzzing will occur"
+    FD_HELP = "Specify the delimiter used to separate the words in the fuzz file"
+    HP_HELP = "Specify a proxy."
+    SP_HELP = "Specify an ssl proxy"
+    DV_HELP = "For https proxies, this flag will disable cert verification."
+    RT_HELP = "Specify the requests read time out."
+    FL_HELP = "Filter OUT fuzzed responses by coma separated lengths"
+    FS_HELP = "Filter IN fuzzed responses by coma separated status codes"
+    FI_HELP = "Filters in and keeps the responses with the specified text"
+    FO_HELP = "Filters out and removes the responses with the specified text"
+    SR_HELP = "Shows the response body"
+    SF_HELP = "Shows the fuzz text used in the request"
+    V_HELP = "Show version"
+    H_HELP = "Show this help message"
     VERSION = "File Fuzzer version: {}".format(FileFuzzer.VERSION)
 
     self.parser = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter)
     parser = self.parser
     required = parser.add_argument_group("Required arguments")
-    required.add_argument("-rh", "--rhost", required=True, help=rhHelp, type=str, metavar="127.0.0.1")
-    required.add_argument("-if", "--input-file", required=True, help=ifHelp, type=str, metavar="request.txt")
-    parser.add_argument("-s", "--secure", action="store_true", help=sHelp)
-    parser.add_argument("-of", "--output-file", help=ofHelp, type=str, metavar=EMPTY)
-    parser.add_argument("-pf", "--post-file", help=pfHelp, type=str, metavar=EMPTY)
-    parser.add_argument("-ff", "--fuzz-file", help=ffHelp, type=str, metavar=EMPTY)
-    parser.add_argument("-hp", "--http-proxy", help=hpHelp, type=str, metavar=EMPTY)
-    parser.add_argument("-sp", "--https-proxy", help=spHelp, type=str, metavar=EMPTY)
-    parser.add_argument("-dv", "--disable-verification", action="store_true", help=dvHelp, default=False)
-    parser.add_argument("-rt", "--read-timeout", help=rtHelp, type=int, metavar=EMPTY, default=None)
-    parser.add_argument("-fl", "--filter-length", help=flHelp, type=str, metavar=EMPTY, default=EMPTY)
-    parser.add_argument("-fs", "--filter-status", help=fsHelp, type=str, metavar=EMPTY)
-    parser.add_argument("-fi", "--filter-in", help=fiHelp, type=str, metavar=EMPTY)
-    parser.add_argument("-fo", "--filter-out", help=foHelp, type=str, metavar=EMPTY)
-    parser.add_argument("-sr", "--show-response", action="store_true", help=srHelp)
-    parser.add_argument("-sf", "--show-fuzz", action="store_true", help=sfHelp)
-    parser.add_argument("-v", "--version", action="version", help=vHelp, version=VERSION)
-    parser.add_argument("-h", "--help", action="help", help=hHelp)
+    required.add_argument("-rh", "--rhost", required=True, help=RH_HELP, type=str, metavar="127.0.0.1")
+    required.add_argument("-if", "--input-file", required=True, help=IF_HELP, type=str, metavar="request.txt")
+    parser.add_argument("-s", "--secure", action="store_true", help=S_HELP)
+    parser.add_argument("-of", "--output-file", help=OF_HELP, type=str, metavar=EMPTY)
+    parser.add_argument("-pf", "--post-file", help=PF_HELP, type=str, metavar=EMPTY)
+    parser.add_argument("-ff", "--fuzz-file", help=FF_HELP, type=str, metavar=EMPTY)
+    parser.add_argument("-fd", "--fuzz-delimiter", help=FD_HELP, type=str, metavar=EMPTY)
+    parser.add_argument("-hp", "--http-proxy", help=HP_HELP, type=str, metavar=EMPTY)
+    parser.add_argument("-sp", "--https-proxy", help=SP_HELP, type=str, metavar=EMPTY)
+    parser.add_argument("-dv", "--disable-verification", action="store_true", help=DV_HELP, default=False)
+    parser.add_argument("-rt", "--read-timeout", help=RT_HELP, type=int, metavar=EMPTY, default=None)
+    parser.add_argument("-fl", "--filter-length", help=FL_HELP, type=str, metavar=EMPTY, default=EMPTY)
+    parser.add_argument("-fs", "--filter-status", help=FS_HELP, type=str, metavar=EMPTY)
+    parser.add_argument("-fi", "--filter-in", help=FI_HELP, type=str, metavar=EMPTY)
+    parser.add_argument("-fo", "--filter-out", help=FO_HELP, type=str, metavar=EMPTY)
+    parser.add_argument("-sr", "--show-response", action="store_true", help=SR_HELP)
+    parser.add_argument("-sf", "--show-fuzz", action="store_true", help=SF_HELP)
+    parser.add_argument("-v", "--version", action="version", help=V_HELP, version=VERSION)
+    parser.add_argument("-h", "--help", action="help", help=H_HELP)
     self.args = parser.parse_args()
 
   def setBoundary(self, line, boundaryString):  #type: (str,str) -> None

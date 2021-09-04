@@ -15,16 +15,15 @@ class Cast(object):
     super(Cast, self).__init__()
 
   @staticmethod
-  def _to(_type, obj):  #type: (Any, object) -> str
-    if (_type == str):
+  def _to(clazz, obj):  #type: (Any, object) -> str
+    if (clazz == str):
       return json.dumps(obj, default=lambda obj: obj.__dict__)
 
   @staticmethod
   def _from(obj, clazz):  #type: (object, Type[T]) -> T
-    _type = type(obj)
     newinstance = clazz()
     try:
-      if (_type == str):
+      if (isinstance(obj, str)):
         jsonObj = json.loads(obj)  #type: dict
         objKeys = jsonObj.keys()
         for objKey in objKeys:
