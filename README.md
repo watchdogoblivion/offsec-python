@@ -56,14 +56,14 @@
         python3 -m pip pipCommand package
 
 ### _Links below are to the docs for the modules_ ##
-    These modules were built with Kali and python. Any os command will rely on linux.
+These modules were built with Kali and python. Any os command will rely on linux.
 
-    "wffuzzer" is the most used module.
+"wffuzzer" is the most used module.
 
-    [File Fuzzer module samples] (docs/wffuzzer.md)
-    [Set Java module samples] (docs/wsetjava.md)
-    [Reverse TCP Basic module samples] (docs/wrtcpb.md)
-    [Oracle Character Converter module samples] (docs/woraclecc.md)
-    [File encoder module samples] (docs/wfencoder.md)
-    [Encoding viewer module samples] (docs/weviewer.md)
-    [Character Converter module samples] (docs/wcharc.md)
+[File Fuzzer module samples](docs/wffuzzer.md)\
+[Set Java module samples](docs/wsetjava.md)\
+[Reverse TCP Basic module samples](docs/wrtcpb.md)\
+[Oracle Character Converter module samples](docs/woraclecc.md)\
+[File encoder module samples](docs/wfencoder.md)\
+[Encoding viewer module samples](docs/weviewer.md)\
+[Character Converter module samples](docs/wcharc.md)
