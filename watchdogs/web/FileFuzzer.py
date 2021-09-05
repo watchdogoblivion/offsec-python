@@ -117,89 +117,92 @@ class FileFuzzer(File, Common):
     self.parsedArgs = parser.parse_args()
 
   def setBoundary(self, line, boundaryString):  #type: (str,str) -> None
-    eIndex = line.find(EQUAL, line.find(boundaryString))
-    scIndex = line.find(SEMI_COLON, eIndex)
-    nlIndex = line.find(LFN)
-    if (scIndex > -1):
-      self.requestBoundary = line[eIndex + 1:scIndex]
-    elif (nlIndex > -1):
-      self.requestBoundary = line[eIndex + 1:nlIndex]
+    equalsIndex = line.find(EQUAL, line.find(boundaryString))
+    semiColonIndex = line.find(SEMI_COLON, equalsIndex)
+    lineFeedIndex = line.find(LFN)
+    if (semiColonIndex > -1):
+      self.requestBoundary = line[equalsIndex + 1:semiColonIndex]
+    elif (lineFeedIndex > -1):
+      self.requestBoundary = line[equalsIndex + 1:lineFeedIndex]
     else:
-      self.requestBoundary = line[eIndex + 1:]
+      self.requestBoundary = line[equalsIndex + 1:]
 
-  def setFields(self, lines):  #type: (FileFuzzer,str) -> None
-    fields = self.requestFields
-    value = EMPTY
+  def setFields(self, fileLines):  #type: (FileFuzzer,str) -> None
+    requestFields = self.requestFields
+    rawValue = EMPTY
     isBody = False
-    length = len(lines)
+    fileLinesLength = len(fileLines)
     index = 0
-    while (index < length):
-      line = lines[index].rstrip()
+    while (index < fileLinesLength):
+      fileLine = fileLines[index].rstrip()
       boundaryString = BOUNDARY + EQUAL + DASH + DASH
-      if (boundaryString in line):
-        self.setBoundary(line, boundaryString)
+      if (boundaryString in fileLine):
+        self.setBoundary(fileLine, boundaryString)
       if (index == 0):
-        setattr(self, fields[0], line)
+        self.raw_info = fileLine
+        # setattr(self, requestFields[0], fileLine)
         index += 1
         continue
-      elif ((line == EMPTY and not isBody) or (index + 1 == length and not isBody)):
+      elif ((fileLine == EMPTY and not isBody) or (index + 1 == fileLinesLength and not isBody)):
         isBody = True
-        setattr(self, fields[1], value)
-        value = ""
-      elif (index + 1 == length):
-        value += line + LFN
-        setattr(self, fields[2], value)
+        self.raw_headers = rawValue
+        # setattr(self, requestFields[1], value)
+        rawValue = ""
+      elif (index + 1 == fileLinesLength):
+        rawValue += fileLine + LFN
+        self.raw_body = rawValue
+        # setattr(self, requestFields[2], rawValue)
         index += 1
         break
 
-      value += line + LFN
+      rawValue += fileLine + LFN
       index += 1
 
   def parseInfo(self):  #type: (FileFuzzer) -> None
-    info = self.raw_info.rstrip().split(SPACE)
-    self.info[METHOD] = info[0]
-    self.info[ENDPOINT] = info[1]
+    rawInfo = self.raw_info.rstrip().split(SPACE)
+    self.info[METHOD] = rawInfo[0]
+    self.info[ENDPOINT] = rawInfo[1]
 
   def parseHeaders(self):  #type: (FileFuzzer) -> None
-    headerArray = self.raw_headers.rstrip().split(LFN)
-    for header in headerArray:
-      index = header.find(COLON)
-      self.requestHeaders[header[0:index]] = header[index + 1:].strip()
+    rawHeaders = self.raw_headers.rstrip().split(LFN)
+    for rawHeader in rawHeaders:
+      colonIndex = rawHeader.find(COLON)
+      self.requestHeaders[rawHeader[0:colonIndex]] = rawHeader[colonIndex + 1:].strip()
 
   def parseBody(self):  #type: (FileFuzzer) -> None
     if (self.postFile):
-      filteredList = [(l) for l in self.raw_body.split(LFN) if l and not self.requestBoundary in l]
-      length = len(filteredList)
+      rawBodyLines = [(l) for l in self.raw_body.split(LFN) if l and not self.requestBoundary in l]
+      rawBodyLinesLength = len(rawBodyLines)
 
-      for index in range(length):
+      for lineIndex in range(rawBodyLinesLength):
         cd = CONTENT_DISPOSITION + COLON
         ct = CONTENT_TYPE + COLON
         fn = FILE_NAME + EQUAL + DOUBLE_QUOTE
         n = NAME + EQUAL + DOUBLE_QUOTE
-        line = filteredList[index]
-        startName = line.find(DOUBLE_QUOTE, line.find(n))
-        endName = line.find(DOUBLE_QUOTE, startName + 1)
+        rawBodyLine = rawBodyLines[lineIndex]
+        startName = rawBodyLine.find(DOUBLE_QUOTE, rawBodyLine.find(n))
+        endName = rawBodyLine.find(DOUBLE_QUOTE, startName + 1)
 
-        if (fn in line):
-          name = line[startName + 1:endName]
-          startFileName = line.find(DOUBLE_QUOTE, line.find(fn))
-          endFileName = line.find(DOUBLE_QUOTE, startFileName + 1)
-          fileName = line[startFileName + 1:endFileName]
-          if (ct in filteredList[index + 1]):
-            contentType = filteredList[index + 1]
+        if (fn in rawBodyLine):
+          name = rawBodyLine[startName + 1:endName]
+          startFileName = rawBodyLine.find(DOUBLE_QUOTE, rawBodyLine.find(fn))
+          endFileName = rawBodyLine.find(DOUBLE_QUOTE, startFileName + 1)
+          fileName = rawBodyLine[startFileName + 1:endFileName]
+          if (ct in rawBodyLines[lineIndex + 1]):
+            contentType = rawBodyLines[lineIndex + 1]
             contentTypeValue = contentType[contentType.find(COLON) + 1:]
           self.requestBody[name] = (fileName, open(self.postFile, RB), contentTypeValue)
-        elif (cd in line):
-          name = line[startName + 1:endName]
-          value = EMPTY
-          i = index + 1
-          nextLine = filteredList[i]
+        elif (cd in rawBodyLine):
+          name = rawBodyLine[startName + 1:endName]
+          rawValue = EMPTY
+          i = lineIndex + 1
+          nextLine = rawBodyLines[i]
           while (True):
-            value += nextLine
-            if (i + 1 == length or cd in filteredList[i + 1]):
-              self.requestBody[name] = value
+            rawValue += nextLine
+            if (i + 1 == rawBodyLinesLength or cd in rawBodyLines[i + 1]):
+              self.requestBody[name] = rawValue
               break
-            nextLine += filteredList[i + 1]
+            nextLine += rawBodyLines[i + 1]
       if (not self.requestBody):
         print(
             "Could not parse thw post file specified. Please ensure that the -pf flag is being used with"
@@ -290,9 +293,9 @@ class FileFuzzer(File, Common):
 
   def parseFile(self):  # type: (FileFuzzer) -> None
     inputFile = open(self.inputFile, LR)
-    lines = inputFile.readlines()
+    fileLines = inputFile.readlines()
 
-    self.setFields(lines)
+    self.setFields(fileLines)
     self.parseInfo()
     self.parseHeaders()
     self.parseBody()

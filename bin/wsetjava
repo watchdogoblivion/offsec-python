@@ -12,16 +12,29 @@ import subprocess
 
 class WSetJava():
 
+  class JavaPath:
+
+    def __init__(self, java=None, javac=None):
+      self.java = java  #type: str
+      self.javac = javac  #type: str
+
   VERSION = "1.0"
+  JAVA = "java"
+  JAVAC = "javac"
   JAVA7 = "java7"
   JAVA8 = "java8"
   JAVA11 = "java11"
   EMPTY = ""
+  LFN = "\n"
 
   JAVA_PATHS = {
-      JAVA7: ["/usr/lib/jvm/jdk1.7.0_80/bin/java", "/usr/lib/jvm/jdk1.7.0_80/bin/javac"],
-      JAVA8: ["/usr/lib/jvm/jdk1.8.0_301/bin/java", "/usr/lib/jvm/jdk1.8.0_301/bin/javac"],
-      JAVA11: ["/usr/lib/jvm/java-11-openjdk-amd64/bin/java", "/usr/lib/jvm/java-11-openjdk-amd64/bin/javac"]
+      JAVA7:
+          JavaPath("/usr/lib/jvm/jdk1.7.0_80/bin/java", "/usr/lib/jvm/jdk1.7.0_80/bin/javac"),
+      JAVA8:
+          JavaPath("/usr/lib/jvm/jdk1.8.0_301/bin/java", "/usr/lib/jvm/jdk1.8.0_301/bin/javac"),
+      JAVA11:
+          JavaPath("/usr/lib/jvm/java-11-openjdk-amd64/bin/java",
+                   "/usr/lib/jvm/java-11-openjdk-amd64/bin/javac")
   }
 
   def __init__(self):
@@ -55,10 +68,14 @@ class WSetJava():
 
   def getJavaAlts(self):  #type: (WSetJava) -> str
     DSPACE = "  "
-    LFN = "\n"
+    LFN = WSetJava.LFN
+    updateAltsList = "update-alternatives --list "
 
-    javaAlts = subprocess.check_output("update-alternatives --list java", shell=True)
-    javacAlts = subprocess.check_output("update-alternatives --list javac", shell=True)
+    javaAltCommand = "{}{}".format(updateAltsList, WSetJava.JAVA)
+    javacAltCommand = "{}{}".format(updateAltsList, WSetJava.JAVAC)
+
+    javaAlts = subprocess.check_output(javaAltCommand, shell=True)
+    javacAlts = subprocess.check_output(javacAltCommand, shell=True)
 
     javaAlts = "{}{}".format(DSPACE, javaAlts.replace(LFN, LFN + DSPACE))
     javacAlts = "{}{}".format(DSPACE, javacAlts.replace(LFN, LFN + DSPACE))
@@ -66,12 +83,15 @@ class WSetJava():
     return "Java Alternatives:{}{}{}{}".format(LFN, javaAlts, LFN, javacAlts.rstrip())
 
   def getJavaPaths(self):  #type: (WSetJava) -> str
+    LFN = WSetJava.LFN
     javaPaths = WSetJava.JAVA_PATHS
-    javaPathsString = ""
+    javaPathsString = "Java paths:{}".format(LFN)
+    javaVersions = sorted(javaPaths.iterkeys(), key=WSetJava.naturalOrdering)
 
-    keys = sorted(javaPaths.iterkeys(), key=WSetJava.naturalOrdering)
-    for key in keys:
-      javaPathsString += "  {} {}\n".format(key, javaPaths[key])
+    for javaVersions in javaVersions:
+      javaPath = javaPaths[javaVersions]
+      stringFormat = "  {} - {}    {}{}    {}{}"
+      javaPathsString += stringFormat.format(javaVersions, LFN, javaPath.java, LFN, javaPath.javac, LFN)
 
     return javaPathsString
 
@@ -117,14 +137,19 @@ class WSetJava():
   def setJava(self):  #type: (WSetJava) -> None
     javaVersion = self.set
     print("Setting version: {}".format(javaVersion))
-    JAVA_PATH = WSetJava.JAVA_PATHS[javaVersion][0]
-    JAVAC_PATH = WSetJava.JAVA_PATHS[javaVersion][1]
 
-    UPDATE_ALTS = "sudo update-alternatives "
-    installJava = "{}--install '/usr/bin/java' 'java' '{}' 0".format(UPDATE_ALTS, JAVA_PATH)
-    installJavac = "{}--install '/usr/bin/javac' 'javac' '{}' 0".format(UPDATE_ALTS, JAVAC_PATH)
-    setJava = "{}--set java {}".format(UPDATE_ALTS, JAVA_PATH)
-    setJavac = "{}--set javac {}".format(UPDATE_ALTS, JAVAC_PATH)
+    JAVA = WSetJava.JAVA
+    JAVAC = WSetJava.JAVAC
+    JAVA_PATH = WSetJava.JAVA_PATHS[javaVersion].java
+    JAVAC_PATH = WSetJava.JAVA_PATHS[javaVersion].javac
+    UPDATE_ALTS_INSTALL = "sudo update-alternatives --install "
+    UPDATE_ALTS_SET = "sudo update-alternatives --set "
+
+    installJava = "{}'/usr/bin/java' '{}' '{}' 0".format(UPDATE_ALTS_INSTALL, JAVA, JAVA_PATH)
+    installJavac = "{}'/usr/bin/javac' '{}' '{}' 0".format(UPDATE_ALTS_INSTALL, JAVAC, JAVAC_PATH)
+    setJava = "{}{} {}".format(UPDATE_ALTS_SET, JAVA, JAVA_PATH)
+    setJavac = "{}{} {}".format(UPDATE_ALTS_SET, JAVAC, JAVAC_PATH)
+
     for command in [installJava, installJavac, setJava, setJavac]:
       print("Executing comand: {}".format(command))
       print(subprocess.check_output("{}".format(command), stderr=subprocess.STDOUT, shell=True))
