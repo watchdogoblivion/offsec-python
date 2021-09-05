@@ -12,13 +12,11 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder
 from watchdogs.io import File
 from watchdogs.web.Locators import *
 from watchdogs.utils import Cast
-from watchdogs.utils.Constants import (
-  EMPTY, COLON, EQUAL, SEMI_COLON, LFN, BOUNDARY, DASH, SPACE, METHOD,
-  ENDPOINT, CONTENT_DISPOSITION, CONTENT_TYPE, FILE_NAME, DOUBLE_QUOTE,
-  NAME, RB, FUZZ, SONE, REGEX_SUB, LR, HOST, INFO, HEADER, LS, BODY,
-  LFRN, HTTP, HTTP_PROTOCOL, HTTPS_PROTOCOL, HTTPS, HTML_PARSER,
-  CONTENT_LENGTH, T, UTF8
-)
+from watchdogs.utils.Constants import (EMPTY, COLON, EQUAL, SEMI_COLON, LFN, BOUNDARY, DASH, SPACE, METHOD,
+                                       ENDPOINT, CONTENT_DISPOSITION, CONTENT_TYPE, FILE_NAME, DOUBLE_QUOTE,
+                                       NAME, RB, FUZZ, SONE, REGEX_SUB, LR, HOST, INFO, HEADER, LS, BODY,
+                                       LFRN, HTTP, HTTP_PROTOCOL, HTTPS_PROTOCOL, HTTPS, HTML_PARSER,
+                                       CONTENT_LENGTH, T, UTF8)
 
 
 class FileFuzzer(File, Common):
@@ -31,16 +29,16 @@ class FileFuzzer(File, Common):
   def __init__(self):
     super(FileFuzzer, self).__init__()
     self.requestFields = []  #type: list[str]
+    self.remoteHost = EMPTY  #type: str
     self.secure = False  #type: bool
-    self.rhost = EMPTY  #type: str
     self.raw_info = EMPTY  #type: str
     self.raw_headers = EMPTY  #type: str
     self.raw_body = EMPTY  #type: str
     self.info = OrderedDict()  #type: OrderedDict
     self.url = EMPTY  #type: str
-    self.headers = OrderedDict()  #type: OrderedDict
-    self.boundary = EMPTY  #type: str
-    self.body = OrderedDict()  #type: OrderedDict
+    self.requestHeaders = OrderedDict()  #type: OrderedDict
+    self.requestBoundary = EMPTY  #type: str
+    self.requestBody = OrderedDict()  #type: OrderedDict
     self.postFile = EMPTY  #type: str
     self.fuzzLocators = FuzzLocators()  #type: FuzzLocators
     self.fuzzFile = EMPTY  #type: str
@@ -55,7 +53,7 @@ class FileFuzzer(File, Common):
     self.filterOut = EMPTY  #type: str
     self.showResponse = False  #type: bool
     self.showFuzz = False  #type: bool
-    self.FuzzText = EMPTY  #type: str
+    self.FuzzValuesString = EMPTY  #type: str
 
   def __setattr__(self, name, value):  #type: (FileFuzzer, str, T) -> T
     super(FileFuzzer, self).__setattr__(name, value)
@@ -75,8 +73,9 @@ class FileFuzzer(File, Common):
     )
     S_HELP = "Specifies https."
     OF_HELP = "Specify the output file to write to."
-    PF_HELP = ("Specify a file to send in a POST request. This flag is for file uploads only and should not be"
-              "used for other POST requests")
+    PF_HELP = (
+        "Specify a file to send in a POST request. This flag is for file uploads only and should not be"
+        "used for other POST requests")
     FF_HELP = "Specify a file to fuzz with. If this is not specified, no fuzzing will occur"
     FD_HELP = "Specify the delimiter used to separate the words in the fuzz file"
     HP_HELP = "Specify a proxy."
@@ -96,7 +95,7 @@ class FileFuzzer(File, Common):
     self.parser = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter)
     parser = self.parser
     required = parser.add_argument_group("Required arguments")
-    required.add_argument("-rh", "--rhost", required=True, help=RH_HELP, type=str, metavar="127.0.0.1")
+    required.add_argument("-rh", "--remote-host", required=True, help=RH_HELP, type=str, metavar="127.0.0.1")
     required.add_argument("-if", "--input-file", required=True, help=IF_HELP, type=str, metavar="request.txt")
     parser.add_argument("-s", "--secure", action="store_true", help=S_HELP)
     parser.add_argument("-of", "--output-file", help=OF_HELP, type=str, metavar=EMPTY)
@@ -115,18 +114,18 @@ class FileFuzzer(File, Common):
     parser.add_argument("-sf", "--show-fuzz", action="store_true", help=SF_HELP)
     parser.add_argument("-v", "--version", action="version", help=V_HELP, version=VERSION)
     parser.add_argument("-h", "--help", action="help", help=H_HELP)
-    self.args = parser.parse_args()
+    self.parsedArgs = parser.parse_args()
 
   def setBoundary(self, line, boundaryString):  #type: (str,str) -> None
     eIndex = line.find(EQUAL, line.find(boundaryString))
     scIndex = line.find(SEMI_COLON, eIndex)
     nlIndex = line.find(LFN)
     if (scIndex > -1):
-      self.boundary = line[eIndex + 1:scIndex]
+      self.requestBoundary = line[eIndex + 1:scIndex]
     elif (nlIndex > -1):
-      self.boundary = line[eIndex + 1:nlIndex]
+      self.requestBoundary = line[eIndex + 1:nlIndex]
     else:
-      self.boundary = line[eIndex + 1:]
+      self.requestBoundary = line[eIndex + 1:]
 
   def setFields(self, lines):  #type: (FileFuzzer,str) -> None
     fields = self.requestFields
@@ -165,11 +164,11 @@ class FileFuzzer(File, Common):
     headerArray = self.raw_headers.rstrip().split(LFN)
     for header in headerArray:
       index = header.find(COLON)
-      self.headers[header[0:index]] = header[index + 1:].strip()
+      self.requestHeaders[header[0:index]] = header[index + 1:].strip()
 
   def parseBody(self):  #type: (FileFuzzer) -> None
     if (self.postFile):
-      filteredList = [(l) for l in self.raw_body.split(LFN) if l and not self.boundary in l]
+      filteredList = [(l) for l in self.raw_body.split(LFN) if l and not self.requestBoundary in l]
       length = len(filteredList)
 
       for index in range(length):
@@ -189,7 +188,7 @@ class FileFuzzer(File, Common):
           if (ct in filteredList[index + 1]):
             contentType = filteredList[index + 1]
             contentTypeValue = contentType[contentType.find(COLON) + 1:]
-          self.body[name] = (fileName, open(self.postFile, RB), contentTypeValue)
+          self.requestBody[name] = (fileName, open(self.postFile, RB), contentTypeValue)
         elif (cd in line):
           name = line[startName + 1:endName]
           value = EMPTY
@@ -198,41 +197,41 @@ class FileFuzzer(File, Common):
           while (True):
             value += nextLine
             if (i + 1 == length or cd in filteredList[i + 1]):
-              self.body[name] = value
+              self.requestBody[name] = value
               break
             nextLine += filteredList[i + 1]
-      if (not self.body):
+      if (not self.requestBody):
         print(
             "Could not parse thw post file specified. Please ensure that the -pf flag is being used with"
             " a proper file upload request. If the attempted request is not a file upload, then remove the -pf"
             " flag to send JSON or standard form data.")
         exit()
     else:
-      self.body = self.raw_body
+      self.requestBody = self.raw_body
 
-  def getFuzzIndicies(self, *fuzzValues):  # type: (FileFuzzer, str) -> list[int]
+  def getFuzzIndicies(self, *fuzzWords):  # type: (FileFuzzer, str) -> list[int]
     boundRegex = FileFuzzer.BOUND_REGEX
-    fuzzIndicies = []
-    for fuzzValue in fuzzValues:
-      if (fuzzValue):
-        fuzzIndicies += re.findall(boundRegex, fuzzValue)
-    return fuzzIndicies
+    fuzzWordsIndicies = []
+    for fuzzWord in fuzzWords:
+      if fuzzWord:
+        fuzzWordsIndicies += re.findall(boundRegex, fuzzWord)
+    return fuzzWordsIndicies
 
-  def getBoundlessFuzz(self, *fuzzValues):  # type: (FileFuzzer, str) -> str
+  def getBoundlessFuzz(self, *fuzzWords):  # type: (FileFuzzer, str) -> str
     boundlessRegex = FileFuzzer.BOUNDLESS_REGEX
-    for fuzzValue in fuzzValues:
-      boundlessArray = re.findall(boundlessRegex, fuzzValue)
+    for fuzzWord in fuzzWords:
+      boundlessArray = re.findall(boundlessRegex, fuzzWord)
       if (boundlessArray):
         if (len(boundlessArray) > 1):
           print(FileFuzzer.DUPLICATE_MESSAGE)
-        return fuzzValue
+        return fuzzWord
 
-  def handleBoundless(self, boundlessFuzz, fuzzIndicies, attrValue, attrKey, aVI=None):
+  def handleBoundless(self, boundlessFuzz, fuzzWordsIndicies, attrValue, attrKey, aVI=None):
     #type: (FileFuzzer, str, list[int], str | OrderedDict, str, AVI) -> None
     if (boundlessFuzz):
       boundlessRegex = FileFuzzer.BOUNDLESS_REGEX
       newValue = re.sub(boundlessRegex, FUZZ + SONE + REGEX_SUB, boundlessFuzz)
-      fuzzIndicies.append(SONE)
+      fuzzWordsIndicies.append(SONE)
       if (type(attrValue) == str):
         setattr(self, attrKey, newValue)
       elif (aVI):
@@ -241,27 +240,27 @@ class FileFuzzer(File, Common):
         fileName = aVI.getFileName()
         contentType = aVI.getContentType()
         if (type(aVIValue) == tuple):
-          newTuple = None
+          newFile = None
           if (fileName == boundlessFuzz):
-            newTuple = (newValue, aVIValue[1], contentType)
+            newFile = (newValue, aVIValue[1], contentType)
           if (contentType == boundlessFuzz):
-            newTuple = (fileName, aVIValue[1], newValue)
-          if (newTuple):
-            attrValue[aVIKey] = newTuple
+            newFile = (fileName, aVIValue[1], newValue)
+          if (newFile):
+            attrValue[aVIKey] = newFile
         elif (type(aVIValue) == str):
           attrValue[aVIKey] = newValue
 
-  def manageLocatorValues(self, fuzzIndicies, existingIndicies, locatorKey, locator):
+  def manageLocatorValues(self, fuzzWordsIndicies, existingIndicies, locatorKey, locator):
     #type: (FileFuzzer, list[int], list[int], str, FuzzLocator) -> None
-    if (len(fuzzIndicies) > 0):
-      for index in fuzzIndicies:
-        if (index in existingIndicies):
+    if (len(fuzzWordsIndicies) > 0):
+      for fuzzWordIndex in fuzzWordsIndicies:
+        if (fuzzWordIndex in existingIndicies):
           print(FileFuzzer.DUPLICATE_MESSAGE)
         container = LocatorContainer()
         container.setLocatorKey(locatorKey)
-        container.setLocatorIndex(index)
+        container.setFuzzWordIndex(fuzzWordIndex)
         locator.getLocatorContainers().append(container)
-        existingIndicies.append(container.getLocatorIndex())
+        existingIndicies.append(container.getFuzzWordIndex())
 
   def updateFuzzLocator(self, *attrKeys):  # type: (FileFuzzer, str) -> None
     locators = self.fuzzLocators
@@ -270,24 +269,24 @@ class FileFuzzer(File, Common):
       attrValue = getattr(self, attrKey)
       locator = Cast._from(getattr(locators, attrKey), FuzzLocator)
       if (type(attrValue) == str):
-        fuzzIndicies = self.getFuzzIndicies(attrValue)
+        fuzzWordsIndicies = self.getFuzzIndicies(attrValue)
         boundlessFuzz = self.getBoundlessFuzz(attrValue)
-        self.handleBoundless(boundlessFuzz, fuzzIndicies, attrValue, attrKey)
-        self.manageLocatorValues(fuzzIndicies, existingIndicies, attrKey, locator)
+        self.handleBoundless(boundlessFuzz, fuzzWordsIndicies, attrValue, attrKey)
+        self.manageLocatorValues(fuzzWordsIndicies, existingIndicies, attrKey, locator)
       elif (type(attrValue) == OrderedDict):
         aVI = OrderedDict(attrValue).items()
         for aVIKey, aVIValue in aVI:
-          fuzzValue = fileName = contentType = EMPTY
+          fuzzWord = fileName = contentType = EMPTY
           if (type(aVIValue) == tuple):
             fileName = aVIValue[0]
             contentType = aVIValue[2]
           elif (type(aVIValue) == str):
-            fuzzValue = aVIValue
-          fuzzIndicies = self.getFuzzIndicies(fuzzValue, fileName, contentType)
-          boundlessFuzz = self.getBoundlessFuzz(fuzzValue, fileName, contentType)
+            fuzzWord = aVIValue
+          fuzzWordsIndicies = self.getFuzzIndicies(fuzzWord, fileName, contentType)
+          boundlessFuzz = self.getBoundlessFuzz(fuzzWord, fileName, contentType)
           aVI = AVI(aVIKey, aVIValue, fileName, contentType)
-          self.handleBoundless(boundlessFuzz, fuzzIndicies, attrValue, None, aVI)
-          self.manageLocatorValues(fuzzIndicies, existingIndicies, aVIKey, locator)
+          self.handleBoundless(boundlessFuzz, fuzzWordsIndicies, attrValue, None, aVI)
+          self.manageLocatorValues(fuzzWordsIndicies, existingIndicies, aVIKey, locator)
 
   def parseFile(self):  # type: (FileFuzzer) -> None
     inputFile = open(self.inputFile, LR)
@@ -303,18 +302,18 @@ class FileFuzzer(File, Common):
     format = '{}: {}'
 
     info = []
-    for k, v in self.info.items():
-      info.append(format.format(k, v))
+    for infoKey, infoValue in self.info.items():
+      info.append(format.format(infoKey, infoValue))
 
     headers = []
-    for k, v in self.headers.items():
-      headers.append(format.format(k, v))
+    for headersKey, headersValue in self.requestHeaders.items():
+      headers.append(format.format(headersKey, headersValue))
 
     body = []
-    if (type(self.body) == str):
-      body.append(self.body)
+    if (type(self.requestBody) == str):
+      body.append(self.requestBody)
     else:
-      for k, v in self.body.items():
+      for k, v in self.requestBody.items():
         body.append(format.format(k, v))
 
     print('{}{}{}{}{}{}{}{}{}{}{}'.format(LFRN, '-----------Request Start-----------',
@@ -322,13 +321,13 @@ class FileFuzzer(File, Common):
                                           LFRN.join(body), LFRN, '----------- Request End ------------',
                                           LFRN))
 
-  def getLocatorsTotalLength(self):  # type: (FileFuzzer) -> int
+  def getAllLocatorsContainers(self):  # type: (FileFuzzer) -> int
     locators = self.fuzzLocators
-    rhostLength = len(locators.getRhost().getLocatorContainers())
-    infoLength = len(locators.getInfo().getLocatorContainers())
-    headersLength = len(locators.getHeaders().getLocatorContainers())
-    bodyLength = len(locators.getBody().getLocatorContainers())
-    return rhostLength + infoLength + headersLength + bodyLength
+    rhostContainers = locators.getRhost().getLocatorContainers()
+    infoContainers = locators.getInfo().getLocatorContainers()
+    headersContainers = locators.getHeaders().getLocatorContainers()
+    bodyContainers = locators.getBody().getLocatorContainers()
+    return rhostContainers + infoContainers + headersContainers + bodyContainers
 
   def getFuzzHelpers(self):  # type: (FileFuzzer) -> list
     locators = vars(self.fuzzLocators)
@@ -338,14 +337,14 @@ class FileFuzzer(File, Common):
       containers = locator.getLocatorContainers()
       for container in containers:
         fuzzHelper = FuzzHelper()
-        fuzzHelper.setLocatorIndex(int(container.getLocatorIndex()))
+        fuzzHelper.setFuzzWordIndex(int(container.getFuzzWordIndex()))
         fuzzHelper.setAttrKey(locatorField)
         fuzzHelper.setLocatorKey(container.getLocatorKey())
         attrValue = getattr(self, locatorField)
         if (type(attrValue) == str):
-          fuzzHelper.setOriginalFuzz(attrValue)
+          fuzzHelper.setOriginalAttrValue(attrValue)
         else:
-          fuzzHelper.setOriginalFuzz(attrValue[fuzzHelper.getLocatorKey()])
+          fuzzHelper.setOriginalAttrValue(attrValue[fuzzHelper.getLocatorKey()])
         fuzzHelpers.append(fuzzHelper)
     return fuzzHelpers
 
@@ -359,10 +358,10 @@ class FileFuzzer(File, Common):
         protocol = HTTPS_PROTOCOL
       return "{}{}{}".format(protocol, host, endpoint)
 
-  def getBody(self):  #type: (FileFuzzer) -> OrderedDict | str
+  def getRequestBody(self):  #type: (FileFuzzer) -> OrderedDict | str
     if (self.postFile):
-      return MultipartEncoder(fields=self.body, boundary=self.boundary)
-    return self.body
+      return MultipartEncoder(fields=self.requestBody, boundary=self.requestBoundary)
+    return self.requestBody
 
   def getProxies(self):  #type: (FileFuzzer) -> dict
     proxies = {}
@@ -392,15 +391,16 @@ class FileFuzzer(File, Common):
 
     responseString = "Response status: {} - Response length: {}".format(responseStatus, responseLength)
     if (self.showFuzz):
-      responseString += " - Fuzz text: {}".format(self.FuzzText)
+      responseString += " - Fuzz text: {}".format(self.FuzzValuesString)
     if (self.showResponse):
       responseString = "Response body: {}{}{}".format(LFRN, responseSoup.encode(UTF8), LFRN) + responseString
     print(responseString)
 
   def sendRequest(self):  #type: (FileFuzzer) -> None
-    self.url = self.parseUrl(self.rhost, self.secure, self.info[ENDPOINT])
+    self.url = self.parseUrl(self.remoteHost, self.secure, self.info[ENDPOINT])
 
-    req = requests.Request(self.info[METHOD], self.url, headers=self.headers, data=self.getBody())
+    req = requests.Request(self.info[METHOD], self.url, headers=self.requestHeaders,
+                           data=self.getRequestBody())
     prepared = req.prepare()
     session = requests.Session()
     session.proxies = self.getProxies()
@@ -408,61 +408,61 @@ class FileFuzzer(File, Common):
     response = session.send(prepared, timeout=self.readTimeout)
     self.handleResponse(response)
 
-  def swapFuzz(self, substrings, fuzzHelpers):  #type: (FileFuzzer, list[str], list[FuzzHelper]) -> None
+  def swapFuzz(self, fuzzValues, fuzzHelpers):  #type: (FileFuzzer, list[str], list[FuzzHelper]) -> None
     for fuzzHelper in fuzzHelpers:
-      index = fuzzHelper.getLocatorIndex()
-      arg1 = FUZZ + str(index)
-      arg2 = substrings[index - 1].rstrip()
+      fuzzWordIndex = fuzzHelper.getFuzzWordIndex()
+      fuzzWord = FUZZ + str(fuzzWordIndex)
+      fuzzValue = fuzzValues[fuzzWordIndex - 1].rstrip()
       attrKey = fuzzHelper.getAttrKey()
       attrValue = getattr(self, attrKey)
       if (type(attrValue) == str):
-        setattr(self, attrKey, str(attrValue).replace(arg1, arg2))
+        setattr(self, attrKey, str(attrValue).replace(fuzzWord, fuzzValue))
         continue
       locatorKey = fuzzHelper.getLocatorKey()
-      originalValue = attrValue[locatorKey]
-      if (type(originalValue) == tuple):
-        fileName = str(originalValue[0])
-        content = originalValue[1]
-        contentType = str(originalValue[2])
-        if (arg1 in fileName):
-          newValue = fileName.replace(arg1, arg2)
+      requestValue = attrValue[locatorKey]
+      if (isinstance(requestValue, tuple)):
+        fileName = str(requestValue[0])
+        content = requestValue[1]
+        contentType = str(requestValue[2])
+        if (fuzzWord in fileName):
+          newValue = fileName.replace(fuzzWord, fuzzValue)
           attrValue[locatorKey] = (newValue, content, contentType)
-        elif (arg1 in contentType):
-          newValue = contentType.replace(arg1, arg2)
+        elif (fuzzWord in contentType):
+          newValue = contentType.replace(fuzzWord, fuzzValue)
           attrValue[locatorKey] = (fileName, content, newValue)
-      else:
-        attrValue[locatorKey] = str(originalValue).replace(arg1, arg2)
+      elif (isinstance(requestValue, str)):
+        attrValue[locatorKey] = str(requestValue).replace(fuzzWord, fuzzValue)
 
   def swapBack(self, fuzzHelpers):  #type: (FileFuzzer, list[FuzzHelper]) -> None
     for fuzzHelper in fuzzHelpers:
-      originalValue = fuzzHelper.getOriginalFuzz()
       attrKey = fuzzHelper.getAttrKey()
-      attrValue = getattr(self, attrKey)
-      if (type(attrValue) == str):
-        setattr(self, attrKey, originalValue)
+      currentAttrValue = getattr(self, attrKey)
+      originalAttrValue = fuzzHelper.getOriginalAttrValue()
+      if (type(currentAttrValue) == str):
+        setattr(self, attrKey, originalAttrValue)
         continue
       locatorKey = fuzzHelper.getLocatorKey()
-      attrValue[locatorKey] = originalValue
+      currentAttrValue[locatorKey] = originalAttrValue
 
   def fuzzRequest(self):  #type: (FileFuzzer) -> None
-    fuzzFile = open(self.fuzzFile, "r")
-    lines = fuzzFile.readlines()
+    fuzzValuesFile = open(self.fuzzFile, "r")
+    fuzzValuesLines = fuzzValuesFile.readlines()
     fuzzHelpers = self.getFuzzHelpers()
-    de = self.fuzzDelimiter
+    fuzzDelimiter = self.fuzzDelimiter
 
     if (len(fuzzHelpers) <= 0):
       print("No FUZZ keyword located. Sending normal request.")
       self.sendRequest()
     else:
-      for line in lines:
-        self.FuzzText = line.rstrip()
-        substrings = line.split(de)
-        self.swapFuzz(substrings, fuzzHelpers)
+      for fuzzValuesLine in fuzzValuesLines:
+        self.FuzzValuesString = fuzzValuesLine.rstrip()
+        fuzzValues = fuzzValuesLine.split(fuzzDelimiter)
+        self.swapFuzz(fuzzValues, fuzzHelpers)
         self.sendRequest()
         self.swapBack(fuzzHelpers)
 
   def processRequest(self):  #type: (FileFuzzer) -> None
-    if (self.getLocatorsTotalLength() > 0):
+    if (len(self.getAllLocatorsContainers()) > 0):
       print("Fuzzing Request")
       self.fuzzRequest()
     else:

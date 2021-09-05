@@ -28,6 +28,7 @@ COMMA = ','
 HASH = '#'
 T = TypeVar('T')
 UTF8 = 'utf-8'
+USC = "_"
 
 ########## Delimiters ##########
 D1 = ' : '

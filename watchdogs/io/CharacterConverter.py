@@ -5,7 +5,7 @@
 import argparse
 
 from watchdogs.io import File
-from watchdogs.utils.Constants import (EMPTY, SPACE)
+from watchdogs.utils.Constants import (EMPTY, LR, SPACE)
 
 
 class CharacterConverter(File):
@@ -27,7 +27,7 @@ class CharacterConverter(File):
     OC_HELP = "Specify the character that will be replaced."
     NC_HELP = "Specify the character that will replace the old character."
     IL_HELP = "Specify if you want to increment the replaced character by line."
-    I_WHELP = "Specify if you want to increment the replaced character by word."
+    IW_HELP = "Specify if you want to increment the replaced character by word."
     U_HELP = "Specify if you want to upper case all the characters."
     L_HELP = "Specify if you want to lower case all the characters."
     V_HELP = "Show version"
@@ -42,40 +42,49 @@ class CharacterConverter(File):
     parser.add_argument("-oc", "--old-char", help=OC_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-nc", "--new-char", help=NC_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-il", "--increment-line", action="store_true", help=IL_HELP)
-    parser.add_argument("-iw", "--increment-word", action="store_true", help=I_WHELP)
+    parser.add_argument("-iw", "--increment-word", action="store_true", help=IW_HELP)
     parser.add_argument("-u", "--upper", action="store_true", help=U_HELP)
     parser.add_argument("-l", "--lower", action="store_true", help=L_HELP)
     parser.add_argument("-v", "--version", action="version", help=V_HELP, version=VERSION)
     parser.add_argument("-h", "--help", action="help", help=H_HELP)
-    self.args = parser.parse_args()
+    self.parsedArgs = parser.parse_args()
 
   def readLines(self):  #type: (CharacterConverter) -> None
-    openedFile = open(self.inputFile, "r")
-    lines = openedFile.readlines()
-    length = len(lines)
-    inc = 1
-    for i in range(length):
-      line = lines[i]
-      if (self.incrementLine and self.newChar):
-        if (line.find(self.oldChar) > -1):
-          line = line.replace(self.oldChar, "{}{}".format(str(inc), self.newChar))
-          inc += 1
-      elif (self.incrementWord and self.newChar):
-        words = line.split(SPACE)
-        wlength = len(words)
-        for w in range(wlength):
-          word = words[w]
-          if (word.find(self.oldChar) > -1):
-            words[w] = word.replace(self.oldChar, "{}{}".format(str(inc), self.newChar))
-            inc += 1
-        line = SPACE.join(words)
+    openedFile = open(self.inputFile, LR)
+    fileLines = openedFile.readlines()
+    increment = 1
+    linesRead = []
+    oldChar = self.oldChar
+    newChar = self.newChar
+    incrementWord = self.incrementWord
+
+    for line in fileLines:
+      if (self.incrementLine and newChar):
+        if (line.find(oldChar) > -1):
+          line = line.replace(oldChar, "{}{}".format(str(increment), newChar))
+          increment += 1
+      elif (incrementWord and newChar):
+        line = self.swapAndIncrementWord(line, increment)
       else:
-        line = line.replace(self.oldChar, self.newChar)
+        line = line.replace(oldChar, newChar)
 
       if (self.upper):
         line = line.upper()
       elif (self.lower):
         line = line.lower()
 
-      lines[i] = line
-    self.lines = lines
+      linesRead.append(line)
+    self.lines = linesRead
+
+  def swapAndIncrementWord(self, line, increment):  #type: (CharacterConverter, str, int) -> None
+    oldChar = self.oldChar
+    newChar = self.newChar
+    words = line.split(SPACE)
+    wordsLength = len(words)
+    for wordIndex in range(wordsLength):
+      word = words[wordIndex]
+      if (word.find(oldChar) > -1):
+        words[wordIndex] = word.replace(oldChar, "{}{}".format(str(increment), newChar))
+        increment += 1
+    line = SPACE.join(words)
+    return line

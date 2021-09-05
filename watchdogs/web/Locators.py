@@ -3,6 +3,7 @@
 # WatchDogs Locators
 
 from watchdogs.base import Common
+from watchdogs.utils.Constants import (EMPTY)
 
 
 class AVI(Common):
@@ -43,8 +44,8 @@ class LocatorContainer(Common):
 
   def __init__(self):
     super(LocatorContainer, self).__init__()
-    self._locatorKey = ''  #type: str
-    self._locatorIndex = -1  #type: int
+    self._locatorKey = EMPTY  #type: str
+    self._fuzzWordIndex = -1  #type: int
 
   def getLocatorKey(self):  #type: (LocatorContainer) -> str
     return getattr(self, "_locatorKey")
@@ -52,11 +53,11 @@ class LocatorContainer(Common):
   def setLocatorKey(self, value):  #type: (LocatorContainer, str) -> None
     setattr(self, "_locatorKey", value)
 
-  def getLocatorIndex(self):  #type: (LocatorContainer) -> int
-    return getattr(self, "_locatorIndex")
+  def getFuzzWordIndex(self):  #type: (LocatorContainer) -> int
+    return getattr(self, "_fuzzWordIndex")
 
-  def setLocatorIndex(self, value):  #type: (LocatorContainer, int) -> None
-    setattr(self, "_locatorIndex", value)
+  def setFuzzWordIndex(self, value):  #type: (LocatorContainer, int) -> None
+    setattr(self, "_fuzzWordIndex", value)
 
 
 class FuzzLocator(Common):
@@ -110,8 +111,8 @@ class FuzzHelper(LocatorContainer):
 
   def __init__(self):
     super(FuzzHelper, self).__init__()
-    self._attrKey = ''  #type: str
-    self._originalFuzz = None  #type: str
+    self._attrKey = EMPTY  #type: str
+    self._originalAttrValue = None  #type: str
 
   def getAttrKey(self):  #type: (FuzzHelper) -> str
     return getattr(self, "_attrKey")
@@ -119,8 +120,8 @@ class FuzzHelper(LocatorContainer):
   def setAttrKey(self, value):  #type: (FuzzHelper, str) -> None
     setattr(self, "_attrKey", value)
 
-  def getOriginalFuzz(self):  #type: (FuzzHelper) -> str
-    return getattr(self, "_originalFuzz")
+  def getOriginalAttrValue(self):  #type: (FuzzHelper) -> str
+    return getattr(self, "_originalAttrValue")
 
-  def setOriginalFuzz(self, value):  #type: (FuzzHelper, str) -> None
-    setattr(self, "_originalFuzz", value)
+  def setOriginalAttrValue(self, value):  #type: (FuzzHelper, str) -> None
+    setattr(self, "_originalAttrValue", value)

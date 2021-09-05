@@ -8,16 +8,18 @@ import argparse
 from collections import OrderedDict
 
 from watchdogs.io import File
-from watchdogs.utils.Constants import (LFN, EMPTY, FS)
+from watchdogs.utils.Constants import (LFN, EMPTY, FS, LR)
 
 
 class FileEncoder(File):
 
   VERSION = "1.0"
+  V1 = "v1"; V2 = "v2"; V3 = "v3"
+
   URL_ENCODING_OPTIONS = OrderedDict([
-      ("v1", "Encodes everything except forward slash '/'"),
-      ("v2", "Encodes everything. Spaces turn to '+'"),
-      ("v3", "Encodes everything. Spaces turn to %20 and forward slashes to %2F"),
+      (V1, "Encodes everything except forward slash '/'"),
+      (V2, "Encodes everything. Spaces turn to '+'"),
+      (V3, "Encodes everything. Spaces turn to %20 and forward slashes to %2F"),
   ])
 
   def __init__(self):
@@ -28,8 +30,8 @@ class FileEncoder(File):
   def getEncodingOptions(self):  #type: (FileEncoder) -> None
     options = FileEncoder.URL_ENCODING_OPTIONS
     optionsString = "Encoding options:" + LFN
-    for k, v in options.items():
-      optionsString += "  {}) {}{}".format(k, v, LFN)
+    for optionsKey, optionsValue in options.items():
+      optionsString += "  {}) {}{}".format(optionsKey, optionsValue, LFN)
     return optionsString
 
   def parseArgs(self):  #type: (FileEncoder) -> None
@@ -53,30 +55,31 @@ class FileEncoder(File):
     parser.add_argument("-uo", "--ue-options", action="version", help=UO_HELP, version=ENCODINGS)
     parser.add_argument("-v", "--version", action="version", help=V_HELP, version=VERSION)
     parser.add_argument("-h", "--help", action="help", help=H_HELP)
-    self.args = parser.parse_args()
+    self.parsedArgs = parser.parse_args()
 
   def readLines(self):  #type: (FileEncoder) -> None
-    openedFile = open(self.inputFile, "r")
+    openedFile = open(self.inputFile, LR)
     lines = openedFile.readlines()
-    length = len(lines)
+    linesLength = len(lines)
+    encodedLines = []
 
-    for i in range(length):
-      encoded = lines[i].rstrip()
+    for index in range(linesLength):
+      encoded = lines[index].rstrip()
       urlEncode = self.urlEncode
 
       if (self.b64Encode):
         encoded = base64.b64encode(encoded)
 
-      if (urlEncode == "v1"):
+      if (urlEncode == FileEncoder.V1):
         encoded = urllib.quote(encoded)
-      elif (urlEncode == "v2"):
+      elif (urlEncode == FileEncoder.V2):
         encoded = urllib.quote_plus(encoded)
-      elif (urlEncode == "v3"):
-        encoded = encoded = urllib.quote(encoded).replace(FS, "%2F")
+      elif (urlEncode == FileEncoder.V3):
+        encoded = str(urllib.quote(encoded)).replace(FS, "%2F")
 
-      if (i + 1 == length):
-        lines[i] = encoded
+      if (index + 1 == linesLength):
+        encodedLines.append(encoded)
       else:
-        lines[i] = encoded + LFN
+        encodedLines.append(encoded + LFN)
 
-    self.lines = lines
+    self.lines = encodedLines

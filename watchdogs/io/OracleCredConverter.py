@@ -5,7 +5,7 @@
 import argparse
 
 from watchdogs.io import File
-from watchdogs.utils.Constants import (EMPTY, LFN, FS)
+from watchdogs.utils.Constants import (EMPTY, LFN, FS, LR)
 
 
 class OracleCredConverter(File):
@@ -51,24 +51,26 @@ class OracleCredConverter(File):
     parser.add_argument("-lc", "--list-conversions", action="version", help=LC_HELP, version=CONVERSIONS)
     parser.add_argument("-v", "--version", action="version", help=V_HELP, version=VERSION)
     parser.add_argument("-h", "--help", action="help", help=H_HELP)
-    self.args = parser.parse_args()
+    self.parsedArgs = parser.parse_args()
 
   def readLines(self):  #type: (OracleCredConverter) -> None
-    openedFile = open(self.inputFile, "r")
-    lines = openedFile.readlines()
-    length = len(lines)
-    for i in range(length):
-      de = FS
-      line = EMPTY
-      splitLines = lines[i].split(de)
-      if (self.conversion == OracleCredConverter.UU):
-        line = "{}{}{}".format(splitLines[0].upper(), de, splitLines[1].upper())
-      if (self.conversion == OracleCredConverter.UL):
-        line = "{}{}{}".format(splitLines[0].upper(), de, splitLines[1].lower())
-      if (self.conversion == OracleCredConverter.LU):
-        line = "{}{}{}".format(splitLines[0].lower(), de, splitLines[1].upper())
-      if (self.conversion == OracleCredConverter.LL):
-        line = "{}{}{}".format(splitLines[0].lower(), de, splitLines[1].lower())
+    openedFile = open(self.inputFile, LR)
+    fileLines = openedFile.readlines()
+    delimiter = FS
+    conversion = self.conversion
+    linesRead = []
 
-      lines[i] = line
-    self.lines = lines
+    for fileLine in fileLines:
+      line = EMPTY
+      fileLineWords = fileLine.split(delimiter)
+      if (conversion == OracleCredConverter.UU):
+        line = "{}{}{}".format(fileLineWords[0].upper(), delimiter, fileLineWords[1].upper())
+      if (conversion == OracleCredConverter.UL):
+        line = "{}{}{}".format(fileLineWords[0].upper(), delimiter, fileLineWords[1].lower())
+      if (conversion == OracleCredConverter.LU):
+        line = "{}{}{}".format(fileLineWords[0].lower(), delimiter, fileLineWords[1].upper())
+      if (conversion == OracleCredConverter.LL):
+        line = "{}{}{}".format(fileLineWords[0].lower(), delimiter, fileLineWords[1].lower())
+
+      linesRead.append(line)
+    self.lines = linesRead

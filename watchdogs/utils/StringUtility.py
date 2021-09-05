@@ -5,57 +5,41 @@
 import re
 from typing import Any
 
+from watchdogs.utils.Constants import (EMPTY, USC)
 
 class StringUtility(object):
 
   @staticmethod
-  def strTobool(s, customArray=None):  #type: (str, list[str]) -> bool
-    if customArray:
-      return s.lower() in customArray
-    return s.lower() in ("yes", "y", "true", "t")
+  def strTobool(string, truthyArray=["yes", "y", "true", "t"]):  #type: (str, list[str]) -> bool
+    return string.lower() in truthyArray
 
   @staticmethod
-  def handleType(convertTo, convertFrom, boolArray=None):  #type: (Any, Any, list[bool]) -> Any
-    typeTo = str(type(convertTo))
-    typeFrom = type(convertFrom)
-    converted = convertFrom
-
-    if not typeTo == typeFrom:
-      if typeTo.find("int") > -1:
-        converted = int(convertFrom)
-      elif typeTo.find("str") > -1:
-        converted = str(convertFrom)
-      elif typeTo.find("bool") > -1:
-        converted = StringUtility.strTobool(convertFrom, boolArray)
-    return converted
-
-  @staticmethod
-  def toCamel(string, char="_"):  #type: (str, str) -> str
-    camel = ""
-    strings = string.split(char)
-    length = len(strings)
-    for i in range(length):
-      s = strings[i]
-      if (i == 0):
-        camel += s.lower()
+  def toCamelCase(string, delimiter=USC):  #type: (str, str) -> str
+    camelCasedString = EMPTY
+    strings = string.split(delimiter)
+    stringsLength = len(strings)
+    for index in range(stringsLength):
+      word = strings[index]
+      if (index == 0):
+        camelCasedString += word.lower()
       else:
-        camel += s[0].upper() + s[1:].lower()
-    return camel
+        camelCasedString += word[0].upper() + word[1:].lower()
+    return camelCasedString
 
   @staticmethod
-  def sanitize(string, dic):  #type: (str, dict[str,str]) -> str
-    cleansed = ""
-    for k, v in dic.items():
-      cleansed = string.replace(k, v)
-    return cleansed
+  def sanitize(string, dict):  #type: (str, dict[str,str]) -> str
+    sanitizedString = EMPTY
+    for dictKey, dictValue in dict.items():
+      sanitizedString = string.replace(dictKey, dictValue)
+    return sanitizedString
 
   @staticmethod
   def naturalOrdering(string):  #type: (str) -> list
-    specArray = []
+    specificationArray = []
     stringArray = re.split(r'(\d+)', string)
     for s in stringArray:
       if (s.isdigit()):
-        specArray.append(int(s))
+        specificationArray.append(int(s))
       else:
-        specArray.append(s)
-    return specArray
+        specificationArray.append(s)
+    return specificationArray

