@@ -77,34 +77,34 @@ class FuzzLocators(Common):
 
   def __init__(self):
     super(FuzzLocators, self).__init__()
-    self.rhost = FuzzLocator()  #type: FuzzLocator
-    self.info = FuzzLocator()  #type: FuzzLocator
-    self.headers = FuzzLocator()  #type: FuzzLocator
-    self.body = FuzzLocator()  #type: FuzzLocator
+    self.remoteHost = FuzzLocator()  #type: FuzzLocator
+    self.requestInfo = FuzzLocator()  #type: FuzzLocator
+    self.requestHeaders = FuzzLocator()  #type: FuzzLocator
+    self.requestBody = FuzzLocator()  #type: FuzzLocator
 
-  def getRhost(self):  #type: (FuzzLocators) -> FuzzLocator
-    return getattr(self, "rhost")
+  def getRemoteHost(self):  #type: (FuzzLocators) -> FuzzLocator
+    return getattr(self, "remoteHost")
 
-  def setRhost(self, value):  #type: (FuzzLocators, FuzzLocator) -> None
-    setattr(self, "rhost", value)
+  def setRemoteHost(self, value):  #type: (FuzzLocators, FuzzLocator) -> None
+    setattr(self, "remoteHost", value)
 
-  def getInfo(self):  #type: (FuzzLocators) -> FuzzLocator
-    return getattr(self, "info")
+  def getRequestInfo(self):  #type: (FuzzLocators) -> FuzzLocator
+    return getattr(self, "requestInfo")
 
-  def setInfo(self, value):  #type: (FuzzLocators, FuzzLocator) -> None
-    setattr(self, "info", value)
+  def setRequestInfo(self, value):  #type: (FuzzLocators, FuzzLocator) -> None
+    setattr(self, "requestInfo", value)
 
-  def getHeaders(self):  #type: (FuzzLocators) -> FuzzLocator
-    return getattr(self, "headers")
+  def getRequestHeaders(self):  #type: (FuzzLocators) -> FuzzLocator
+    return getattr(self, "requestHeaders")
 
-  def setHeaders(self, value):  #type: (FuzzLocators, FuzzLocator) -> None
-    setattr(self, "headers", value)
+  def setRequestHeaders(self, value):  #type: (FuzzLocators, FuzzLocator) -> None
+    setattr(self, "requestHeaders", value)
 
-  def getBody(self):  #type: (FuzzLocators) -> FuzzLocator
-    return getattr(self, "body")
+  def getRequestBody(self):  #type: (FuzzLocators) -> FuzzLocator
+    return getattr(self, "requestBody")
 
-  def setBody(self, value):  #type: (FuzzLocators, FuzzLocator) -> None
-    setattr(self, "body", value)
+  def setRequestBody(self, value):  #type: (FuzzLocators, FuzzLocator) -> None
+    setattr(self, "requestBody", value)
 
 
 class FuzzHelper(LocatorContainer):

@@ -34,8 +34,8 @@ class FileFuzzer(File, Common):
     self.raw_info = EMPTY  #type: str
     self.raw_headers = EMPTY  #type: str
     self.raw_body = EMPTY  #type: str
-    self.info = OrderedDict()  #type: OrderedDict
-    self.url = EMPTY  #type: str
+    self.requestInfo = OrderedDict()  #type: OrderedDict
+    self.requestUrl = EMPTY  #type: str
     self.requestHeaders = OrderedDict()  #type: OrderedDict
     self.requestBoundary = EMPTY  #type: str
     self.requestBody = OrderedDict()  #type: OrderedDict
@@ -101,7 +101,7 @@ class FileFuzzer(File, Common):
     parser.add_argument("-of", "--output-file", help=OF_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-pf", "--post-file", help=PF_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-ff", "--fuzz-file", help=FF_HELP, type=str, metavar=EMPTY)
-    parser.add_argument("-fd", "--fuzz-delimiter", help=FD_HELP, type=str, metavar=EMPTY)
+    parser.add_argument("-fd", "--fuzz-delimiter", help=FD_HELP, type=str, metavar=EMPTY, default=COLON)
     parser.add_argument("-hp", "--http-proxy", help=HP_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-sp", "--https-proxy", help=SP_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-dv", "--disable-verification", action="store_true", help=DV_HELP, default=False)
@@ -128,7 +128,6 @@ class FileFuzzer(File, Common):
       self.requestBoundary = line[equalsIndex + 1:]
 
   def setFields(self, fileLines):  #type: (FileFuzzer,str) -> None
-    requestFields = self.requestFields
     rawValue = EMPTY
     isBody = False
     fileLinesLength = len(fileLines)
@@ -140,18 +139,15 @@ class FileFuzzer(File, Common):
         self.setBoundary(fileLine, boundaryString)
       if (index == 0):
         self.raw_info = fileLine
-        # setattr(self, requestFields[0], fileLine)
         index += 1
         continue
       elif ((fileLine == EMPTY and not isBody) or (index + 1 == fileLinesLength and not isBody)):
         isBody = True
         self.raw_headers = rawValue
-        # setattr(self, requestFields[1], value)
-        rawValue = ""
+        rawValue = EMPTY
       elif (index + 1 == fileLinesLength):
         rawValue += fileLine + LFN
         self.raw_body = rawValue
-        # setattr(self, requestFields[2], rawValue)
         index += 1
         break
 
@@ -160,8 +156,8 @@ class FileFuzzer(File, Common):
 
   def parseInfo(self):  #type: (FileFuzzer) -> None
     rawInfo = self.raw_info.rstrip().split(SPACE)
-    self.info[METHOD] = rawInfo[0]
-    self.info[ENDPOINT] = rawInfo[1]
+    self.requestInfo[METHOD] = rawInfo[0]
+    self.requestInfo[ENDPOINT] = rawInfo[1]
 
   def parseHeaders(self):  #type: (FileFuzzer) -> None
     rawHeaders = self.raw_headers.rstrip().split(LFN)
@@ -299,13 +295,14 @@ class FileFuzzer(File, Common):
     self.parseInfo()
     self.parseHeaders()
     self.parseBody()
-    self.updateFuzzLocator(LR + HOST, INFO, HEADER + LS, BODY)
+    attrKeys = ["remoteHost", "requestInfo", "requestHeaders", "requestBody"]
+    self.updateFuzzLocator(*attrKeys)
 
   def printRequest(self):  # type: (FileFuzzer) -> None
     format = '{}: {}'
 
     info = []
-    for infoKey, infoValue in self.info.items():
+    for infoKey, infoValue in self.requestInfo.items():
       info.append(format.format(infoKey, infoValue))
 
     headers = []
@@ -326,10 +323,10 @@ class FileFuzzer(File, Common):
 
   def getAllLocatorsContainers(self):  # type: (FileFuzzer) -> int
     locators = self.fuzzLocators
-    rhostContainers = locators.getRhost().getLocatorContainers()
-    infoContainers = locators.getInfo().getLocatorContainers()
-    headersContainers = locators.getHeaders().getLocatorContainers()
-    bodyContainers = locators.getBody().getLocatorContainers()
+    rhostContainers = locators.getRemoteHost().getLocatorContainers()
+    infoContainers = locators.getRequestInfo().getLocatorContainers()
+    headersContainers = locators.getRequestHeaders().getLocatorContainers()
+    bodyContainers = locators.getRequestBody().getLocatorContainers()
     return rhostContainers + infoContainers + headersContainers + bodyContainers
 
   def getFuzzHelpers(self):  # type: (FileFuzzer) -> list
@@ -400,9 +397,9 @@ class FileFuzzer(File, Common):
     print(responseString)
 
   def sendRequest(self):  #type: (FileFuzzer) -> None
-    self.url = self.parseUrl(self.remoteHost, self.secure, self.info[ENDPOINT])
+    self.requestUrl = self.parseUrl(self.remoteHost, self.secure, self.requestInfo[ENDPOINT])
 
-    req = requests.Request(self.info[METHOD], self.url, headers=self.requestHeaders,
+    req = requests.Request(self.requestInfo[METHOD], self.requestUrl, headers=self.requestHeaders,
                            data=self.getRequestBody())
     prepared = req.prepare()
     session = requests.Session()
