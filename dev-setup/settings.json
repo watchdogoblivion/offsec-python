@@ -1,32 +1,32 @@
 {
-    "workbench.editorAssociations": {
-        "*.ipynb": "jupyter-notebook"
-    },
-    "notebook.cellToolbarLocation": {
-        "default": "right",
-        "jupyter-notebook": "left"
-    },
-    "editor.suggestSelection": "first",
-    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
-    "security.workspace.trust.untrustedFiles": "open",
-    "python.languageServer": "Pylance",
-    "[json]": {
-        "editor.defaultFormatter": "vscode.json-language-features"
-    },
-    "window.zoomLevel": 1,
-    "python.defaultInterpreterPath": "/usr/bin/python",
-    "[python]": {
-        "editor.defaultFormatter": "ms-python.python"
-    },
-    "python.formatting.provider": "yapf",
-    "python.linting.enabled": true,
-    "python.linting.lintOnSave": true,
-    "python.linting.pylintPath": "pylint",
-    "python.linting.pylintEnabled": true,
-    "python.formatting.yapfArgs": [
-        "--style={BASED_ON_STYLE: google, COLUMN_LIMIT: 110, INDENT_WIDTH: 2, , SPLIT_BEFORE_NAMED_ASSIGNS= False}"
-    ],
-    "[markdown]": {
-        "editor.defaultFormatter": "yzhang.markdown-all-in-one"
-    }
+  "workbench.editorAssociations": {
+    "*.ipynb": "jupyter-notebook"
+  },
+  "notebook.cellToolbarLocation": {
+    "default": "right",
+    "jupyter-notebook": "left"
+  },
+  "editor.suggestSelection": "first",
+  "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+  "security.workspace.trust.untrustedFiles": "open",
+  "python.languageServer": "Pylance",
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "window.zoomLevel": 1,
+  "python.defaultInterpreterPath": "/usr/bin/python",
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.python"
+  },
+  "python.formatting.provider": "yapf",
+  "python.linting.enabled": true,
+  "python.linting.lintOnSave": true,
+  "python.linting.pylintPath": "pylint",
+  "python.linting.pylintEnabled": true,
+  "python.formatting.yapfArgs": [
+    "--style={BASED_ON_STYLE: google, COLUMN_LIMIT: 110, INDENT_WIDTH: 2, , SPLIT_BEFORE_NAMED_ASSIGNS= False}"
+  ],
+  "[markdown]": {
+    "editor.defaultFormatter": "yzhang.markdown-all-in-one"
+  }
 }

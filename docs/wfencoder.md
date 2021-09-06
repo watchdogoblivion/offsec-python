@@ -1,9 +1,11 @@
-#### Use case ####
+#### Use case
+
     More often than not, I am constantly testing URL encoded and base64
     encoded payloads when trying to get a foothold.
     This module is just for speeding up the proccess.
 
-#### Sample module wfencoder - Encode file contents ####
+#### Sample module wfencoder - Encode file contents
+
     If the foothold requires fuzzing a login, this module can help with the payload.
     Sometimes, the login requires a base64 encoded set of credentials.
     Sometimes that base64 encoded data needs to be url encoded after the base64 encoding.
@@ -37,4 +39,4 @@
             L2Jpbi9zaCAtYyAnL2Jpbi9zaCAtaSA%2BJiAvZGV2L3RjcC8xMC4xMC4xNC4xNi80NDQzIDA%2BJjEn
             cGhwIC1yICckc29jaz1mc29ja29wZW4oIjEwLjEwLjE0LjE2Iiw0NDQ0KTtleGVjKCIvYmluL3NoIC1pIDwmMyA%2BJjMgMj4mMyIpOyc%3D
 
-##### _All modules have a -h and --help for more assistance._ #####
+##### _All modules have helper flags -h and --help for more assistance._

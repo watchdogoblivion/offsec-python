@@ -1,11 +1,13 @@
-#### Use case ####
+#### Use case
+
     This module is mainly for manipulating characters in a file for
     payload generation and various testing.
     Like the woraclecc most these operations can be performed with
     a code editor like VSCode.
     This is simply for conveinence and speed.
 
-#### Sample module wcharc - Convert characters ####
+#### Sample module wcharc - Convert characters
+
     Py.txt
         python -m pip install  type
         python -m pip install  request
@@ -29,3 +31,5 @@
         2)test
         3)test test best
         4)test test 5)best
+
+##### _All modules have helper flags -h and --help for more assistance._

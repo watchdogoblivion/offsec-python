@@ -1,4 +1,5 @@
-#### Use case ####
+#### Use case
+
     Sometimes while enumerating, there may be files that are encoded in a
     way that obscures the actual content.
     This can be problematic if you obtained credentials.
@@ -6,7 +7,8 @@
     the hard coded encodings list.
     This module actually uses iconv which is a Unix based cli program.
 
-#### Sample module weviewer - Encode file contents ####
+#### Sample module weviewer - Encode file contents
+
     Obtained.txt
         Admin password:
         �%G00dH@Ck1ng$
@@ -15,4 +17,4 @@
         Admin password:
         £%G00dH@Ck1ng$
 
-##### _All modules have a -h and --help for more assistance._ #####
+##### _All modules have helper flags -h and --help for more assistance._

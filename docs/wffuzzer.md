@@ -1,9 +1,11 @@
-#### Use case ####
+#### Use case
+
     While penetration testing, I found certain capabilities split across
     different public python modules. So I wanted a central flow not only for
     all needed fuzzing but also with easy to follow documentation.
 
-#### Sample module wffuzzer - File upload ####
+#### Sample module wffuzzer - File upload
+
     The module wffuzzer is used for fuzzing requests using a file that contains all the request
     information.
 
@@ -63,23 +65,34 @@
             wffuzzer -if testrest -rh 10.10.10.10 -pf postFile.txt -ff fuzzFile.txt -fl "1115" -sr
                 Fuzzing Request
                 Response body:
+
 ```html
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
-    <body>
-        <form action="upload.jsp" enctype="multipart/form-data" id="form1" method="post" name="form1">
-            <div>
-                <span id="Label1" style="color:Green;">File uploaded successfully.</span>
-            </div>
-        </form>
-    </body>
+  <body>
+    <form
+      action="upload.jsp"
+      enctype="multipart/form-data"
+      id="form1"
+      method="post"
+      name="form1"
+    >
+      <div>
+        <span id="Label1" style="color:Green;"
+          >File uploaded successfully.</span
+        >
+      </div>
+    </form>
+  </body>
 </html>
 ```
+
                 Response status: 200 - Response length: 1110
 
         If any help is required, the standard --help and -h is available for all flags and descriptions.
 
-#### Sample module wffuzzer - Login ####
+#### Sample module wffuzzer - Login
+
     Example:
         In the browser, go to a page that allows a file upload.
             http://10.10.10.10/manager/html
@@ -136,6 +149,7 @@
 
             wffuzzer -if testrest -rh 10.10.10.10:8080 -ff fuzzFileE.txt -fs "200" -sf -sr
                 Response body:
+
 ```html
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -163,8 +177,9 @@
     </body>
 </html>
 ```
+
                 Response status: 200 - Response length: None - Fuzz text: dG9tY2F0OnMzY3JldA==
 
         If any help is required, the standard --help and -h is available for all flags and descriptions.
 
-##### _All modules have a -h and --help for more assistance._ #####
+##### _All modules have helper flags -h and --help for more assistance._

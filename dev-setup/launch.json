@@ -1,109 +1,81 @@
 {
-    "configurations": [
-        {
-            "name": "wffuzzer",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/bin/wffuzzer",
-            "console": "internalConsole",
-            "args": [
-                "-rh",
-                "10.10.10.FUZZ",
-                "-if",
-                "${env:TEST_DATA}/testrest",
-                "-pf",
-                "${env:TEST_DATA}/web.config",
-                "-ff",
-                "${env:TEST_DATA}/fuzzFile.txt",
-                "-hp",
-                "http://127.0.0.1:8080"
-            ]
-        },
-        {
-            "name": "wsetjava",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/bin/wsetjava",
-            "console": "integratedTerminal",
-            "args": [
-                "-s",
-                "java8"
-            ],
-            "sudo": true
-        },
-        {
-            "name": "wrtcpb",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/bin/wrtcpb",
-            "console": "internalConsole",
-            "args": [
-                "-lh",
-                "10.10.12.21",
-                "-lp",
-                "4443",
-                "-s",
-                "/bin/sh"
-            ]
-        },
-        {
-            "name": "woraclecc",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/bin/woraclecc",
-            "console": "internalConsole",
-            "args": [
-                "-if",
-                "${env:TEST_DATA}/oracle.txt",
-                "-c",
-                "ll"
-            ]
-        },
-        {
-            "name": "wfencoder",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/bin/wfencoder",
-            "console": "internalConsole",
-            "args": [
-                "-if",
-                "${env:TEST_DATA}/fuzzFileE.txt",
-                "-be",
-                "-ue",
-                "v1"
-            ]
-        },
-        {
-            "name": "weviewer",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/bin/weviewer",
-            "console": "internalConsole",
-            "args": [
-                "-if",
-                "${env:TEST_DATA}/out.file",
-                "-ef",
-                "67",
-                "-et",
-                "85"
-            ]
-        },
-        {
-            "name": "wcharc",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/bin/wcharc",
-            "console": "internalConsole",
-            "args": [
-                "-if",
-                "${env:TEST_DATA}/i.txt",
-                "-l",
-                "-oc",
-                "*",
-                "-nc",
-                "u",
-                "-il"
-            ]
-        }
-    ]
+  "configurations": [
+    {
+      "name": "wffuzzer",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/wffuzzer",
+      "console": "internalConsole",
+      "args": [
+        "-rh",
+        "10.10.10.FUZZ",
+        "-if",
+        "${env:TEST_DATA}/testrest",
+        "-pf",
+        "${env:TEST_DATA}/web.config",
+        "-ff",
+        "${env:TEST_DATA}/fuzzFile.txt",
+        "-hp",
+        "http://127.0.0.1:8080"
+      ]
+    },
+    {
+      "name": "wsetjava",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/wsetjava",
+      "console": "integratedTerminal",
+      "args": ["-s", "java8"],
+      "sudo": true
+    },
+    {
+      "name": "wrtcpb",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/wrtcpb",
+      "console": "internalConsole",
+      "args": ["-lh", "10.10.12.21", "-lp", "4443", "-s", "/bin/sh"]
+    },
+    {
+      "name": "woraclecc",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/woraclecc",
+      "console": "internalConsole",
+      "args": ["-if", "${env:TEST_DATA}/oracle.txt", "-c", "ll"]
+    },
+    {
+      "name": "wfencoder",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/wfencoder",
+      "console": "internalConsole",
+      "args": ["-if", "${env:TEST_DATA}/fuzzFileE.txt", "-be", "-ue", "v1"]
+    },
+    {
+      "name": "weviewer",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/weviewer",
+      "console": "internalConsole",
+      "args": ["-if", "${env:TEST_DATA}/out.file", "-ef", "67", "-et", "85"]
+    },
+    {
+      "name": "wcharc",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/wcharc",
+      "console": "internalConsole",
+      "args": [
+        "-if",
+        "${env:TEST_DATA}/i.txt",
+        "-l",
+        "-oc",
+        "*",
+        "-nc",
+        "u",
+        "-il"
+      ]
+    }
+  ]
 }
