@@ -73,14 +73,9 @@
 
     The IDE/Code editor is VSCode.
 
-    The library used is pylint:
-        /usr/bin/python -m pip install -U "pylint<2.0.0" --user
+    The library used for python linting is pylint.
 
-    The configurations in the settings.json:
-        "python.linting.enabled": true,
-        "python.linting.lintOnSave": true,
-        "python.linting.pylintPath": "pylint",
-        "python.linting.pylintEnabled": true
+See all the configurations in the [Dev Setup folder](dev-setup)
 
 #### _Formatting_ ####
     I am enforcing a formatting standard.
@@ -88,21 +83,11 @@
 
     The IDE/Code editor is VSCode.
 
-    The library used is yapf:
-        /usr/bin/python -m pip install -U yapf --user
-    
-    The configurations in the settings.json:
-        "python.defaultInterpreterPath": "/usr/bin/python",
-        "[python]": {
-            "editor.defaultFormatter": "ms-python.python"
-        },
-        "python.formatting.provider": "yapf",
-        "python.formatting.yapfArgs": [
-            "--style={BASED_ON_STYLE: google, COLUMN_LIMIT: 110, INDENT_WIDTH: 2, , SPLIT_BEFORE_NAMED_ASSIGNS= False}",
-        ]
-    
-    For markdown the following extension is used:
-        Markdown All in One
+    The library used for python formatting is yapf.
+
+    For markdown and json formatting, prettier is used.
+
+See all the configurations in the [Dev Setup folder](dev-setup)
 
 #### _Custom_ ####
     I have explictly set the standard, that all methods should aim
