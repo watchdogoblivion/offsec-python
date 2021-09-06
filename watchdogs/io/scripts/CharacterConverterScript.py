@@ -5,7 +5,7 @@
 import traceback
 
 from watchdogs.base.models import Common
-from watchdogs.io.models.CharacterConverterArgs import CharacterConverterArgs
+from watchdogs.io.parsers import CharacterConverterArgs
 from watchdogs.io.services.CharacterConverterService import CharacterConverterService
 
 

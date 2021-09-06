@@ -4,7 +4,7 @@
 
 from watchdogs.base.models import Common
 from watchdogs.io.services.FileService import FileService
-from watchdogs.io.models.CharacterConverterArgs import CharacterConverterArgs
+from watchdogs.io.parsers import CharacterConverterArgs
 from watchdogs.utils.Constants import (LR, SPACE)
 
 

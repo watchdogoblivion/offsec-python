@@ -5,7 +5,7 @@
 import traceback
 
 from watchdogs.base.models.Common import Common
-from watchdogs.io.models.OracleCredConverterArgs import OracleCredConverterArgs
+from watchdogs.io.parsers import OracleCredConverterArgs
 from watchdogs.io.services.OracleCredConverterService import OracleCredConverterService
 
 

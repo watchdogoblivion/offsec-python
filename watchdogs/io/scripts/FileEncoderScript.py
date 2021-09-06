@@ -5,7 +5,7 @@
 import traceback
 
 from watchdogs.base.models.Common import Common
-from watchdogs.io.models.FileEncoderArgs import FileEncoderArgs
+from watchdogs.io.parsers import FileEncoderArgs
 from watchdogs.io.services.FileEncoderService import FileEncoderService
 
 

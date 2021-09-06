@@ -11,8 +11,8 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder
 from watchdogs.utils import Cast
 from watchdogs.web.models import AVI
 from watchdogs.base.models import Common
-from watchdogs.web.models.FileFuzzer import FileFuzzer
-from watchdogs.web.models.FileFuzzerArgs import FileFuzzerArgs
+from watchdogs.web.models import FileFuzzer
+from watchdogs.web.parsers import FileFuzzerArgs
 from watchdogs.web.models.Locators import (FuzzHelper, FuzzLocator, LocatorContainer)
 from watchdogs.utils.Constants import (EMPTY, COLON, EQUAL, SEMI_COLON, LFN, BOUNDARY, DASH, SPACE, METHOD,
                                        ENDPOINT, CONTENT_DISPOSITION, CONTENT_TYPE, FILE_NAME, DOUBLE_QUOTE,
@@ -195,13 +195,8 @@ class FileFuzzerService(Common):
       if (type(attrValue) == str):
         fuzzWordsIndicies = self.getFuzzIndicies(attrValue)
         boundlessFuzz = self.getBoundlessFuzz(attrValue)
-        print("boundlessFuzz", boundlessFuzz)
-        print("fuzzWordsIndicies", fuzzWordsIndicies)
-        print("attrValue", attrValue)
-        print("attrKey", attrKey)
         self.handleBoundless(boundlessFuzz, fuzzWordsIndicies, attrValue, attrKey)
         self.manageLocatorValues(fuzzWordsIndicies, existingIndicies, attrKey, locator)
-        print("getattr(fileFuzzer, attrKey):", getattr(fileFuzzer, attrKey))
       elif (type(attrValue) == OrderedDict):
         aVI = OrderedDict(attrValue).items()
         for aVIKey, aVIValue in aVI:

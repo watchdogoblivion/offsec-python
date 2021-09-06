@@ -4,7 +4,7 @@
 
 from collections import OrderedDict
 from watchdogs.base.models.Common import Common
-from watchdogs.io.models.FileArgs import FileArgs
+from watchdogs.io.parsers import FileArgs
 
 from watchdogs.utils.Constants import (LFN, EMPTY, V1, V2, V3)
 

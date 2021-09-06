@@ -6,7 +6,7 @@ import traceback
 
 from watchdogs.base.models import Common
 from watchdogs.utils.Constants import (EMPTY, COLON)
-from watchdogs.web.models.FileFuzzerArgs import FileFuzzerArgs
+from watchdogs.web.parsers import FileFuzzerArgs
 from watchdogs.web.services.FileFuzzerService import FileFuzzerService
 
 

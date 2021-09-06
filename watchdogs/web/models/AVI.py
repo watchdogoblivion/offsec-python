@@ -2,7 +2,7 @@
 # description: TODO
 # WatchDogs AVI
 
-from watchdogs.base import Common
+from watchdogs.base.models import Common
 
 
 class AVI(Common):

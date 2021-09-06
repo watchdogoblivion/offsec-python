@@ -2,7 +2,7 @@
 # description: TODO
 # WatchDogs Oracle Credentials Converter Args
 
-from watchdogs.io.models.FileArgs import FileArgs
+from watchdogs.io.parsers import FileArgs
 from watchdogs.base.models.Common import Common
 from watchdogs.utils.Constants import (EMPTY, LFN)
 

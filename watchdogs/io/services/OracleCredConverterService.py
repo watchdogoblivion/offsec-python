@@ -4,7 +4,7 @@
 
 from watchdogs.base.models.Common import Common
 from watchdogs.io.services.FileService import FileService
-from watchdogs.io.models.OracleCredConverterArgs import OracleCredConverterArgs
+from watchdogs.io.parsers import OracleCredConverterArgs
 from watchdogs.utils.Constants import (EMPTY, FS, LR)
 
 

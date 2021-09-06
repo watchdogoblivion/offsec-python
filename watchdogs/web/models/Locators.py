@@ -2,7 +2,7 @@
 # description: TODO
 # WatchDogs Locators
 
-from watchdogs.base import Common
+from watchdogs.base.models import Common
 from watchdogs.utils.Constants import (EMPTY)
 
 

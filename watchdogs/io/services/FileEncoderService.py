@@ -4,7 +4,7 @@
 
 import urllib
 import base64
-from watchdogs.io.models import FileEncoderArgs
+from watchdogs.io.parsers import FileEncoderArgs
 from watchdogs.base.models.Common import Common
 from watchdogs.io.services.FileService import FileService
 from watchdogs.utils.Constants import (LFN, FS, LR, V1, V2, V3)

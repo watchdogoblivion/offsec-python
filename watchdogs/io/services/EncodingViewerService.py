@@ -3,7 +3,7 @@
 # WatchDogs Encoding Viewer Service
 
 import os
-from watchdogs.io.models.EncodingViewerArgs import EncodingViewerArgs
+from watchdogs.io.parsers import EncodingViewerArgs
 from watchdogs.base.models.Common import Common
 from watchdogs.io.services.FileService import FileService
 

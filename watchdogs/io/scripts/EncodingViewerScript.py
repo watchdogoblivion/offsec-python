@@ -5,7 +5,7 @@
 import traceback
 
 from watchdogs.base.models.Common import Common
-from watchdogs.io.models.EncodingViewerArgs import EncodingViewerArgs
+from watchdogs.io.parsers import EncodingViewerArgs
 from watchdogs.io.services.EncodingViewerService import EncodingViewerService
 
 

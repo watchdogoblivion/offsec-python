@@ -2,7 +2,7 @@
 # description: TODO
 # WatchDogs Character Converter Args
 
-from watchdogs.io.models import FileArgs
+from watchdogs.io.parsers import FileArgs
 from watchdogs.base.models import Common
 from watchdogs.utils.Constants import (EMPTY)
 
