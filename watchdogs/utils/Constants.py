@@ -29,6 +29,9 @@ HASH = '#'
 T = TypeVar('T')
 UTF8 = 'utf-8'
 USC = "_"
+V1 = "v1"
+V2 = "v2"
+V3 = "v3"
 
 ########## Delimiters ##########
 D1 = ' : '

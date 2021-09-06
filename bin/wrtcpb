@@ -103,11 +103,11 @@ class WReverseTCPB:
 
 def __main__():  #type: () -> None
 
-  wrtcpb = WReverseTCPB()
+  wRTCPB = WReverseTCPB()
   try:
-    wrtcpb.checkArgs()
-    wrtcpb.iterateArguments()
-    wrtcpb.reverseTCP()
+    wRTCPB.checkArgs()
+    wRTCPB.iterateArguments()
+    wRTCPB.reverseTCP()
   except ValueError as ve:
     print(ve)
     print(WReverseTCPB.USAGE)

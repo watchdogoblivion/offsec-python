@@ -4,24 +4,11 @@
 # description: TODO
 # WatchDogs File Fuzzer a.k.a wffuzzer
 
-import traceback
-
-from watchdogs.web import FileFuzzer
+from watchdogs.web.scripts import FileFuzzerScript
 
 
 def __main__():  #type: () -> None
-  fuzzer = FileFuzzer()
-  try:
-    fuzzer.parseArgs()
-    fuzzer.setArguments()
-    fuzzer.parseFile()
-    fuzzer.processRequest()
-  except ValueError as ve:
-    print(ve)
-    print(fuzzer.parser.print_usage())
-  except Exception:
-    print(traceback.format_exc())
-    print(fuzzer.parser.print_usage())
+  FileFuzzerScript().run()
 
 
 __main__()

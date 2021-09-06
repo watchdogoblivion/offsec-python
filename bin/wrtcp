@@ -74,17 +74,17 @@ class WReverseTCP():
 
 
 def __main__():  #type: () -> None
-  wrtcp = WReverseTCP()
+  wRTCP = WReverseTCP()
   try:
-    wrtcp.parseArgs()
-    wrtcp.setArguments()
-    wrtcp.reverseTCP()
+    wRTCP.parseArgs()
+    wRTCP.setArguments()
+    wRTCP.reverseTCP()
   except ValueError as ve:
     print(ve)
-    print(wrtcp.parser.print_usage())
+    print(wRTCP.parser.print_usage())
   except Exception:
     print(traceback.format_exc())
-    print(wrtcp.parser.print_usage())
+    print(wRTCP.parser.print_usage())
 
 
 __main__()

@@ -4,27 +4,11 @@
 # description: TODO
 # WatchDogs Oracle Credentials Converter a.k.a woraclecc
 
-import traceback
-
-from watchdogs.io import OracleCredConverter
+from watchdogs.io.scripts import OracleCredConverterScript
 
 
 def __main__():  #type: () -> None
-  occ = OracleCredConverter()
-  try:
-    occ.parseArgs()
-    occ.setArguments()
-    occ.readLines()
-    if occ.outputFile:
-      occ.writeLines()
-    else:
-      occ.printLines()
-  except ValueError as ve:
-    print(ve)
-    print(occ.parser.print_usage())
-  except Exception:
-    print(traceback.format_exc())
-    print(occ.parser.print_usage())
+  OracleCredConverterScript().run()
 
 
 __main__()

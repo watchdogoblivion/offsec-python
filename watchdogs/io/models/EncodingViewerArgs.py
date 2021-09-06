@@ -1,16 +1,15 @@
 # author: WatchDogOblivion
 # description: TODO
-# WatchDogs Encoding Viewer
+# WatchDogs Encoding Viewer Args
 
-import os
-import argparse
 from collections import OrderedDict
 
-from watchdogs.io import File
+from watchdogs.base.models.Common import Common
+from watchdogs.io.models.FileArgs import FileArgs
 from watchdogs.utils.Constants import (EMPTY, LFN)
 
 
-class EncodingViewer(File):
+class EncodingViewerArgs(FileArgs, Common):
 
   VERSION = "1.0"
 
@@ -40,55 +39,34 @@ class EncodingViewer(File):
                            (99, 'unicode-internal'), (100, 'uu-codec'), (101, 'zlib-codec')])
 
   def __init__(self):
-    super(EncodingViewer, self).__init__()
+    super(EncodingViewerArgs, self).__init__()
     self.encodeFrom = -1  #type: int
     self.encodeTo = 85  #type: int
 
-  def getEncodings(self):  #type: (EncodingViewer) -> str
-    encodings = EncodingViewer.ENCODINGS
+    self.parseArgs()
+    self.setArguments()
+
+  def getEncodings(self):  #type: (EncodingViewerArgs) -> str
+    encodings = EncodingViewerArgs.ENCODINGS
     encodingString = "Encodings:" + LFN
     for encodingsKey, encodingsValue in encodings.items():
       encodingString += "  {}) {}{}".format(encodingsKey, encodingsValue, LFN)
     return encodingString
 
-  def parseArgs(self):  #type: (EncodingViewer) -> None
-    IF_HELP = "Specify the input file to read from."
+  def parseArgs(self):  #type: (EncodingViewerArgs) -> None
     EF_HELP = ("The encoding type to encode from. This value must be a numerical value from the encoding"
                " list.")
-    OF_HELP = "Specify the output file to write to."
     ET_HELP = ("The encoding type to encode to. This value must be a numerical value from the encoding"
                "list. Default is number 85 - utf-8")
     LE_HELP = "Conversion types."
     V_HELP = "Show version"
-    H_HELP = "Show this help message"
     ENCODINGS = self.getEncodings()
-    VERSION = "Encoding Viewer version: {}".format(EncodingViewer.VERSION)
+    VERSION = "Encoding Viewer version: {}".format(EncodingViewerArgs.VERSION)
 
-    self.parser = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter)
     parser = self.parser
     required = parser.add_argument_group("Required arguments")
-    required.add_argument("-if", "--input-file", required=True, help=IF_HELP, type=str, metavar=EMPTY)
     required.add_argument("-ef", "--encode-from", required=True, help=EF_HELP, type=int, metavar=EMPTY)
-    parser.add_argument("-of", "--output-file", help=OF_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-et", "--encode-to", help=ET_HELP, type=int, metavar=EMPTY, default=85)
     parser.add_argument("-le", "--list-encodings", action="version", help=LE_HELP, version=ENCODINGS)
     parser.add_argument("-v", "--version", action="version", help=V_HELP, version=VERSION)
-    parser.add_argument("-h", "--help", action="help", help=H_HELP)
     self.parsedArgs = parser.parse_args()
-
-  def writeEncoding(self, osCommand):  #type: (EncodingViewer, str) -> None
-    outputFile = self.outputFile
-    if not os.path.isfile(outputFile):
-      print("File does not exist. Creating file in order to perform write operation.")
-    redirectToFile = " > {}".format(outputFile)
-    os.system(osCommand + redirectToFile)
-
-  def outputEncoding(self):  #type: (EncodingViewer) -> None
-    encodings = EncodingViewer.ENCODINGS
-    osCommand = "iconv -f {} -t {}//translit {}"
-    osCommand = osCommand.format(encodings[self.encodeFrom], encodings[self.encodeTo], self.inputFile)
-    print("Command: {}".format(osCommand))
-    if self.outputFile:
-      self.writeEncoding(osCommand)
-    else:
-      os.system(osCommand)

@@ -156,17 +156,17 @@ class WSetJava():
 
 
 def __main__():  #type: () -> None
-  wsj = WSetJava()
+  wSJ = WSetJava()
   try:
-    wsj.parseArgs()
-    wsj.setArguments()
-    wsj.setJava()
+    wSJ.parseArgs()
+    wSJ.setArguments()
+    wSJ.setJava()
   except ValueError as ve:
     print(ve)
-    print(wsj.parser.print_usage())
+    print(wSJ.parser.print_usage())
   except Exception:
     print(traceback.format_exc())
-    print(wsj.parser.print_usage())
+    print(wSJ.parser.print_usage())
 
 
 __main__()
