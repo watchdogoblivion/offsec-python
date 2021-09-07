@@ -2,26 +2,37 @@
 # description: TODO
 # WatchDogs File Fuzzer
 
-from collections import OrderedDict
+# from collections import OrderedDict
 
 from watchdogs.base.models import Common
-from watchdogs.utils.Constants import (EMPTY)
+from watchdogs.web.models.Requests import Request
 from watchdogs.web.models.Locators import FuzzLocators
 
 
 class FileFuzzer(Common):
 
-  def __init__(self):
+  def __init__(self, request=Request(), fuzzLocators=FuzzLocators(), fuzzValuesString=str()):
+    #type: (Request, FuzzLocators, str) -> None
+
     super(FileFuzzer, self).__init__()
-    self.requestFields = []  #type: list[str]
-    self.remoteHost = EMPTY  #type: str
-    self.raw_info = EMPTY  #type: str
-    self.raw_headers = EMPTY  #type: str
-    self.raw_body = EMPTY  #type: str
-    self.requestInfo = OrderedDict()  #type: OrderedDict
-    self.requestUrl = EMPTY  #type: str
-    self.requestHeaders = OrderedDict()  #type: OrderedDict
-    self.requestBoundary = EMPTY  #type: str
-    self.requestBody = OrderedDict()  #type: OrderedDict
-    self.fuzzLocators = FuzzLocators()  #type: FuzzLocators
-    self.FuzzValuesString = EMPTY  #type: str
+    self.__request = request
+    self.__fuzzLocators = fuzzLocators
+    self.__fuzzValuesString = fuzzValuesString
+
+  def getRequest(self):  #type: () -> Request
+    return self.__request
+
+  def setRequest(self, request):  #type: (Request) -> None
+    self.__request = request
+
+  def getFuzzLocators(self):  #type: () -> FuzzLocators
+    return self.__fuzzLocators
+
+  def setFuzzLocators(self, fuzzLocators):  #type: (FuzzLocators) -> None
+    self.__fuzzLocators = fuzzLocators
+
+  def getFuzzValuesString(self):  #type: () -> str
+    return self.__fuzzValuesString
+
+  def setFuzzValuesString(self, fuzzValuesString):  #type: (str) -> None
+    self.__fuzzValuesString = fuzzValuesString

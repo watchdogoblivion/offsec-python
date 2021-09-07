@@ -43,16 +43,16 @@ class FuzzLocators(Common):
 
   def __init__(self):
     super(FuzzLocators, self).__init__()
-    self.remoteHost = FuzzLocator()  #type: FuzzLocator
+    self.urlHost = FuzzLocator()  #type: FuzzLocator
     self.requestInfo = FuzzLocator()  #type: FuzzLocator
     self.requestHeaders = FuzzLocator()  #type: FuzzLocator
     self.requestBody = FuzzLocator()  #type: FuzzLocator
 
   def getRemoteHost(self):  #type: (FuzzLocators) -> FuzzLocator
-    return getattr(self, "remoteHost")
+    return getattr(self, "urlHost")
 
   def setRemoteHost(self, value):  #type: (FuzzLocators, FuzzLocator) -> None
-    setattr(self, "remoteHost", value)
+    setattr(self, "urlHost", value)
 
   def getRequestInfo(self):  #type: (FuzzLocators) -> FuzzLocator
     return getattr(self, "requestInfo")

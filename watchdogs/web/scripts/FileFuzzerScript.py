@@ -12,19 +12,19 @@ from watchdogs.web.services.FileFuzzerService import FileFuzzerService
 
 class FileFuzzerScript(Common):
 
-  def __init__(self, fileFuzzerService=FileFuzzerService()):
+  def __init__(self, fileFuzzerService=FileFuzzerService()):  #type: (FileFuzzerService) -> None
     super(FileFuzzerScript, self).__init__()
-    self.fileFuzzerService = fileFuzzerService  #type: FileFuzzerService
+    self.__fileFuzzerService = fileFuzzerService
 
-  def run(self):  #type: (FileFuzzerScript) -> None
-    fFArgs = FileFuzzerArgs()
-    fFService = FileFuzzerService()
+  def run(self):  #type: () -> None
+    fFuzzerArgs = FileFuzzerArgs()
+    fFuzzerService = self.__fileFuzzerService
     try:
-      fFService.parseFile(fFArgs)
-      fFService.processRequest(fFArgs)
+      fFuzzerService.parseFile(fFuzzerArgs)
+      fFuzzerService.processRequest(fFuzzerArgs)
     except ValueError as ve:
       print(ve)
-      print(fFArgs.parser.print_usage())
+      print(fFuzzerArgs.parser.print_usage())
     except Exception:
       print(traceback.format_exc())
-      print(fFArgs.parser.print_usage())
+      print(fFuzzerArgs.parser.print_usage())
