@@ -3,6 +3,7 @@
 # WatchDogs File Fuzzer
 
 import re
+from watchdogs import web
 import requests
 from bs4 import BeautifulSoup
 from collections import OrderedDict
@@ -13,6 +14,7 @@ from watchdogs.web.models import AVI
 from watchdogs.base.models import Common
 from watchdogs.web.models import FileFuzzer
 from watchdogs.web.parsers import FileFuzzerArgs
+from watchdogs.web.models.WebFile import WebFile
 from watchdogs.web.models.Requests import RequestInfo
 from watchdogs.web.models.Locators import (FuzzHelper, FuzzLocator, LocatorContainer)
 from watchdogs.utils.Constants import (EMPTY, COLON, EQUAL, SEMI_COLON, LFN, BOUNDARY, DASH, SPACE,
@@ -90,7 +92,9 @@ class FileFuzzerService(Common):
 
     for rawHeader in rawHeadersSplit:
       colonIndex = rawHeader.find(COLON)
-      requestHeaders[rawHeader[0:colonIndex]] = rawHeader[colonIndex + 1:].strip()
+      headerKey = rawHeader[0:colonIndex]
+      headerValue = rawHeader[colonIndex + 1:].strip()
+      requestHeaders[headerKey] = headerValue
     request.setRequestHeaders(requestHeaders)
 
   def parseBody(self, fileFuzzerArgs):  #type: (FileFuzzerArgs) -> None
@@ -116,21 +120,24 @@ class FileFuzzerService(Common):
           startFileName = rawBodyLine.find(DOUBLE_QUOTE, rawBodyLine.find(fn))
           endFileName = rawBodyLine.find(DOUBLE_QUOTE, startFileName + 1)
           fileName = rawBodyLine[startFileName + 1:endFileName]
+          contentTypeValue = None
           if (ct in rawBodyLines[lineIndex + 1]):
             contentType = rawBodyLines[lineIndex + 1]
             contentTypeValue = contentType[contentType.find(COLON) + 1:]
-          requestBody[name] = (fileName, open(fileFuzzerArgs.postFile, RB), contentTypeValue)
+          webFile = (fileName, open(fileFuzzerArgs.postFile, RB), contentTypeValue)
+          requestBody[name] = WebFile(webFile)
         elif (cd in rawBodyLine):
           name = rawBodyLine[startName + 1:endName]
           rawValue = EMPTY
           i = lineIndex + 1
-          nextLine = rawBodyLines[i]
           while (True):
-            rawValue += nextLine
-            if (i + 1 == rawBodyLinesLength or cd in rawBodyLines[i + 1]):
+            rawValue += rawBodyLines[i]
+            nextLine = EMPTY
+            if (i + 1 < rawBodyLinesLength):
+              nextLine = rawBodyLines[i + 1]
+            if (i + 1 == rawBodyLinesLength or cd in nextLine):
               requestBody[name] = rawValue
               break
-            nextLine += rawBodyLines[i + 1]
         request.setRequestBody(requestBody)
       if (not request.getRequestBody()):
         print(
@@ -174,14 +181,12 @@ class FileFuzzerService(Common):
         aVIValue = aVI.getAVIValue()
         fileName = aVI.getFileName()
         contentType = aVI.getContentType()
-        if (type(aVIValue) == tuple):
-          newFile = None
+        if (type(aVIValue) == WebFile):
+          webFile = Cast._to(WebFile, aVIValue)
           if (fileName == boundlessFuzz):
-            newFile = (newValue, aVIValue[1], contentType)
+            webFile.setFileName(newValue)
           if (contentType == boundlessFuzz):
-            newFile = (fileName, aVIValue[1], newValue)
-          if (newFile):
-            attrValue[aVIKey] = newFile
+            webFile.setContentType(newValue)
         elif (type(aVIValue) == str):
           attrValue[aVIKey] = newValue
 
@@ -221,9 +226,10 @@ class FileFuzzerService(Common):
         aVI = OrderedDict(attrValue).items()
         for aVIKey, aVIValue in aVI:
           fuzzWord = fileName = contentType = EMPTY
-          if (type(aVIValue) == tuple):
-            fileName = aVIValue[0]
-            contentType = aVIValue[2]
+          if (type(aVIValue) == WebFile):
+            webFile = Cast._to(WebFile, aVIValue)
+            fileName = webFile.getFileName()
+            contentType = webFile.getContentType()
           elif (type(aVIValue) == str):
             fuzzWord = aVIValue
           fuzzWordsIndicies = self.getFuzzIndicies(fuzzWord, fileName, contentType)
@@ -312,10 +318,14 @@ class FileFuzzerService(Common):
 
   def getRequestBody(self, fileFuzzerArgs):  #type: (FileFuzzerArgs) -> OrderedDict | str
     request = self.__fileFuzzer.getRequest()
-    requestBody = request.getRequestBody()
+    requestBodyDict = request.getRequestBody()
     if (fileFuzzerArgs.postFile):
-      return MultipartEncoder(fields=requestBody, boundary=request.getRequestBoundary())
-    return requestBody
+      for requestBodyKey in requestBodyDict:
+        requestBodyValue = requestBodyDict[requestBodyKey]
+        if (type(requestBodyValue) == WebFile):
+          requestBodyDict[requestBodyKey] = Cast._to(WebFile, requestBodyValue).getWebFile()
+      return MultipartEncoder(fields=requestBodyDict, boundary=request.getRequestBoundary())
+    return requestBodyDict
 
   def getProxies(self, fileFuzzerArgs):  #type: (FileFuzzerArgs) -> dict
     proxies = {}
@@ -386,16 +396,16 @@ class FileFuzzerService(Common):
       elif (type(attrValue) == OrderedDict):
         locatorKey = fuzzHelper.getLocatorKey()
         requestValue = attrValue[locatorKey]
-        if (isinstance(requestValue, tuple)):
-          fileName = str(requestValue[0])
-          content = requestValue[1]
-          contentType = str(requestValue[2])
+        if (isinstance(requestValue, WebFile)):
+          webFile = Cast._to(WebFile, requestValue)
+          fileName = webFile.getFileName()
+          contentType = webFile.getContentType()
           if (fuzzWord in fileName):
             newValue = fileName.replace(fuzzWord, fuzzValue)
-            attrValue[locatorKey] = (newValue, content, contentType)
+            webFile.setFileName(newValue)
           elif (fuzzWord in contentType):
             newValue = contentType.replace(fuzzWord, fuzzValue)
-            attrValue[locatorKey] = (fileName, content, newValue)
+            webFile.setContentType(newValue)
         elif (isinstance(requestValue, str)):
           attrValue[locatorKey] = str(requestValue).replace(fuzzWord, fuzzValue)
 
