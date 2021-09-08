@@ -74,6 +74,16 @@ INFO = 'info'
 HEADER = 'header'
 BODY = 'body'
 HTML_PARSER = 'html.parser'
+HEAD = 'HEAD'
+OPTIONS = 'OPTIONS'
+TRACE = 'TRACE'
+CONNECT = 'CONNECT'
+GET = 'GET'
+POST = 'POST'
+PUT = 'PUT'
+PATCH = 'PATCH'
+DELETE = 'DELETE'
+REQUEST_METHODS = [HEAD, OPTIONS, TRACE, CONNECT, GET, POST, PUT, PATCH, DELETE]
 
 ########## Lowercase Alphabet ##########
 LA = 'a'

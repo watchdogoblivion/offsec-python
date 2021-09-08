@@ -2,6 +2,7 @@
 # description: TODO
 # WatchDogs Request
 
+import copy
 from collections import OrderedDict
 
 from watchdogs.base.models import Common
@@ -9,10 +10,17 @@ from watchdogs.base.models import Common
 
 class RequestInfo(Common):
 
-  def __init__(self, method=str(), endpoint=str()):  #type: (str, str) -> None
+  def __init__(self, urlHost=str(), method=str(), endpoint=str()):  #type: (str, str, str) -> None
     super(RequestInfo, self).__init__()
+    self._urlHost = urlHost
     self._method = method
     self._endpoint = endpoint
+
+  def getUrlHost(self):  #type: () -> str
+    return self._urlHost
+
+  def setUrlHost(self, urlHost):  #type: (str) -> None
+    self._urlHost = urlHost
 
   def getMethod(self):  #type: () -> str
     return self._method
@@ -29,20 +37,22 @@ class RequestInfo(Common):
 
 class Request(Common):
 
-  def __init__(self, rawInfo=str(), rawHeaders=str(), rawBody=str(), urlHost=str(), requestInfo=RequestInfo(),
+  def __init__(self, rawInfo=str(), rawHeaders=str(), rawBody=str(), requestInfo=RequestInfo(),
                requestUrl=str(), requestHeaders=OrderedDict(), requestBoundary=str(),
                requestBody=OrderedDict()):
-    #type: (str, str, str, str, RequestInfo, str, OrderedDict, str, OrderedDict) -> None
+    #type: (str, str, str, RequestInfo, str, OrderedDict, str, OrderedDict) -> None
     super(Request, self).__init__()
     self._rawInfo = rawInfo
     self._rawHeaders = rawHeaders
     self._rawBody = rawBody
-    self.urlHost = urlHost
     self.requestInfo = requestInfo
     self.requestUrl = requestUrl
     self.requestHeaders = requestHeaders
     self.requestBoundary = requestBoundary
     self.requestBody = requestBody
+    self.originalRequestInfo = requestInfo
+    self.originalRequestHeaders = requestHeaders
+    self.originalRequestBody = requestBody
 
   def getRawInfo(self):  #type: () -> str
     return self._rawInfo
@@ -62,14 +72,8 @@ class Request(Common):
   def setRawBody(self, rawBody):  #type: (str) -> None
     self._rawBody = rawBody
 
-  def getUrlHost(self):  #type: () -> str
-    return self.urlHost
-
-  def setUrlHost(self, urlHost):  #type: (str) -> None
-    self.urlHost = urlHost
-
   def getRequestInfo(self):  #type: () -> RequestInfo
-    return self.requestInfo
+    return copy.copy(self.requestInfo)
 
   def setRequestInfo(self, requestInfo):  #type: (RequestInfo) -> None
     self.requestInfo = requestInfo
@@ -97,3 +101,31 @@ class Request(Common):
 
   def setRequestBody(self, requestBody):  #type: (OrderedDict) -> None
     self.requestBody = requestBody
+
+  def getOriginalRequestInfo(self):  #type: () -> OrderedDict
+    return self.originalRequestInfo
+
+  def setOriginalRequestInfo(self, originalRequestInfo):  #type: (OrderedDict) -> None
+    self.originalRequestInfo = originalRequestInfo
+
+  def getOriginalRequestHeaders(self):  #type: () -> OrderedDict
+    return self.originalRequestHeaders
+
+  def setOriginalRequestHeaders(self, originalRequestHeaders):  #type: (OrderedDict) -> None
+    self.originalRequestHeaders = originalRequestHeaders
+
+  def getOriginalRequestBody(self):  #type: () -> OrderedDict
+    return self.originalRequestBody
+
+  def setOriginalRequestBody(self, originalRequestBody):  #type: (OrderedDict) -> None
+    self.originalRequestBody = originalRequestBody
+
+  def updateOriginalValues(self):  #type: () -> None
+    self.originalRequestInfo = self.requestInfo
+    self.originalRequestHeaders = self.requestHeaders
+    self.originalRequestBody = self.requestBody
+
+  def resetRequestValues(self):
+    self.requestInfo = self.originalRequestInfo
+    self.requestHeaders = self.originalRequestHeaders
+    self.requestBody = self.originalRequestBody
