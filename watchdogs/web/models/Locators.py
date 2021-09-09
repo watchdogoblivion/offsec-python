@@ -2,33 +2,25 @@
 # description: TODO
 # WatchDogs Locators
 
-from typing import Any
-
 from watchdogs.base.models import Common
 from watchdogs.utils.Constants import (EMPTY)
 
 
-class LocatorContainer(Common):
+class LocatorDatum(Common):
 
   def __init__(self):
-    super(LocatorContainer, self).__init__()
-    self._locatorKey = EMPTY  #type: str
-    self._fuzzWordIndex = -1  #type: int
+    super(LocatorDatum, self).__init__()
+    # self._locatorKey = EMPTY  #type: str
+    self._indexOfSubstitute = -1  #type: int
     self._isInfo = False
     self._headerKey = EMPTY
     self._bodyKey = EMPTY
 
-  def getLocatorKey(self):  #type: (LocatorContainer) -> str
-    return getattr(self, "_locatorKey")
+  def getIndexOfSubstitute(self):  #type: (LocatorDatum) -> int
+    return getattr(self, "_indexOfSubstitute")
 
-  def setLocatorKey(self, value):  #type: (LocatorContainer, str) -> None
-    setattr(self, "_locatorKey", value)
-
-  def getFuzzWordIndex(self):  #type: (LocatorContainer) -> int
-    return getattr(self, "_fuzzWordIndex")
-
-  def setFuzzWordIndex(self, value):  #type: (LocatorContainer, int) -> None
-    setattr(self, "_fuzzWordIndex", value)
+  def setIndexOfSubstitute(self, value):  #type: (LocatorDatum, int) -> None
+    setattr(self, "_indexOfSubstitute", value)
 
   def isInfo(self):  #type: () -> bool
     return self._isInfo
@@ -49,21 +41,21 @@ class LocatorContainer(Common):
     self._bodyKey = bodyKey
 
 
-class FuzzLocator(Common):
+class VariantLocator(Common):
 
-  def __init__(self, locatorContainers=[], isInfo=False, isHeaders=False, isBody=False):
-    #type: (list[LocatorContainer], bool,bool,bool) -> None
-    super(FuzzLocator, self).__init__()
-    self._locatorContainers = locatorContainers
+  def __init__(self, locatorData=[], isInfo=False, isHeaders=False, isBody=False):
+    #type: (list[LocatorDatum], bool,bool,bool) -> None
+    super(VariantLocator, self).__init__()
+    self._locatorData = locatorData
     self._isInfo = isInfo
-    self._isHeader = isHeaders
+    self._isHeaders = isHeaders
     self._isBody = isBody
 
-  def getLocatorContainers(self):  #type: (FuzzLocator) -> list[LocatorContainer]
-    return getattr(self, "_locatorContainers")
+  def getLocatorData(self):  #type: (VariantLocator) -> list[LocatorDatum]
+    return getattr(self, "_locatorData")
 
-  def setLocatorContainers(self, value):  #type: (FuzzLocator, list[LocatorContainer]) -> None
-    setattr(self, "_locatorContainers", value)
+  def setLocatorData(self, value):  #type: (VariantLocator, list[LocatorDatum]) -> None
+    setattr(self, "_locatorData", value)
 
   def isInfo(self):  #type: () -> bool
     return self._isInfo
@@ -72,61 +64,13 @@ class FuzzLocator(Common):
     self._isInfo = isInfo
 
   def isHeader(self):  #type: () -> bool
-    return self._isHeader
+    return self._isHeaders
 
   def setIsHeader(self, isHeader):  #type: (bool) -> None
-    self._isHeader = isHeader
+    self._isHeaders = isHeader
 
   def isBody(self):  #type: () -> bool
     return self._isBody
 
   def setIsBody(self, isBody):  #type: (bool) -> None
     self._isBody = isBody
-
-
-class FuzzLocators(Common):
-
-  def __init__(self, requestInfo=FuzzLocator(isInfo=True), requestHeaders=FuzzLocator(isHeaders=True),
-               requestBody=FuzzLocator(isBody=True)):
-    #type: (FuzzLocator, FuzzLocator, FuzzLocator) -> None
-    super(FuzzLocators, self).__init__()
-    self.requestInfo = requestInfo
-    self.requestHeaders = requestHeaders
-    self.requestBody = requestBody
-
-  def getUrlHost(self):  #type: (FuzzLocators) -> FuzzLocator
-    return getattr(self, "urlHost")
-
-  def setUrlHost(self, value):  #type: (FuzzLocators, FuzzLocator) -> None
-    setattr(self, "urlHost", value)
-
-  def getRequestInfo(self):  #type: (FuzzLocators) -> FuzzLocator
-    return getattr(self, "requestInfo")
-
-  def setRequestInfo(self, value):  #type: (FuzzLocators, FuzzLocator) -> None
-    setattr(self, "requestInfo", value)
-
-  def getRequestHeaders(self):  #type: (FuzzLocators) -> FuzzLocator
-    return getattr(self, "requestHeaders")
-
-  def setRequestHeaders(self, value):  #type: (FuzzLocators, FuzzLocator) -> None
-    setattr(self, "requestHeaders", value)
-
-  def getRequestBody(self):  #type: (FuzzLocators) -> FuzzLocator
-    return getattr(self, "requestBody")
-
-  def setRequestBody(self, value):  #type: (FuzzLocators, FuzzLocator) -> None
-    setattr(self, "requestBody", value)
-
-
-class FuzzHelper(LocatorContainer):
-
-  def __init__(self):
-    super(FuzzHelper, self).__init__()
-    self._attrKey = EMPTY  #type: str
-
-  def getAttrKey(self):  #type: (FuzzHelper) -> str
-    return getattr(self, "_attrKey")
-
-  def setAttrKey(self, value):  #type: (FuzzHelper, str) -> None
-    setattr(self, "_attrKey", value)

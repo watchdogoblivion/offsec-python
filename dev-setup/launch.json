@@ -13,7 +13,7 @@
         "${env:TEST_DATA}/testrest",
         "-pf",
         "${env:TEST_DATA}/web.config",
-        "-ff",
+        "-sf",
         "${env:TEST_DATA}/fuzzFile.txt",
         "-hp",
         "http://127.0.0.1:8080"

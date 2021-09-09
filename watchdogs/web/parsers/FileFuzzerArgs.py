@@ -19,8 +19,8 @@ class FileFuzzerArgs(FileArgs, Common):
     self.remoteHost = EMPTY  #type: str
     self.secure = False  #type: bool
     self.postFile = EMPTY  #type: str
-    self.fuzzFile = EMPTY  #type: str
-    self.fuzzDelimiter = COLON  #type: str
+    self.substitutesFile = EMPTY  #type: str
+    self.substitutesDelimiter = COLON  #type: str
     self.httpProxy = EMPTY  #type: str
     self.httpsProxy = EMPTY  #type: str
     self.disableVerification = False  #type: bool
@@ -30,7 +30,7 @@ class FileFuzzerArgs(FileArgs, Common):
     self.filterIn = EMPTY  #type: str
     self.filterOut = EMPTY  #type: str
     self.showResponse = False  #type: bool
-    self.showFuzz = False  #type: bool
+    self.showSubstitutes = False  #type: bool
 
     self.parseArgs()
     self.setArguments()
@@ -39,15 +39,17 @@ class FileFuzzerArgs(FileArgs, Common):
     RH_HELP = "Explictly specify the remote host."
     IF_HELP = (
         "Specify the input file to read from.\nWhen executing POST, always ensure there is a new line"
-        "feed separating the body from the headers.\nIf fuzzing, the file must include exactly 1 'FUZZ' keyword."
-    )
+        " feed separating the body from the headers.\nIf fuzzing, the file must include exactly 1 'FUZZ'"
+        " keyword.")
     S_HELP = "Specifies https."
     OF_HELP = "Specify the output file to write to."
     PF_HELP = (
         "Specify a file to send in a POST request. This flag is for file uploads only and should not be"
-        "used for other POST requests")
-    FF_HELP = "Specify a file to fuzz with. If this is not specified, no fuzzing will occur"
-    FD_HELP = "Specify the delimiter used to separate the words in the fuzz file"
+        " used for other POST requests")
+    SS_HELP = ("Specify the file which contains the words that will be used as substitutions for the 'FUZZ'"
+               " words. If this is not specified, no fuzzing will occur")
+    SD_HELP = ("Specify the delimiter used to separate the words in the substitutes file. The default is a"
+               " colon")
     HP_HELP = "Specify a proxy."
     SP_HELP = "Specify an ssl proxy"
     DV_HELP = "For https proxies, this flag will disable cert verification."
@@ -57,7 +59,7 @@ class FileFuzzerArgs(FileArgs, Common):
     FI_HELP = "Filters in and keeps the responses with the specified text"
     FO_HELP = "Filters out and removes the responses with the specified text"
     SR_HELP = "Shows the response body"
-    SF_HELP = "Shows the fuzz text used in the request"
+    SS_HELP = "Shows the fuzz substituted text used in the request"
     V_HELP = "Show version"
     H_HELP = "Show this help message"
     VERSION = "File Fuzzer version: {}".format(FileFuzzerArgs.VERSION)
@@ -70,8 +72,9 @@ class FileFuzzerArgs(FileArgs, Common):
     parser.add_argument("-s", "--secure", action="store_true", help=S_HELP)
     parser.add_argument("-of", "--output-file", help=OF_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-pf", "--post-file", help=PF_HELP, type=str, metavar=EMPTY)
-    parser.add_argument("-ff", "--fuzz-file", help=FF_HELP, type=str, metavar=EMPTY)
-    parser.add_argument("-fd", "--fuzz-delimiter", help=FD_HELP, type=str, metavar=EMPTY, default=COLON)
+    parser.add_argument("-sf", "--substitutes-file", help=SS_HELP, type=str, metavar=EMPTY)
+    parser.add_argument("-sd", "--substitutes-delimiter", help=SD_HELP, type=str, metavar=EMPTY,
+                        default=COLON)
     parser.add_argument("-hp", "--http-proxy", help=HP_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-sp", "--https-proxy", help=SP_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-dv", "--disable-verification", action="store_true", help=DV_HELP, default=False)
@@ -81,7 +84,7 @@ class FileFuzzerArgs(FileArgs, Common):
     parser.add_argument("-fi", "--filter-in", help=FI_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-fo", "--filter-out", help=FO_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-sr", "--show-response", action="store_true", help=SR_HELP)
-    parser.add_argument("-sf", "--show-fuzz", action="store_true", help=SF_HELP)
+    parser.add_argument("-ss", "--show-substitutes", action="store_true", help=SS_HELP)
     parser.add_argument("-v", "--version", action="version", help=V_HELP, version=VERSION)
     parser.add_argument("-h", "--help", action="help", help=H_HELP)
     self.parsedArgs = parser.parse_args()
