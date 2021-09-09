@@ -12,27 +12,27 @@ class RequestInfo(Common):
 
   def __init__(self, urlHost=str(), method=str(), endpoint=str()):  #type: (str, str, str) -> None
     super(RequestInfo, self).__init__()
-    self._urlHost = urlHost
-    self._method = method
-    self._endpoint = endpoint
+    self.__urlHost = urlHost
+    self.__method = method
+    self.__endpoint = endpoint
 
   def getUrlHost(self):  #type: () -> str
-    return self._urlHost
+    return self.__urlHost
 
   def setUrlHost(self, urlHost):  #type: (str) -> None
-    self._urlHost = urlHost
+    self.__urlHost = urlHost
 
   def getMethod(self):  #type: () -> str
-    return self._method
+    return self.__method
 
   def setMethod(self, method):  #type: (str) -> None
-    self._method = method
+    self.__method = method
 
   def getEndpoint(self):  #type: () -> str
-    return self._endpoint
+    return self.__endpoint
 
   def setEndpoint(self, endpoint):  #type: (str) -> None
-    self._endpoint = endpoint
+    self.__endpoint = endpoint
 
 
 class Request(Common):
@@ -42,90 +42,90 @@ class Request(Common):
                requestBody=OrderedDict()):
     #type: (str, str, str, RequestInfo, str, OrderedDict, str, OrderedDict) -> None
     super(Request, self).__init__()
-    self._rawInfo = rawInfo
-    self._rawHeaders = rawHeaders
-    self._rawBody = rawBody
-    self.requestInfo = requestInfo
-    self.requestUrl = requestUrl
-    self.requestHeaders = requestHeaders
-    self.requestBoundary = requestBoundary
-    self.requestBody = requestBody
-    self.originalRequestInfo = requestInfo
-    self.originalRequestHeaders = requestHeaders
-    self.originalRequestBody = requestBody
+    self.__rawInfo = rawInfo
+    self.__rawHeaders = rawHeaders
+    self.__rawBody = rawBody
+    self.__requestInfo = requestInfo
+    self.__requestUrl = requestUrl
+    self.__requestHeaders = requestHeaders
+    self.__requestBoundary = requestBoundary
+    self.__requestBody = requestBody
+    self.__originalRequestInfo = requestInfo
+    self.__originalRequestHeaders = requestHeaders
+    self.__originalRequestBody = requestBody
 
   def getRawInfo(self):  #type: () -> str
-    return self._rawInfo
+    return self.__rawInfo
 
   def setRawInfo(self, rawInfo):  #type: (str) -> None
-    self._rawInfo = rawInfo
+    self.__rawInfo = rawInfo
 
   def getRawHeaders(self):  #type: () -> str
-    return self._rawHeaders
+    return self.__rawHeaders
 
   def setRawHeaders(self, rawHeaders):  #type: (str) -> None
-    self._rawHeaders = rawHeaders
+    self.__rawHeaders = rawHeaders
 
   def getRawBody(self):  #type: () -> str
-    return self._rawBody
+    return self.__rawBody
 
   def setRawBody(self, rawBody):  #type: (str) -> None
-    self._rawBody = rawBody
+    self.__rawBody = rawBody
 
   def getRequestInfo(self):  #type: () -> RequestInfo
-    return copy.copy(self.requestInfo)
+    return copy.copy(self.__requestInfo)
 
   def setRequestInfo(self, requestInfo):  #type: (RequestInfo) -> None
-    self.requestInfo = requestInfo
+    self.__requestInfo = requestInfo
 
   def getRequestUrl(self):  #type: () -> str
-    return self.requestUrl
+    return self.__requestUrl
 
   def setRequestUrl(self, requestUrl):  #type: (str) -> None
-    self.requestUrl = requestUrl
+    self.__requestUrl = requestUrl
 
   def getRequestHeaders(self):  #type: () -> OrderedDict
-    return OrderedDict(self.requestHeaders)
+    return OrderedDict(self.__requestHeaders)
 
   def setRequestHeaders(self, requestHeaders):  #type: (OrderedDict) -> None
-    self.requestHeaders = requestHeaders
+    self.__requestHeaders = requestHeaders
 
   def getRequestBoundary(self):  #type: () -> str
-    return self.requestBoundary
+    return self.__requestBoundary
 
   def setRequestBoundary(self, requestBoundary):  #type: (str) -> None
-    self.requestBoundary = requestBoundary
+    self.__requestBoundary = requestBoundary
 
   def getRequestBody(self):  #type: () -> OrderedDict
-    return OrderedDict(self.requestBody)
+    return OrderedDict(self.__requestBody)
 
   def setRequestBody(self, requestBody):  #type: (OrderedDict) -> None
-    self.requestBody = requestBody
+    self.__requestBody = requestBody
 
   def getOriginalRequestInfo(self):  #type: () -> OrderedDict
-    return self.originalRequestInfo
+    return self.__originalRequestInfo
 
   def setOriginalRequestInfo(self, originalRequestInfo):  #type: (OrderedDict) -> None
-    self.originalRequestInfo = originalRequestInfo
+    self.__originalRequestInfo = originalRequestInfo
 
   def getOriginalRequestHeaders(self):  #type: () -> OrderedDict
-    return self.originalRequestHeaders
+    return self.__originalRequestHeaders
 
   def setOriginalRequestHeaders(self, originalRequestHeaders):  #type: (OrderedDict) -> None
-    self.originalRequestHeaders = originalRequestHeaders
+    self.__originalRequestHeaders = originalRequestHeaders
 
   def getOriginalRequestBody(self):  #type: () -> OrderedDict
-    return self.originalRequestBody
+    return self.__originalRequestBody
 
   def setOriginalRequestBody(self, originalRequestBody):  #type: (OrderedDict) -> None
-    self.originalRequestBody = originalRequestBody
+    self.__originalRequestBody = originalRequestBody
 
   def updateOriginalValues(self):  #type: () -> None
-    self.originalRequestInfo = self.requestInfo
-    self.originalRequestHeaders = self.requestHeaders
-    self.originalRequestBody = self.requestBody
+    self.__originalRequestInfo = self.__requestInfo
+    self.__originalRequestHeaders = self.__requestHeaders
+    self.__originalRequestBody = self.__requestBody
 
   def resetRequestValues(self):
-    self.requestInfo = self.originalRequestInfo
-    self.requestHeaders = self.originalRequestHeaders
-    self.requestBody = self.originalRequestBody
+    self.__requestInfo = self.__originalRequestInfo
+    self.__requestHeaders = self.__originalRequestHeaders
+    self.__requestBody = self.__originalRequestBody

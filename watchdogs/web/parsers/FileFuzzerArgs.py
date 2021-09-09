@@ -64,8 +64,8 @@ class FileFuzzerArgs(FileArgs, Common):
     H_HELP = "Show this help message"
     VERSION = "File Fuzzer version: {}".format(FileFuzzerArgs.VERSION)
 
-    self.parser = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter)
-    parser = self.parser
+    self.setParser(argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter))
+    parser = self.getParser()
     required = parser.add_argument_group("Required arguments")
     required.add_argument("-rh", "--remote-host", required=True, help=RH_HELP, type=str, metavar="127.0.0.1")
     required.add_argument("-if", "--input-file", required=True, help=IF_HELP, type=str, metavar="request.txt")
@@ -87,4 +87,4 @@ class FileFuzzerArgs(FileArgs, Common):
     parser.add_argument("-ss", "--show-substitutes", action="store_true", help=SS_HELP)
     parser.add_argument("-v", "--version", action="version", help=V_HELP, version=VERSION)
     parser.add_argument("-h", "--help", action="help", help=H_HELP)
-    self.parsedArgs = parser.parse_args()
+    self.setParsedArgs(parser.parse_args())

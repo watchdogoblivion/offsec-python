@@ -11,7 +11,6 @@ from collections import OrderedDict
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 
 from watchdogs.utils import Cast
-from watchdogs.web.models import AVI
 from watchdogs.base.models import Common
 from watchdogs.web.models import FileFuzzer
 from watchdogs.web.parsers import FileFuzzerArgs
@@ -192,7 +191,7 @@ class FileFuzzerService(Common):
       else:
         setNewValue(newValue)
 
-  def updateLocatorData(self, indiciesOfSubstitutes, existingIndicies, variantLocator, locatorKey=None):
+  def updateLocatorData(self, indiciesOfSubstitutes, existingIndicies, variantLocator, requestKey=None):
     #type: (list[int], list, VariantLocator, str) -> None
     if (len(indiciesOfSubstitutes) > 0):
       for indexOfSubstitute in indiciesOfSubstitutes:
@@ -204,9 +203,9 @@ class FileFuzzerService(Common):
         if (variantLocator.isInfo()):
           locatorDatum.setIsInfo(True)
         elif (variantLocator.isHeader()):
-          locatorDatum.setHeaderKey(locatorKey)
+          locatorDatum.setHeaderKey(requestKey)
         elif (variantLocator.isBody()):
-          locatorDatum.setBodyKey(locatorKey)
+          locatorDatum.setBodyKey(requestKey)
 
         variantLocator.getLocatorData().append(locatorDatum)
         existingIndicies.append(locatorDatum.getIndexOfSubstitute())
@@ -238,32 +237,32 @@ class FileFuzzerService(Common):
       elif (fuzzLocator.isHeader()):
         requestHeaders = request.getRequestHeaders()
 
-        aVI = OrderedDict(requestHeaders).items()
-        for aVIKey, aVIValue in aVI:
-          fuzzWord = aVIValue
+        requestHeaderItems = OrderedDict(requestHeaders).items()
+        for requestHeaderKey, requestHeaderValue in requestHeaderItems:
+          fuzzWord = requestHeaderValue
           indiciesOfSubstitutes = self.getIndiciesOfSubstitutes(fuzzWord)
           unnumberedFuzz = self.getUnnumberedFuzz(fuzzWord)
-          self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestHeaders, None, aVIKey)
-          self.updateLocatorData(indiciesOfSubstitutes, existingIndicies, fuzzLocator, aVIKey)
+          self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestHeaders, None, requestHeaderKey)
+          self.updateLocatorData(indiciesOfSubstitutes, existingIndicies, fuzzLocator, requestHeaderKey)
           request.setRequestHeaders(requestHeaders)
       elif (fuzzLocator.isBody()):
         requestBody = request.getRequestBody()
 
-        aVI = OrderedDict(requestBody).items()
-        for aVIKey, aVIValue in aVI:
+        requestBodyItems = OrderedDict(requestBody).items()
+        for requestBodyKey, requestBodyValue in requestBodyItems:
           fuzzWord = fileName = contentType = EMPTY
           webFile = None
-          if (type(aVIValue) == WebFile):
-            webFile = Cast._to(WebFile, aVIValue)
+          if (type(requestBodyValue) == WebFile):
+            webFile = Cast._to(WebFile, requestBodyValue)
             fileName = webFile.getFileName()
             contentType = webFile.getContentType()
-          elif (type(aVIValue) == str):
-            fuzzWord = aVIValue
+          elif (type(requestBodyValue) == str):
+            fuzzWord = requestBodyValue
 
           if (fuzzWord):
             indiciesOfSubstitutes = self.getIndiciesOfSubstitutes(fuzzWord, fileName, contentType)
             unnumberedFuzz = self.getUnnumberedFuzz(fuzzWord, fileName, contentType)
-            self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestBody, None, aVIKey)
+            self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestBody, None, requestBodyKey)
 
           if (webFile):
             indiciesOfSubstitutes = self.getIndiciesOfSubstitutes(fileName)
@@ -274,11 +273,11 @@ class FileFuzzerService(Common):
             unnumberedFuzz = self.getUnnumberedFuzz(contentType)
             self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestBody, webFile.setContentType)
 
-          self.updateLocatorData(indiciesOfSubstitutes, existingIndicies, fuzzLocator, aVIKey)
+          self.updateLocatorData(indiciesOfSubstitutes, existingIndicies, fuzzLocator, requestBodyKey)
           request.setRequestBody(requestBody)
 
   def parseFile(self, fileFuzzerArgs):  # type: (FileFuzzerArgs) -> None
-    inputFile = open(fileFuzzerArgs.inputFile, LR)
+    inputFile = open(fileFuzzerArgs.getInputFile(), LR)
     inptFileLines = inputFile.readlines()
 
     self.setFields(inptFileLines)

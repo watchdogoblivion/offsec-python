@@ -8,37 +8,37 @@ from watchdogs.utils.Constants import (EMPTY)
 
 class LocatorDatum(Common):
 
-  def __init__(self):
+  def __init__(self, indexOfSubstitute=-1, isInfo=False, headerKey=EMPTY, bodyKey=EMPTY):
+    #type: (int, bool, str, str) -> None
     super(LocatorDatum, self).__init__()
-    # self._locatorKey = EMPTY  #type: str
-    self._indexOfSubstitute = -1  #type: int
-    self._isInfo = False
-    self._headerKey = EMPTY
-    self._bodyKey = EMPTY
+    self.__indexOfSubstitute = indexOfSubstitute
+    self.__isInfo = isInfo
+    self.__headerKey = headerKey
+    self.__bodyKey = bodyKey
 
-  def getIndexOfSubstitute(self):  #type: (LocatorDatum) -> int
-    return getattr(self, "_indexOfSubstitute")
+  def getIndexOfSubstitute(self):  #type: () -> int
+    return self.__indexOfSubstitute
 
-  def setIndexOfSubstitute(self, value):  #type: (LocatorDatum, int) -> None
-    setattr(self, "_indexOfSubstitute", value)
+  def setIndexOfSubstitute(self, indexOfSubstitute):  #type: (int) -> None
+    self.__indexOfSubstitute = indexOfSubstitute
 
   def isInfo(self):  #type: () -> bool
-    return self._isInfo
+    return self.__isInfo
 
   def setIsInfo(self, isInfo):  #type: (bool) -> None
-    self._isInfo = isInfo
+    self.__isInfo = isInfo
 
   def getHeaderKey(self):  #type: () -> str
-    return self._headerKey
+    return self.__headerKey
 
   def setHeaderKey(self, headerKey):  #type: (str) -> None
-    self._headerKey = headerKey
+    self.__headerKey = headerKey
 
   def getBodyKey(self):  #type: () -> str
-    return self._bodyKey
+    return self.__bodyKey
 
   def setBodyKey(self, bodyKey):  #type: (str) -> None
-    self._bodyKey = bodyKey
+    self.__bodyKey = bodyKey
 
 
 class VariantLocator(Common):
@@ -46,31 +46,31 @@ class VariantLocator(Common):
   def __init__(self, locatorData=[], isInfo=False, isHeaders=False, isBody=False):
     #type: (list[LocatorDatum], bool,bool,bool) -> None
     super(VariantLocator, self).__init__()
-    self._locatorData = locatorData
-    self._isInfo = isInfo
-    self._isHeaders = isHeaders
-    self._isBody = isBody
+    self.__locatorData = locatorData
+    self.__isInfo = isInfo
+    self.__isHeaders = isHeaders
+    self.__isBody = isBody
 
-  def getLocatorData(self):  #type: (VariantLocator) -> list[LocatorDatum]
-    return getattr(self, "_locatorData")
+  def getLocatorData(self):  #type: () -> list[LocatorDatum]
+    return self.__locatorData
 
-  def setLocatorData(self, value):  #type: (VariantLocator, list[LocatorDatum]) -> None
-    setattr(self, "_locatorData", value)
+  def setLocatorData(self, locatorData):  #type: (list[LocatorDatum]) -> None
+    self.__locatorData = locatorData
 
   def isInfo(self):  #type: () -> bool
-    return self._isInfo
+    return self.__isInfo
 
   def setIsInfo(self, isInfo):  #type: (bool) -> None
-    self._isInfo = isInfo
+    self.__isInfo = isInfo
 
   def isHeader(self):  #type: () -> bool
-    return self._isHeaders
+    return self.__isHeaders
 
   def setIsHeader(self, isHeader):  #type: (bool) -> None
-    self._isHeaders = isHeader
+    self.__isHeaders = isHeader
 
   def isBody(self):  #type: () -> bool
-    return self._isBody
+    return self.__isBody
 
   def setIsBody(self, isBody):  #type: (bool) -> None
-    self._isBody = isBody
+    self.__isBody = isBody

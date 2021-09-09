@@ -16,14 +16,20 @@ class OracleCredConverterArgs(FileArgs, Common):
   LU = "lu"
   LL = "ll"
 
-  def __init__(self):
+  def __init__(self, conversion=EMPTY):  #type: (str) -> None
     super(OracleCredConverterArgs, self).__init__()
-    self.conversion = EMPTY  #type: str
+    self.conversion = conversion
 
     self.parseArgs()
     self.setArguments()
 
-  def getConversions(self):  #type: (OracleCredConverterArgs) -> str
+  def getConversion(self):  #type: () -> str
+    return self.conversion
+
+  def setConversion(self, conversion):  #type: (str) -> None
+    self.conversion = conversion
+
+  def getConversions(self):  #type: () -> str
     uppered = "uppered"
     lowered = "lowered"
     base = "  {}   : First word {} and second word {}{}"
@@ -35,15 +41,15 @@ class OracleCredConverterArgs(FileArgs, Common):
     conversions += base.format(OracleCredConverterArgs.LL, lowered, lowered, LFN)
     return conversions
 
-  def parseArgs(self):  #type: (OracleCredConverterArgs) -> None
+  def parseArgs(self):  #type: () -> None
     C_HELP = "Specify the conversion type."
     LC_HELP = "Conversion types."
     V_HELP = "Show version"
     CONVERSIONS = self.getConversions()
     VERSION = " Oracle Credentials Converter version: {}".format(OracleCredConverterArgs.VERSION)
 
-    parser = self.parser
+    parser = self.getParser()
     parser.add_argument("-c", "--conversion", help=C_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-lc", "--list-conversions", action="version", help=LC_HELP, version=CONVERSIONS)
     parser.add_argument("-v", "--version", action="version", help=V_HELP, version=VERSION)
-    self.parsedArgs = parser.parse_args()
+    self.setParsedArgs(parser.parse_args())

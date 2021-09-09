@@ -12,8 +12,17 @@ from watchdogs.io.services.EncodingViewerService import EncodingViewerService
 class EncodingViewerScript(Common):
 
   def __init__(self, encodingViewerService=EncodingViewerService()):
+    #type: (EncodingViewerService) -> None
     super(EncodingViewerScript, self).__init__()
-    self.encodingViewerService = encodingViewerService  #type: EncodingViewerService
+    self.__encodingViewerService = encodingViewerService
+
+  def getEncodingViewerService(self):
+    #type: () -> EncodingViewerService
+    return self.__encodingViewerService
+
+  def setEncodingViewerService(self, __encodingViewerService):
+    #type: (EncodingViewerService) -> None
+    self.__encodingViewerService = __encodingViewerService
 
   def run(self):  #type: (EncodingViewerScript) -> None
     eViewerArgs = EncodingViewerArgs()
@@ -22,7 +31,7 @@ class EncodingViewerScript(Common):
       eViewerService.outputEncoding(eViewerArgs)
     except ValueError as ve:
       print(ve)
-      print(eViewerArgs.parser.print_usage())
+      print(eViewerArgs.getParser().print_usage())
     except Exception:
       print(traceback.format_exc())
-      print(eViewerArgs.parser.print_usage())
+      print(eViewerArgs.getParser().print_usage())

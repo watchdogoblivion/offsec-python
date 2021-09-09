@@ -12,20 +12,20 @@ from watchdogs.utils.Constants import (LFN, FS, LR, V1, V2, V3)
 
 class FileEncoderService(FileService, Common):
 
-  def __init__(self):
+  def __init__(self):  #type: () -> None
     super(FileEncoderService, self).__init__()
 
-  def readLines(self, fileEncoderArgs):  #type: (FileEncoderService, FileEncoderArgs) -> None
-    openedFile = open(fileEncoderArgs.inputFile, LR)
+  def readLines(self, fileEncoderArgs):  #type: (FileEncoderArgs) -> None
+    openedFile = open(fileEncoderArgs.getInputFile(), LR)
     lines = openedFile.readlines()
     linesLength = len(lines)
     encodedLines = []
 
     for index in range(linesLength):
       encoded = lines[index].rstrip()
-      urlEncode = fileEncoderArgs.urlEncode
+      urlEncode = fileEncoderArgs.getUrlEncode()
 
-      if (fileEncoderArgs.b64Encode):
+      if (fileEncoderArgs.isB64Encode()):
         encoded = base64.b64encode(encoded)
 
       if (urlEncode == V1):
@@ -40,4 +40,4 @@ class FileEncoderService(FileService, Common):
       else:
         encodedLines.append(encoded + LFN)
 
-    self.file.lines = encodedLines
+    self.getFile().setLines(encodedLines)

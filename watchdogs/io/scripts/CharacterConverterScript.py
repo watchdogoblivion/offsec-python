@@ -12,8 +12,17 @@ from watchdogs.io.services.CharacterConverterService import CharacterConverterSe
 class CharacterConverterScript(Common):
 
   def __init__(self, characterConverterService=CharacterConverterService()):
+    #type: (CharacterConverterService) -> None
     super(CharacterConverterScript, self).__init__()
-    self.characterConverterService = characterConverterService  #type: CharacterConverterService
+    self.__characterConverterService = characterConverterService
+
+  def getCharacterConverterService(self):
+    #type: () -> CharacterConverterService
+    return self.__characterConverterService
+
+  def setCharacterConverterService(self, characterConverterService):
+    #type: (CharacterConverterService) -> None
+    self.__characterConverterService = characterConverterService
 
   def run(self):  #type: (CharacterConverterScript) -> None
     cConverterArgs = CharacterConverterArgs()
@@ -26,7 +35,7 @@ class CharacterConverterScript(Common):
         cConverterService.printLines()
     except ValueError as ve:
       print(ve)
-      print(cConverterArgs.parser.print_usage())
+      print(cConverterArgs.getParser().print_usage())
     except Exception:
       print(traceback.format_exc())
-      print(cConverterArgs.parser.print_usage())
+      print(cConverterArgs.getParser().print_usage())

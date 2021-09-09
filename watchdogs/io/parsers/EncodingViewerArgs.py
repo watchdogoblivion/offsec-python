@@ -38,22 +38,34 @@ class EncodingViewerArgs(FileArgs, Common):
                            (96, 'string-escape'), (97, 'undefined'), (98, 'unicode-escape'),
                            (99, 'unicode-internal'), (100, 'uu-codec'), (101, 'zlib-codec')])
 
-  def __init__(self):
+  def __init__(self, encodeFrom=-1, encodeTo=65):  #type: (int, int) -> None
     super(EncodingViewerArgs, self).__init__()
-    self.encodeFrom = -1  #type: int
-    self.encodeTo = 85  #type: int
+    self.encodeFrom = encodeFrom
+    self.encodeTo = encodeTo
 
     self.parseArgs()
     self.setArguments()
 
-  def getEncodings(self):  #type: (EncodingViewerArgs) -> str
+  def getEncodeFrom(self):  #type: () -> int
+    return self.encodeFrom
+
+  def setEncodeFrom(self, encodeFrom):  #type: (int) -> None
+    self.encodeFrom = encodeFrom
+
+  def getEncodeTo(self):  #type: () -> int
+    return self.encodeTo
+
+  def setEncodeTo(self, encodeTo):  #type: (int) -> None
+    self.encodeTo = encodeTo
+
+  def getEncodings(self):  #type: () -> str
     encodings = EncodingViewerArgs.ENCODINGS
     encodingString = "Encodings:" + LFN
     for encodingsKey, encodingsValue in encodings.items():
       encodingString += "  {}) {}{}".format(encodingsKey, encodingsValue, LFN)
     return encodingString
 
-  def parseArgs(self):  #type: (EncodingViewerArgs) -> None
+  def parseArgs(self):  #type: () -> None
     EF_HELP = ("The encoding type to encode from. This value must be a numerical value from the encoding"
                " list.")
     ET_HELP = ("The encoding type to encode to. This value must be a numerical value from the encoding"
@@ -63,10 +75,10 @@ class EncodingViewerArgs(FileArgs, Common):
     ENCODINGS = self.getEncodings()
     VERSION = "Encoding Viewer version: {}".format(EncodingViewerArgs.VERSION)
 
-    parser = self.parser
+    parser = self.getParser()
     required = parser.add_argument_group("Required arguments")
     required.add_argument("-ef", "--encode-from", required=True, help=EF_HELP, type=int, metavar=EMPTY)
     parser.add_argument("-et", "--encode-to", help=ET_HELP, type=int, metavar=EMPTY, default=85)
     parser.add_argument("-le", "--list-encodings", action="version", help=LE_HELP, version=ENCODINGS)
     parser.add_argument("-v", "--version", action="version", help=V_HELP, version=VERSION)
-    self.parsedArgs = parser.parse_args()
+    self.setParsedArgs(parser.parse_args())

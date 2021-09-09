@@ -12,13 +12,21 @@ from watchdogs.io.services.OracleCredConverterService import OracleCredConverter
 class OracleCredConverterScript(Common):
 
   def __init__(self, oracleCredConverterService=OracleCredConverterService()):
+    #type: (OracleCredConverterService) -> None
     super(OracleCredConverterScript, self).__init__()
-    self.oracleCredConverterService = oracleCredConverterService  #type: OracleCredConverterService
+    self.__oracleCredConverterService = oracleCredConverterService
+
+  def getOracleCredConverterService(self):
+    #type: () -> OracleCredConverterService
+    return self.__oracleCredConverterService
+
+  def setOracleCredConverterService(self, __oracleCredConverterService):
+    #type: (OracleCredConverterService) -> None
+    self.__oracleCredConverterService = __oracleCredConverterService
 
   def run(self):  #type: (OracleCredConverterScript) -> None
     oracleCredConverterArgs = OracleCredConverterArgs()
     oCredConverterService = OracleCredConverterService()
-
     try:
       oCredConverterService.readLines(oracleCredConverterArgs)
       if oracleCredConverterArgs.outputFile:
@@ -27,7 +35,7 @@ class OracleCredConverterScript(Common):
         oCredConverterService.printLines()
     except ValueError as ve:
       print(ve)
-      print(oracleCredConverterArgs.parser.print_usage())
+      print(oracleCredConverterArgs.getParser().print_usage())
     except Exception:
       print(traceback.format_exc())
-      print(oracleCredConverterArgs.parser.print_usage())
+      print(oracleCredConverterArgs.getParser().print_usage())

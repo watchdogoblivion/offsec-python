@@ -10,16 +10,15 @@ from watchdogs.utils.Constants import (EMPTY, FS, LR)
 
 class OracleCredConverterService(FileService, Common):
 
-  def __init__(self):
+  def __init__(self):  #type: () -> None
     super(OracleCredConverterService, self).__init__()
-    self.conversion = EMPTY  #type: str
 
   def readLines(self, oracleCredConverterArgs):
-    #type: (OracleCredConverterService, OracleCredConverterArgs) -> None
-    openedFile = open(oracleCredConverterArgs.inputFile, LR)
+    #type: (OracleCredConverterArgs) -> None
+    openedFile = open(oracleCredConverterArgs.getInputFile(), LR)
     fileLines = openedFile.readlines()
     delimiter = FS
-    conversion = oracleCredConverterArgs.conversion
+    conversion = oracleCredConverterArgs.getConversion()
     linesRead = []
 
     for fileLine in fileLines:
@@ -35,4 +34,4 @@ class OracleCredConverterService(FileService, Common):
         line = "{}{}{}".format(fileLineWords[0].lower(), delimiter, fileLineWords[1].lower())
 
       linesRead.append(line)
-    self.file.lines = linesRead
+    self.getFile().setLines(linesRead)

@@ -16,6 +16,12 @@ class FileFuzzerScript(Common):
     super(FileFuzzerScript, self).__init__()
     self.__fileFuzzerService = fileFuzzerService
 
+  def getFileFuzzerService(self):  #type: () -> FileFuzzerService
+    return self.__fileFuzzerService
+
+  def setFileFuzzerService(self, fileFuzzerService):  #type: (FileFuzzerService) -> None
+    self.__fileFuzzerService = fileFuzzerService
+
   def run(self):  #type: () -> None
     fFuzzerArgs = FileFuzzerArgs()
     fFuzzerService = self.__fileFuzzerService
@@ -24,7 +30,7 @@ class FileFuzzerScript(Common):
       fFuzzerService.processRequest(fFuzzerArgs)
     except ValueError as ve:
       print(ve)
-      print(fFuzzerArgs.parser.print_usage())
+      print(fFuzzerArgs.getParser().print_usage())
     except Exception:
       print(traceback.format_exc())
-      print(fFuzzerArgs.parser.print_usage())
+      print(fFuzzerArgs.getParser().print_usage())

@@ -8,7 +8,7 @@ from typing import Any
 
 class Common(object):
 
-  def __init__(self):
+  def __init__(self):  #type: () -> None
     super(Common, self).__init__()
 
   def prepForDump(self, obj):  #type: (Any) -> Any
@@ -18,8 +18,8 @@ class Common(object):
     else:
       return str(obj)
 
-  def __str__(self):  #type: (Common) -> str
+  def __str__(self):  #type: () -> str
     return json.dumps(self, default=lambda obj: self.prepForDump(obj))
 
-  def __repr__(self):  #type: (Common) -> str
+  def __repr__(self):  #type: () -> str
     return json.dumps(self, default=lambda obj: self.prepForDump(obj))
