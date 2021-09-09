@@ -17,15 +17,20 @@ from watchdogs.web.models import FileFuzzer
 from watchdogs.web.parsers import FileFuzzerArgs
 from watchdogs.web.models.WebFile import WebFile
 from watchdogs.web.models.Locators import (VariantLocator, LocatorDatum)
-from watchdogs.utils.Constants import (EMPTY, COLON, EQUAL, SEMI_COLON, LFN, BOUNDARY, DASH, SPACE,
-                                       CONTENT_DISPOSITION, CONTENT_TYPE, FILE_NAME, DOUBLE_QUOTE, NAME, RB,
-                                       FUZZ, SONE, REGEX_SUB, LR, LFRN, HTTP, HTTP_PROTOCOL, HTTPS_PROTOCOL,
-                                       HTTPS, HTML_PARSER, CONTENT_LENGTH, UTF8)
+from watchdogs.utils.Constants import (EMPTY, LFN, LFR, SPACE, CONTENT_DISPOSITION, CONTENT_TYPE, FILE_NAME,
+                                       RB, FUZZ, SONE, REGEX_SUB, LR, LFRN, HTTP, HTTP_PROTOCOL,
+                                       HTTPS_PROTOCOL, HTTPS, HTML_PARSER, CONTENT_LENGTH, UTF8)
 
 
 class FileFuzzerService(Common):
 
   VERSION = "1.0"
+
+  BOUNDARY_REGEX = r'boundary=([-a-zA-Z0-9]*)(?:$| )'
+  KEY_REGEX = r'([-a-zA-Z0-9]+):'
+  VALUE_REGEX = r':(.*)'
+  NAME_REGEX = r' name="([^"]*)'
+  FILENAME_REGEX = r' filename="([^"]*)'
   UNNUMBERED_REGEX = r'(?:FUZZ)($|[^0-9])'
   NUMBERED_REGEX = r'FUZZ([0-9]+)'
   DUPLICATE_MESSAGE = "INFO: Duplicate FUZZ keys detected. Note: FUZZ is treated as FUZZ1"
@@ -34,43 +39,42 @@ class FileFuzzerService(Common):
     super(FileFuzzerService, self).__init__()
     self.__fileFuzzer = fileFuzzer
 
-  def setBoundary(self, fileLine, boundaryString):  #type: (str,str) -> None
-    request = self.__fileFuzzer.getRequest()
-    equalsIndex = fileLine.find(EQUAL, fileLine.find(boundaryString))
-    semiColonIndex = fileLine.find(SEMI_COLON, equalsIndex)
-    lineFeedIndex = fileLine.find(LFN)
-    if (semiColonIndex > -1):
-      request.setRequestBoundary(fileLine[equalsIndex + 1:semiColonIndex])
-    elif (lineFeedIndex > -1):
-      request.setRequestBoundary(fileLine[equalsIndex + 1:lineFeedIndex])
-    else:
-      request.setRequestBoundary(fileLine[equalsIndex + 1:])
+  def setBoundary(self, fileLine):  #type: (str) -> bool
+    matchedBoundary = re.search(FileFuzzerService.BOUNDARY_REGEX, fileLine)
+    if (matchedBoundary):
+      self.__fileFuzzer.getRequest().setRequestBoundary(matchedBoundary.group(1))
+      return True
+    return False
+
+  def isLineFeed(self, string):  #type: (str) -> bool
+    return string == LFN or string == LFR
 
   def setFields(self, fileLines):  #type: (str) -> None
+    fileLinesLength = len(fileLines)
+    index = 0
     request = self.__fileFuzzer.getRequest()
     rawValue = EMPTY
     isBody = False
-    fileLinesLength = len(fileLines)
-    index = 0
+    boundarySet = False
 
     while (index < fileLinesLength):
-      fileLine = fileLines[index].rstrip()
-      boundaryString = BOUNDARY + EQUAL + DASH + DASH
-      if (boundaryString in fileLine):
-        self.setBoundary(fileLine, boundaryString)
+      fileLine = fileLines[index]
+      isLastIndex = index + 1 == fileLinesLength
+
+      if (not boundarySet):
+        boundarySet = self.setBoundary(fileLine)
       if (index == 0):
         request.setRawInfo(fileLine)
         index += 1
         continue
-      elif ((fileLine == EMPTY and not isBody) or (index + 1 == fileLinesLength and not isBody)):
+      elif ((self.isLineFeed(fileLine) and not isBody) or (isLastIndex and not isBody)):
         isBody = True
         request.setRawHeaders(rawValue)
         rawValue = EMPTY
-      elif (index + 1 == fileLinesLength):
+      elif (isLastIndex):
         rawValue += fileLine + LFN
         request.setRawBody(rawValue)
         index += 1
-        break
 
       rawValue += fileLine + LFN
       index += 1
@@ -91,63 +95,69 @@ class FileFuzzerService(Common):
   def parseHeaders(self):  #type: () -> None
     request = self.__fileFuzzer.getRequest()
     requestHeaders = request.getRequestHeaders()
-
-    rawHeaders = request.getRawHeaders()
-    rawHeadersSplit = rawHeaders.rstrip().split(LFN)
+    rawHeadersSplit = request.getRawHeaders().rstrip().split(LFN)
 
     for rawHeader in rawHeadersSplit:
-      colonIndex = rawHeader.find(COLON)
-      headerKey = rawHeader[0:colonIndex]
-      headerValue = rawHeader[colonIndex + 1:].strip()
+      matchedKey = re.search(FileFuzzerService.KEY_REGEX, rawHeader)
+      if (not matchedKey):
+        continue
+
+      matchedValue = re.search(FileFuzzerService.VALUE_REGEX, rawHeader)
+      if (not matchedValue):
+        continue
+
+      headerKey = matchedKey.group(1)
+      headerValue = matchedValue.group(1).strip()
       requestHeaders[headerKey] = headerValue
 
     request.setRequestHeaders(requestHeaders)
 
+  def getRawBodyFiltered(self):  #type: () -> list[str]
+    request = self.__fileFuzzer.getRequest()
+    rawBodyLines = request.getRawBody().split(LFN)
+    requestBoundary = request.getRequestBoundary()
+    filteredLines = []
+    for rawBodyLine in rawBodyLines:
+      if (rawBodyLine and not requestBoundary in rawBodyLine):
+        filteredLines.append(rawBodyLine)
+    return filteredLines
+
   def parseBody(self, fileFuzzerArgs):  #type: (FileFuzzerArgs) -> None
     request = self.__fileFuzzer.getRequest()
     if (fileFuzzerArgs.postFile):
-      rawBodyLines = [
-          (l) for l in request.getRawBody().split(LFN) if l and not request.getRequestBoundary() in l
-      ]
+      rawBodyLines = self.getRawBodyFiltered()
       rawBodyLinesLength = len(rawBodyLines)
 
       for lineIndex in range(rawBodyLinesLength):
-        cd = CONTENT_DISPOSITION + COLON
-        ct = CONTENT_TYPE + COLON
-        fn = FILE_NAME + EQUAL + DOUBLE_QUOTE
-        n = NAME + EQUAL + DOUBLE_QUOTE
         rawBodyLine = rawBodyLines[lineIndex]
-        startName = rawBodyLine.find(DOUBLE_QUOTE, rawBodyLine.find(n))
-        endName = rawBodyLine.find(DOUBLE_QUOTE, startName + 1)
         requestBody = request.getRequestBody()
 
-        if (fn in rawBodyLine):
-          name = rawBodyLine[startName + 1:endName]
-          startFileName = rawBodyLine.find(DOUBLE_QUOTE, rawBodyLine.find(fn))
-          endFileName = rawBodyLine.find(DOUBLE_QUOTE, startFileName + 1)
-          fileName = rawBodyLine[startFileName + 1:endFileName]
+        if (FILE_NAME in rawBodyLine):
+          nameValue = re.search(FileFuzzerService.NAME_REGEX, rawBodyLine).group(1)
+          fileNameValue = re.search(FileFuzzerService.FILENAME_REGEX, rawBodyLine).group(1)
           contentTypeValue = None
-          if (ct in rawBodyLines[lineIndex + 1]):
-            contentType = rawBodyLines[lineIndex + 1]
-            contentTypeValue = contentType[contentType.find(COLON) + 1:]
-          webFile = (fileName, open(fileFuzzerArgs.postFile, RB), contentTypeValue)
-          requestBody[name] = WebFile(webFile)
-        elif (cd in rawBodyLine):
-          name = rawBodyLine[startName + 1:endName]
-          rawValue = EMPTY
-          i = lineIndex + 1
+          nextLine = rawBodyLines[lineIndex + 1]
+          if (CONTENT_TYPE in nextLine):
+            contentTypeValue = re.search(FileFuzzerService.VALUE_REGEX, nextLine).group(1)
+          webFile = (fileNameValue, open(fileFuzzerArgs.postFile, RB), contentTypeValue)
+          requestBody[nameValue] = WebFile(webFile)
+        elif (CONTENT_DISPOSITION in rawBodyLine):
+          nameValue = re.search(FileFuzzerService.NAME_REGEX, rawBodyLine).group(1)
+          dispositionValue = EMPTY
+          nextIndex = lineIndex + 1
           while (True):
-            rawValue += rawBodyLines[i]
+            dispositionValue += rawBodyLines[nextIndex]
             nextLine = EMPTY
-            if (i + 1 < rawBodyLinesLength):
-              nextLine = rawBodyLines[i + 1]
-            if (i + 1 == rawBodyLinesLength or cd in nextLine):
-              requestBody[name] = rawValue
+            nextIndex += 1
+            if (nextIndex < rawBodyLinesLength):
+              nextLine = rawBodyLines[nextIndex]
+            if (nextIndex == rawBodyLinesLength or CONTENT_DISPOSITION in nextLine):
+              requestBody[nameValue] = dispositionValue
               break
         request.setRequestBody(requestBody)
       if (not request.getRequestBody()):
         print(
-            "Could not parse thw post file specified. Please ensure that the -pf flag is being used with"
+            "Could not parse the post file specified. Please ensure that the -pf flag is being used with"
             " a proper file upload request. If the attempted request is not a file upload, then remove the -pf"
             " flag to send JSON or standard form data.")
         exit()
@@ -155,18 +165,16 @@ class FileFuzzerService(Common):
       request.setRequestBody(request.getRawBody())
 
   def getIndiciesOfSubstitutes(self, *fuzzWords):  # type: (str) -> list[int]
-    numberedRegex = FileFuzzerService.NUMBERED_REGEX
     stringIndicies = []
     for fuzzWord in fuzzWords:
       if fuzzWord:
-        stringIndicies += re.findall(numberedRegex, fuzzWord)
+        stringIndicies += re.findall(FileFuzzerService.NUMBERED_REGEX, fuzzWord)
     indiciesOfSubstitutes = map(int, stringIndicies)
     return indiciesOfSubstitutes
 
   def getUnnumberedFuzz(self, *fuzzWords):  # type: (str) -> str
-    unnumberedRegex = FileFuzzerService.UNNUMBERED_REGEX
     for fuzzWord in fuzzWords:
-      unnumberedArray = re.findall(unnumberedRegex, fuzzWord)
+      unnumberedArray = re.findall(FileFuzzerService.UNNUMBERED_REGEX, fuzzWord)
       if unnumberedArray:
         if (len(unnumberedArray) > 1):
           print(FileFuzzerService.DUPLICATE_MESSAGE)
@@ -176,8 +184,8 @@ class FileFuzzerService(Common):
                        requestKey=None):
     #type: (str, list[int], Any, Callable, str) -> None
     if unnumberedFuzz:
-      unnumberedRegex = FileFuzzerService.UNNUMBERED_REGEX
-      newValue = re.sub(unnumberedRegex, FUZZ + SONE + REGEX_SUB, unnumberedFuzz)
+      UNNUMBERED_REGEX = FileFuzzerService.UNNUMBERED_REGEX
+      newValue = re.sub(UNNUMBERED_REGEX, FUZZ + SONE + REGEX_SUB, unnumberedFuzz)
       indiciesOfSubstitutes.append(1)
       if (type(requestObject) == OrderedDict and requestKey):
         requestObject[requestKey] = newValue
