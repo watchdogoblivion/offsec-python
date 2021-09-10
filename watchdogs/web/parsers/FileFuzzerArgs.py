@@ -2,16 +2,13 @@
 # description: TODO
 # WatchDogs File Fuzzer Arguments
 
-import argparse
-
-from watchdogs.io.parsers import FileArgs
-from watchdogs.base.models import Common
+from watchdogs.base.models import Args
 from watchdogs.utils.Constants import (EMPTY, COLON)
 
 
-class FileFuzzerArgs(FileArgs, Common):
+class FileFuzzerArgs(Args):
 
-  VERSION = "1.0"
+  VERSION = "File Fuzzer version: 1.0"
 
   def __init__(self):
     super(FileFuzzerArgs, self).__init__()
@@ -32,24 +29,18 @@ class FileFuzzerArgs(FileArgs, Common):
     self.showResponse = False  #type: bool
     self.showSubstitutes = False  #type: bool
 
-    self.parseArgs()
-    self.setArguments()
+  def getVersion(self):  #type: () -> str
+    return FileFuzzerArgs.VERSION
 
-  def parseArgs(self):  #type: (FileFuzzerArgs) -> None
+  def addArguments(self):  #type: () -> FileFuzzerArgs
     RH_HELP = "Explictly specify the remote host."
-    IF_HELP = (
-        "Specify the input file to read from.\nWhen executing POST, always ensure there is a new line"
-        " feed separating the body from the headers.\nIf fuzzing, the file must include exactly 1 'FUZZ'"
-        " keyword.")
     S_HELP = "Specifies https."
-    OF_HELP = "Specify the output file to write to."
-    PF_HELP = (
-        "Specify a file to send in a POST request. This flag is for file uploads only and should not be"
-        " used for other POST requests")
+    PF_HELP = ("Specify a file to send in a POST request."
+               "\nThis flag is for file uploads only and should not be used for other POST requests")
     SS_HELP = ("Specify the file which contains the words that will be used as substitutions for the 'FUZZ'"
                " words. If this is not specified, no fuzzing will occur")
-    SD_HELP = ("Specify the delimiter used to separate the words in the substitutes file. The default is a"
-               " colon")
+    SD_HELP = ("Specify the delimiter used to separate the words in the substitutes file."
+               "\nThe default is a colon")
     HP_HELP = "Specify a proxy."
     SP_HELP = "Specify an ssl proxy"
     DV_HELP = "For https proxies, this flag will disable cert verification."
@@ -60,17 +51,11 @@ class FileFuzzerArgs(FileArgs, Common):
     FO_HELP = "Filters out and removes the responses with the specified text"
     SR_HELP = "Shows the response body"
     SS_HELP = "Shows the fuzz substituted text used in the request"
-    V_HELP = "Show version"
-    H_HELP = "Show this help message"
-    VERSION = "File Fuzzer version: {}".format(FileFuzzerArgs.VERSION)
 
-    self.setParser(argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter))
     parser = self.getParser()
     required = parser.add_argument_group("Required arguments")
     required.add_argument("-rh", "--remote-host", required=True, help=RH_HELP, type=str, metavar="127.0.0.1")
-    required.add_argument("-if", "--input-file", required=True, help=IF_HELP, type=str, metavar="request.txt")
     parser.add_argument("-s", "--secure", action="store_true", help=S_HELP)
-    parser.add_argument("-of", "--output-file", help=OF_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-pf", "--post-file", help=PF_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-sf", "--substitutes-file", help=SS_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-sd", "--substitutes-delimiter", help=SD_HELP, type=str, metavar=EMPTY,
@@ -85,6 +70,5 @@ class FileFuzzerArgs(FileArgs, Common):
     parser.add_argument("-fo", "--filter-out", help=FO_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-sr", "--show-response", action="store_true", help=SR_HELP)
     parser.add_argument("-ss", "--show-substitutes", action="store_true", help=SS_HELP)
-    parser.add_argument("-v", "--version", action="version", help=V_HELP, version=VERSION)
-    parser.add_argument("-h", "--help", action="help", help=H_HELP)
-    self.setParsedArgs(parser.parse_args())
+
+    return self

@@ -4,14 +4,13 @@
 
 from collections import OrderedDict
 
-from watchdogs.base.models.Common import Common
-from watchdogs.io.parsers import FileArgs
+from watchdogs.base.models.Args import Args
 from watchdogs.utils.Constants import (EMPTY, LFN)
 
 
-class EncodingViewerArgs(FileArgs, Common):
+class EncodingViewerArgs(Args):
 
-  VERSION = "1.0"
+  VERSION = "Encoding Viewer version: 1.0"
 
   ENCODINGS = OrderedDict([(1, 'ascii'), (2, 'big5'), (3, 'big5hkscs'), (4, 'cp037'), (5, 'cp424'),
                            (6, 'cp437'), (7, 'cp500'), (8, 'cp737'), (9, 'cp775'),
@@ -43,9 +42,6 @@ class EncodingViewerArgs(FileArgs, Common):
     self.encodeFrom = encodeFrom
     self.encodeTo = encodeTo
 
-    self.parseArgs()
-    self.setArguments()
-
   def getEncodeFrom(self):  #type: () -> int
     return self.encodeFrom
 
@@ -65,20 +61,22 @@ class EncodingViewerArgs(FileArgs, Common):
       encodingString += "  {}) {}{}".format(encodingsKey, encodingsValue, LFN)
     return encodingString
 
-  def parseArgs(self):  #type: () -> None
-    EF_HELP = ("The encoding type to encode from. This value must be a numerical value from the encoding"
-               " list.")
-    ET_HELP = ("The encoding type to encode to. This value must be a numerical value from the encoding"
-               "list. Default is number 85 - utf-8")
+  def getVersion(self):  #type: () -> str
+    return EncodingViewerArgs.VERSION
+
+  def addArguments(self):  #type: () -> EncodingViewerArgs
+    EF_HELP = ("The encoding type to encode from."
+               "\nThis value must be a numerical value from the encoding list.")
+    ET_HELP = ("The encoding type to encode to."
+               "\nThis value must be a numerical value from the encoding list."
+               "\nThe default is number 85 - utf-8")
     LE_HELP = "Conversion types."
-    V_HELP = "Show version"
     ENCODINGS = self.getEncodings()
-    VERSION = "Encoding Viewer version: {}".format(EncodingViewerArgs.VERSION)
 
     parser = self.getParser()
     required = parser.add_argument_group("Required arguments")
     required.add_argument("-ef", "--encode-from", required=True, help=EF_HELP, type=int, metavar=EMPTY)
     parser.add_argument("-et", "--encode-to", help=ET_HELP, type=int, metavar=EMPTY, default=85)
     parser.add_argument("-le", "--list-encodings", action="version", help=LE_HELP, version=ENCODINGS)
-    parser.add_argument("-v", "--version", action="version", help=V_HELP, version=VERSION)
-    self.setParsedArgs(parser.parse_args())
+
+    return self

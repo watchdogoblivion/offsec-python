@@ -3,8 +3,10 @@
 # WatchDogs File Service
 
 import os
+from watchdogs.io.parsers.FileArgs import FileArgs
 
 from watchdogs.io.models.File import File
+from watchdogs.base.models import AllArgs
 from watchdogs.utils.Constants import (EMPTY, LFN, LW)
 
 
@@ -20,8 +22,9 @@ class FileService(object):
   def setFile(self, file):  #type: (File) -> None
     self.__file = file
 
-  def writeLines(self, outputFile):  #type: (str) -> None
+  def writeLines(self, allArgs):  #type: (AllArgs) -> None
     file = self.__file
+    outputFile = allArgs.getArgs(FileArgs).outputFile
     if not os.path.isfile(outputFile):
       print("File does not exist. Creating file in order to perform write operation.")
     openedFile = open(outputFile, LW)

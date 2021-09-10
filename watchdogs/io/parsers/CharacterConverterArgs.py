@@ -2,14 +2,14 @@
 # description: TODO
 # WatchDogs Character Converter Args
 
-from watchdogs.io.parsers import FileArgs
-from watchdogs.base.models import Common
+from watchdogs.base.models import Args
 from watchdogs.utils.Constants import (EMPTY)
 
 
-class CharacterConverterArgs(FileArgs, Common):
+class CharacterConverterArgs(Args):
 
-  VERSION = "1.0"
+  # VERSION = "1.0"
+  VERSION = "Character Converter version: 1.0"
 
   def __init__(self, oldChar=EMPTY, newChar=EMPTY, incrementLine=False, incrementWord=False, upper=False,
                lower=False):
@@ -21,9 +21,6 @@ class CharacterConverterArgs(FileArgs, Common):
     self.incrementWord = incrementWord
     self.upper = upper
     self.lower = lower
-
-    self.parseArgs()
-    self.setArguments()
 
   def getOldChar(self):  #type: () -> str
     return self.oldChar
@@ -61,15 +58,16 @@ class CharacterConverterArgs(FileArgs, Common):
   def setLower(self, lower):  #type: (bool) -> None
     self.lower = lower
 
-  def parseArgs(self):  #type: () -> None
+  def getVersion(self): #type: () -> str
+    return CharacterConverterArgs.VERSION
+
+  def addArguments(self):  #type: () -> CharacterConverterArgs
     OC_HELP = "Specify the character that will be replaced."
     NC_HELP = "Specify the character that will replace the old character."
     IL_HELP = "Specify if you want to increment the replaced character by line."
     IW_HELP = "Specify if you want to increment the replaced character by word."
     U_HELP = "Specify if you want to upper case all the characters."
     L_HELP = "Specify if you want to lower case all the characters."
-    V_HELP = "Show version"
-    VERSION = "Character Converter version: {}".format(CharacterConverterArgs.VERSION)
 
     parser = self.getParser()
     parser.add_argument("-oc", "--old-char", help=OC_HELP, type=str, metavar=EMPTY)
@@ -78,5 +76,5 @@ class CharacterConverterArgs(FileArgs, Common):
     parser.add_argument("-iw", "--increment-word", action="store_true", help=IW_HELP)
     parser.add_argument("-u", "--upper", action="store_true", help=U_HELP)
     parser.add_argument("-l", "--lower", action="store_true", help=L_HELP)
-    parser.add_argument("-v", "--version", action="version", help=V_HELP, version=VERSION)
-    self.setParsedArgs(parser.parse_args())
+
+    return self

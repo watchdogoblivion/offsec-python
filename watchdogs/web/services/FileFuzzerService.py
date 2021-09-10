@@ -11,7 +11,8 @@ from collections import OrderedDict
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 
 from watchdogs.utils import Cast
-from watchdogs.base.models import Common
+from watchdogs.base.models import AllArgs, Common
+from watchdogs.io.parsers.FileArgs import FileArgs
 from watchdogs.web.models import FileFuzzer
 from watchdogs.web.parsers import FileFuzzerArgs
 from watchdogs.web.models.WebFile import WebFile
@@ -276,8 +277,9 @@ class FileFuzzerService(Common):
           self.updateLocatorData(indiciesOfSubstitutes, existingIndicies, fuzzLocator, requestBodyKey)
           request.setRequestBody(requestBody)
 
-  def parseFile(self, fileFuzzerArgs):  # type: (FileFuzzerArgs) -> None
-    inputFile = open(fileFuzzerArgs.getInputFile(), LR)
+  def parseFile(self, allArgs):  # type: (AllArgs) -> None
+    fileFuzzerArgs = allArgs.getArgs(FileFuzzerArgs)
+    inputFile = open(allArgs.getArgs(FileArgs).getInputFile(), LR)
     inptFileLines = inputFile.readlines()
 
     self.setFields(inptFileLines)
@@ -449,7 +451,8 @@ class FileFuzzerService(Common):
       self.sendRequest(fileFuzzerArgs)
       request.resetRequestValues()
 
-  def processRequest(self, fileFuzzerArgs):  #type: (FileFuzzerArgs) -> None
+  def processRequest(self, allArgs):  #type: (AllArgs) -> None
+    fileFuzzerArgs = allArgs.getArgs(FileFuzzerArgs)
     allVariantsLocatorData = self.getAllVariantsLocatorData()
     if (len(allVariantsLocatorData) > 0):
       print("Fuzzing Request")

@@ -2,14 +2,13 @@
 # description: TODO
 # WatchDogs Oracle Credentials Converter Args
 
-from watchdogs.io.parsers import FileArgs
-from watchdogs.base.models.Common import Common
+from watchdogs.base.models.Args import Args
 from watchdogs.utils.Constants import (EMPTY, LFN)
 
 
-class OracleCredConverterArgs(FileArgs, Common):
+class OracleCredConverterArgs(Args):
 
-  VERSION = "1.0"
+  VERSION = "Oracle Credentials Converter version: 1.0"
 
   UU = "uu"
   UL = "ul"
@@ -19,9 +18,6 @@ class OracleCredConverterArgs(FileArgs, Common):
   def __init__(self, conversion=EMPTY):  #type: (str) -> None
     super(OracleCredConverterArgs, self).__init__()
     self.conversion = conversion
-
-    self.parseArgs()
-    self.setArguments()
 
   def getConversion(self):  #type: () -> str
     return self.conversion
@@ -41,15 +37,16 @@ class OracleCredConverterArgs(FileArgs, Common):
     conversions += base.format(OracleCredConverterArgs.LL, lowered, lowered, LFN)
     return conversions
 
-  def parseArgs(self):  #type: () -> None
+  def getVersion(self):  #type: () -> str
+    return OracleCredConverterArgs.VERSION
+
+  def addArguments(self):  #type: () -> OracleCredConverterArgs
     C_HELP = "Specify the conversion type."
     LC_HELP = "Conversion types."
-    V_HELP = "Show version"
     CONVERSIONS = self.getConversions()
-    VERSION = " Oracle Credentials Converter version: {}".format(OracleCredConverterArgs.VERSION)
 
     parser = self.getParser()
     parser.add_argument("-c", "--conversion", help=C_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-lc", "--list-conversions", action="version", help=LC_HELP, version=CONVERSIONS)
-    parser.add_argument("-v", "--version", action="version", help=V_HELP, version=VERSION)
-    self.setParsedArgs(parser.parse_args())
+
+    return self

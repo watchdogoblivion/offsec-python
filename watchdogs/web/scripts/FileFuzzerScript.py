@@ -4,8 +4,8 @@
 
 import traceback
 
-from watchdogs.base.models import Common
-from watchdogs.utils.Constants import (EMPTY, COLON)
+from watchdogs.io.parsers import FileArgs
+from watchdogs.base.models import Common, AllArgs
 from watchdogs.web.parsers import FileFuzzerArgs
 from watchdogs.web.services.FileFuzzerService import FileFuzzerService
 
@@ -23,11 +23,12 @@ class FileFuzzerScript(Common):
     self.__fileFuzzerService = fileFuzzerService
 
   def run(self):  #type: () -> None
-    fFuzzerArgs = FileFuzzerArgs()
+    allArgs = AllArgs([FileFuzzerArgs(), FileArgs()]).mergeAndProcess()
+    fFuzzerArgs = allArgs.getArgs(FileFuzzerArgs)
     fFuzzerService = self.__fileFuzzerService
     try:
-      fFuzzerService.parseFile(fFuzzerArgs)
-      fFuzzerService.processRequest(fFuzzerArgs)
+      fFuzzerService.parseFile(allArgs)
+      fFuzzerService.processRequest(allArgs)
     except ValueError as ve:
       print(ve)
       print(fFuzzerArgs.getParser().print_usage())

@@ -2,9 +2,9 @@
 # description: TODO
 # WatchDogs Character Converter Service
 
-from watchdogs.base.models import Common
+from watchdogs.base.models import AllArgs, Common
 from watchdogs.io.services.FileService import FileService
-from watchdogs.io.parsers import CharacterConverterArgs
+from watchdogs.io.parsers import CharacterConverterArgs, FileArgs
 from watchdogs.utils.Constants import (LR, SPACE)
 
 
@@ -13,8 +13,9 @@ class CharacterConverterService(FileService, Common):
   def __init__(self):  #type: () -> None
     super(CharacterConverterService, self).__init__()
 
-  def readLines(self, characterConverterArgs):  #type: (CharacterConverterArgs) -> None
-    openedFile = open(characterConverterArgs.getInputFile(), LR)
+  def readLines(self, allArgs):  #type: (AllArgs) -> None
+    characterConverterArgs = allArgs.getArgs(CharacterConverterArgs)
+    openedFile = open(allArgs.getArgs(FileArgs).getInputFile(), LR)
     fileLines = openedFile.readlines()
     increment = 1
     linesRead = []
@@ -29,7 +30,7 @@ class CharacterConverterService(FileService, Common):
           increment += 1
       elif (incrementWord and newChar):
         line = self.swapAndIncrementWord(characterConverterArgs, line, increment)
-      else:
+      elif (oldChar and newChar):
         line = line.replace(oldChar, newChar)
 
       if (characterConverterArgs.isUpper()):

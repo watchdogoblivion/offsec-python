@@ -3,15 +3,14 @@
 # WatchDogs File Encoder Script
 
 from collections import OrderedDict
-from watchdogs.base.models.Common import Common
-from watchdogs.io.parsers import FileArgs
 
+from watchdogs.base.models.Args import Args
 from watchdogs.utils.Constants import (LFN, EMPTY, V1, V2, V3)
 
 
-class FileEncoderArgs(FileArgs, Common):
+class FileEncoderArgs(Args):
 
-  VERSION = "1.0"
+  VERSION = "Character Converter version: 1.0"
 
   URL_ENCODING_OPTIONS = OrderedDict([
       (V1, "Encodes everything except forward slash '/'"),
@@ -23,9 +22,6 @@ class FileEncoderArgs(FileArgs, Common):
     super(FileEncoderArgs, self).__init__()
     self.b64Encode = b64Encode
     self.urlEncode = urlEncode
-
-    self.parseArgs()
-    self.setArguments()
 
   def isB64Encode(self):  #type: () -> bool
     return self.b64Encode
@@ -46,17 +42,18 @@ class FileEncoderArgs(FileArgs, Common):
       optionsString += "  {}) {}{}".format(optionsKey, optionsValue, LFN)
     return optionsString
 
-  def parseArgs(self):  #type: () -> None
+  def getVersion(self):  #type: () -> str
+    return FileEncoderArgs.VERSION
+
+  def addArguments(self):  #type: () -> FileEncoderArgs
     BE_HELP = "Specify if you want to perform base64 encoding. Enabled by default"
     UE_HELP = "Specify if you want to perform url encoding. Look at flag -uo/ue-options for arguments"
     UO_HELP = "Show url encoding options"
-    V_HELP = "Show version"
     ENCODINGS = "{}".format(self.getEncodingOptions())
-    VERSION = "Character Converter version: {}".format(FileEncoderArgs.VERSION)
 
     parser = self.getParser()
     parser.add_argument("-be", "--b64-encode", action="store_true", help=BE_HELP, default=False)
     parser.add_argument("-ue", "--url-encode", help=UE_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-uo", "--ue-options", action="version", help=UO_HELP, version=ENCODINGS)
-    parser.add_argument("-v", "--version", action="version", help=V_HELP, version=VERSION)
-    self.setParsedArgs(parser.parse_args())
+
+    return self

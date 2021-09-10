@@ -4,8 +4,8 @@
 
 import traceback
 
-from watchdogs.base.models.Common import Common
-from watchdogs.io.parsers import OracleCredConverterArgs
+from watchdogs.base.models import Common, AllArgs
+from watchdogs.io.parsers import OracleCredConverterArgs, FileArgs
 from watchdogs.io.services.OracleCredConverterService import OracleCredConverterService
 
 
@@ -25,12 +25,13 @@ class OracleCredConverterScript(Common):
     self.__oracleCredConverterService = __oracleCredConverterService
 
   def run(self):  #type: (OracleCredConverterScript) -> None
-    oracleCredConverterArgs = OracleCredConverterArgs()
+    allArgs = AllArgs([OracleCredConverterArgs(), FileArgs()]).mergeAndProcess()
+    oracleCredConverterArgs = allArgs.getArgs(OracleCredConverterArgs)
     oCredConverterService = OracleCredConverterService()
     try:
-      oCredConverterService.readLines(oracleCredConverterArgs)
-      if oracleCredConverterArgs.outputFile:
-        oCredConverterService.writeLines(oracleCredConverterArgs.outputFile)
+      oCredConverterService.readLines(allArgs)
+      if allArgs.getArgs(FileArgs).outputFile:
+        oCredConverterService.writeLines(allArgs)
       else:
         oCredConverterService.printLines()
     except ValueError as ve:

@@ -3,8 +3,9 @@
 # WatchDogs Encoding Viewer Service
 
 import os
-from watchdogs.io.parsers import EncodingViewerArgs
-from watchdogs.base.models.Common import Common
+
+from watchdogs.base.models import Common, AllArgs
+from watchdogs.io.parsers import EncodingViewerArgs, FileArgs
 from watchdogs.io.services.FileService import FileService
 
 
@@ -19,12 +20,15 @@ class EncodingViewerService(FileService, Common):
     redirectToFile = " > {}".format(outputFile)
     os.system(osCommand + redirectToFile)
 
-  def outputEncoding(self, encodingViewerArgs):  #type: (EncodingViewerArgs) -> None
+  def outputEncoding(self, allArgs):  #type: (AllArgs) -> None
+    encodingViewerArgs = allArgs.getArgs(EncodingViewerArgs)
+    fileArgs = allArgs.getArgs(FileArgs)
+
     encodings = EncodingViewerArgs.ENCODINGS
     encodeFrom = encodingViewerArgs.getEncodeFrom()
     encodeTo = encodingViewerArgs.getEncodeTo()
-    inputFile = encodingViewerArgs.getInputFile()
-    outputFile = encodingViewerArgs.getOutputFile()
+    inputFile = fileArgs.getInputFile()
+    outputFile = fileArgs.getOutputFile()
 
     osCommand = "iconv -f {} -t {}//translit {}"
     osCommand = osCommand.format(encodings[encodeFrom], encodings[encodeTo], inputFile)

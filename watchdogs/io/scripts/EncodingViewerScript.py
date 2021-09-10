@@ -4,8 +4,8 @@
 
 import traceback
 
-from watchdogs.base.models.Common import Common
-from watchdogs.io.parsers import EncodingViewerArgs
+from watchdogs.base.models import Common, AllArgs
+from watchdogs.io.parsers import EncodingViewerArgs, FileArgs
 from watchdogs.io.services.EncodingViewerService import EncodingViewerService
 
 
@@ -25,10 +25,11 @@ class EncodingViewerScript(Common):
     self.__encodingViewerService = __encodingViewerService
 
   def run(self):  #type: (EncodingViewerScript) -> None
-    eViewerArgs = EncodingViewerArgs()
+    allArgs = AllArgs([EncodingViewerArgs(), FileArgs()]).mergeAndProcess()
+    eViewerArgs = allArgs.getArgs(EncodingViewerArgs)
     eViewerService = EncodingViewerService()
     try:
-      eViewerService.outputEncoding(eViewerArgs)
+      eViewerService.outputEncoding(allArgs)
     except ValueError as ve:
       print(ve)
       print(eViewerArgs.getParser().print_usage())

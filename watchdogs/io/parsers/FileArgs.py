@@ -14,8 +14,6 @@ class FileArgs(Args):
     self.outputFile = outputFile
     self.lines = lines
 
-    self.fileArgs()
-
   def getInputFile(self):  #type: () -> str
     return self.inputFile
 
@@ -28,13 +26,13 @@ class FileArgs(Args):
   def setOutputFile(self, outputFile):  #type: (str) -> None
     self.outputFile = outputFile
 
-  def get_lines(self):  #type: () -> list[str]
+  def getLines(self):  #type: () -> list[str]
     return self.lines
 
-  def set_lines(self, lines):  #type: (list[str]) -> None
+  def setLines(self, lines):  #type: (list[str]) -> None
     self.lines = lines
 
-  def fileArgs(self):  #type: () -> None
+  def addArguments(self):  #type: () -> FileArgs
     IF_HELP = "Specify the input file to read from."
     OF_HELP = "Specify the output file to write to."
 
@@ -42,3 +40,5 @@ class FileArgs(Args):
     required = parser.add_argument_group("Required arguments")
     required.add_argument("-if", "--input-file", required=True, help=IF_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-of", "--output-file", help=OF_HELP, type=str, metavar=EMPTY)
+
+    return self

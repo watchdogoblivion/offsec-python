@@ -4,8 +4,8 @@
 
 import traceback
 
-from watchdogs.base.models.Common import Common
-from watchdogs.io.parsers import FileEncoderArgs
+from watchdogs.base.models import Common, AllArgs
+from watchdogs.io.parsers import FileArgs, FileEncoderArgs
 from watchdogs.io.services.FileEncoderService import FileEncoderService
 
 
@@ -25,12 +25,13 @@ class FileEncoderScript(Common):
     self.__fileEncoderService = __fileEncoderService
 
   def run(self):  #type: (FileEncoderScript) -> None
-    fEncoderArgs = FileEncoderArgs()
+    allArgs = AllArgs([FileEncoderArgs(), FileArgs()]).mergeAndProcess()
+    fEncoderArgs = allArgs.getArgs(FileEncoderArgs)
     fEncoderService = FileEncoderService()
     try:
-      fEncoderService.readLines(fEncoderArgs)
-      if fEncoderArgs.outputFile:
-        fEncoderService.writeLines(fEncoderArgs.getInputFile())
+      fEncoderService.readLines(allArgs)
+      if allArgs.getArgs(FileArgs).outputFile:
+        fEncoderService.writeLines(allArgs)
       else:
         fEncoderService.printLines()
     except ValueError as ve:
