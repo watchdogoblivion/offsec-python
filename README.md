@@ -63,9 +63,9 @@
 
 These modules were built with Kali and python. Any os command will rely on linux.
 
-"wffuzzer" is the most used module.
+"wrfuzzer" is the most used module.
 
-[File Fuzzer module samples](docs/wffuzzer.md)\
+[Request Fuzzer module samples](docs/wrfuzzer.md)\
 [Set Java module samples](docs/wsetjava.md)\
 [Reverse TCP Basic module samples](docs/wrtcpb.md)\
 [Oracle Character Converter module samples](docs/woraclecc.md)\

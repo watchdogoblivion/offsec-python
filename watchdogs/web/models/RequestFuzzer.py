@@ -1,20 +1,22 @@
 # author: WatchDogOblivion
 # description: TODO
-# WatchDogs File Fuzzer
+# WatchDogs Request Fuzzer
 
 from watchdogs.base.models import Common
 from watchdogs.web.models.Requests import Request
 from watchdogs.web.models.Locators import VariantLocator
+from watchdogs.utils.Constants import EMPTY
 
 
-class FileFuzzer(Common):
+class RequestFuzzer(Common):
 
-  def __init__(self, request=Request(), variantLocators=[]):
-    #type: (Request, list[VariantLocator]) -> None
+  def __init__(self, request=Request(), variantLocators=[], fuzzSubstitutes=EMPTY):
+    #type: (Request, list[VariantLocator], str) -> None
 
-    super(FileFuzzer, self).__init__()
+    super(RequestFuzzer, self).__init__()
     self.__request = request
     self.__variantLocators = variantLocators
+    self.__fuzzSubstitutes = fuzzSubstitutes
 
   def getRequest(self):  #type: () -> Request
     return self.__request
@@ -28,7 +30,13 @@ class FileFuzzer(Common):
   def setVariantLocators(self, variantLocators):  #type: (list[VariantLocator]) -> None
     self.__variantLocators = variantLocators
 
-  def rebaseLocators(self):  #type() -> list[FuzzLocator]
+  def getFuzzSubstitutes(self):  #type: () -> str
+    return self.__fuzzSubstitutes
+
+  def setFuzzSubstitutes(self, substitutes):  #type: (str) -> None
+    self.__fuzzSubstitutes = substitutes
+
+  def rebaseLocators(self):  #type() -> list[VariantLocator]
     self.__variantLocators.append(VariantLocator(isInfo=True))
     self.__variantLocators.append(VariantLocator(isHeaders=True))
     self.__variantLocators.append(VariantLocator(isBody=True))

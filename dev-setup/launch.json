@@ -1,10 +1,10 @@
 {
   "configurations": [
     {
-      "name": "wffuzzer",
+      "name": "wrfuzzer",
       "type": "python",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/wffuzzer",
+      "program": "${workspaceFolder}/bin/wrfuzzer",
       "console": "internalConsole",
       "args": [
         "-rh",

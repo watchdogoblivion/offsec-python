@@ -4,9 +4,9 @@
     different public python modules. So I wanted a central flow not only for
     all needed fuzzing but also with easy to follow documentation.
 
-#### Sample module wffuzzer - File upload
+#### Sample module wrfuzzer - File upload
 
-    The module wffuzzer is used for fuzzing requests using a file that contains all the request
+    The module wrfuzzer is used for fuzzing requests using a file that contains all the request
     information.
 
     All you need to do is intercept a request in burp suite, owasp zap, or any other interceptor
@@ -46,7 +46,7 @@
 
         Run the script and use the flags to control filtering by length, status code, and/or text.
         Hide or display responses with a flag.
-            wffuzzer -if testrest -rh 10.10.10.10 -pf postFile.txt -ff fuzzFile.txt
+            wrfuzzer -if testrest -rh 10.10.10.10 -pf postFile.txt -ff fuzzFile.txt
                 Fuzzing Request
                 Response status: 200 - Response length: 1115
                 Response status: 200 - Response length: 1115
@@ -62,7 +62,7 @@
                 Response status: 200 - Response length: 1115
                 Response status: 200 - Response length: 1110
 
-            wffuzzer -if testrest -rh 10.10.10.10 -pf postFile.txt -ff fuzzFile.txt -fl "1115" -sr
+            wrfuzzer -if testrest -rh 10.10.10.10 -pf postFile.txt -ff fuzzFile.txt -fl "1115" -sr
                 Fuzzing Request
                 Response body:
 
@@ -91,7 +91,7 @@
 
         If any help is required, the standard --help and -h is available for all flags and descriptions.
 
-#### Sample module wffuzzer - Login
+#### Sample module wrfuzzer - Login
 
     Example:
         In the browser, go to a page that allows a file upload.
@@ -131,7 +131,7 @@
 
         Run the script and use the flags to control filtering by length, status code, and/or text.
         Hide or display responses with a flag.
-            wffuzzer -if testrest -rh 10.10.10.10:8080 -ff fuzzFileE.txt
+            wrfuzzer -if testrest -rh 10.10.10.10:8080 -ff fuzzFileE.txt
                 Fuzzing Request
                 Response status: 401 - Response length: 2536
                 Response status: 401 - Response length: 2536
@@ -147,7 +147,7 @@
                 Response status: 401 - Response length: 2536
                 Response status: 401 - Response length: 2536
 
-            wffuzzer -if testrest -rh 10.10.10.10:8080 -ff fuzzFileE.txt -fs "200" -sf -sr
+            wrfuzzer -if testrest -rh 10.10.10.10:8080 -ff fuzzFileE.txt -fs "200" -sf -sr
                 Response body:
 
 ```html

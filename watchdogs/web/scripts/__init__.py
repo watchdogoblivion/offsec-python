@@ -1,1 +1,1 @@
-from .FileFuzzerScript import FileFuzzerScript
+from .RequestFuzzerScript import RequestFuzzerScript

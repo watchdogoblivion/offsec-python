@@ -5,12 +5,13 @@
 import copy
 from collections import OrderedDict
 
+from watchdogs.utils.Constants import EMPTY
 from watchdogs.base.models import Common
 
 
 class RequestInfo(Common):
 
-  def __init__(self, urlHost=str(), method=str(), endpoint=str()):  #type: (str, str, str) -> None
+  def __init__(self, urlHost= EMPTY, method=EMPTY, endpoint=EMPTY):  #type: (str, str, str) -> None
     super(RequestInfo, self).__init__()
     self.__urlHost = urlHost
     self.__method = method
@@ -37,8 +38,8 @@ class RequestInfo(Common):
 
 class Request(Common):
 
-  def __init__(self, rawInfo=str(), rawHeaders=str(), rawBody=str(), requestInfo=RequestInfo(),
-               requestUrl=str(), requestHeaders=OrderedDict(), requestBoundary=str(),
+  def __init__(self, rawInfo=EMPTY, rawHeaders=EMPTY, rawBody=EMPTY, requestInfo=RequestInfo(),
+               requestUrl=EMPTY, requestHeaders=OrderedDict(), requestBoundary=EMPTY,
                requestBody=OrderedDict()):
     #type: (str, str, str, RequestInfo, str, OrderedDict, str, OrderedDict) -> None
     super(Request, self).__init__()
