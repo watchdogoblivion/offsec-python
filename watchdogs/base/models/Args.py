@@ -7,12 +7,12 @@ from argparse import ArgumentParser, Namespace
 
 from watchdogs.utils import StringUtility
 
-DEFAULT_PARSER = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter)
+SHARED_PARSER = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter)
 
 
 class Args(object):
 
-  def __init__(self, parser=DEFAULT_PARSER, parsedArgs=None):
+  def __init__(self, parser=SHARED_PARSER, parsedArgs=None):
     #type: (ArgumentParser, Namespace | tuple[Namespace,list[str]]) -> None
     super(Args, self).__init__()
     self.__parser = parser

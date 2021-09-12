@@ -25,7 +25,7 @@ class EncodingViewerScript(Common):
     self.__encodingViewerService = __encodingViewerService
 
   def run(self):  #type: (EncodingViewerScript) -> None
-    allArgs = AllArgs([EncodingViewerArgs(), FileArgs()]).mergeAndProcess()
+    allArgs = AllArgs([EncodingViewerArgs(), FileArgs()]).processAllArguments()
     eViewerArgs = allArgs.getArgs(EncodingViewerArgs)
     eViewerService = EncodingViewerService()
     try:

@@ -33,7 +33,7 @@ class RequestResponseService(Common):
       headers.append(format.format(headersKey, headersValue))
 
     body = []
-    if (type(request.getRequestBody()) == str):
+    if (isinstance(request.getRequestBody(), str)):
       body.append(request.getRequestBody())
     else:
       for k, v in request.getRequestBody().items():
@@ -59,7 +59,7 @@ class RequestResponseService(Common):
     if (requestArgs.postFile):
       for requestBodyKey in requestBodyDict:
         requestBodyValue = requestBodyDict[requestBodyKey]
-        if (type(requestBodyValue) == WebFile):
+        if (isinstance(requestBodyValue, WebFile)):
           requestBodyDict[requestBodyKey] = Cast._to(WebFile, requestBodyValue).getWebFile()
       return MultipartEncoder(fields=requestBodyDict, boundary=request.getRequestBoundary())
     return requestBodyDict

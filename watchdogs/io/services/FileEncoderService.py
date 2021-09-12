@@ -4,9 +4,11 @@
 
 import urllib
 import base64
+
+from watchdogs.base.models import Common, AllArgs
+from watchdogs.io.models import File
 from watchdogs.io.parsers.FileArgs import FileArgs
 from watchdogs.io.parsers import FileEncoderArgs
-from watchdogs.base.models import Common, AllArgs
 from watchdogs.io.services.FileService import FileService
 from watchdogs.utils.Constants import (LFN, FS, LR, V1, V2, V3)
 
@@ -16,7 +18,7 @@ class FileEncoderService(FileService, Common):
   def __init__(self):  #type: () -> None
     super(FileEncoderService, self).__init__()
 
-  def readLines(self, allArgs):  #type: (AllArgs) -> None
+  def readLines(self, allArgs, file):  #type: (AllArgs, File) -> None
     fileEncoderArgs = allArgs.getArgs(FileEncoderArgs)
     openedFile = open(allArgs.getArgs(FileArgs).getInputFile(), LR)
     lines = openedFile.readlines()
@@ -42,4 +44,4 @@ class FileEncoderService(FileService, Common):
       else:
         encodedLines.append(encoded + LFN)
 
-    self.getFile().setLines(encodedLines)
+    file.setLines(encodedLines)

@@ -43,7 +43,7 @@ class LocatorDatum(Common):
 
 class VariantLocator(Common):
 
-  def __init__(self, locatorData=[], isInfo=False, isHeaders=False, isBody=False):
+  def __init__(self, locatorData=None, isInfo=False, isHeaders=False, isBody=False):
     #type: (list[LocatorDatum], bool,bool,bool) -> None
     super(VariantLocator, self).__init__()
     self.__locatorData = locatorData
@@ -52,7 +52,9 @@ class VariantLocator(Common):
     self.__isBody = isBody
 
   def getLocatorData(self):  #type: () -> list[LocatorDatum]
-    return self.__locatorData
+    if(not self.__locatorData):
+      return []
+    return list(self.__locatorData)
 
   def setLocatorData(self, locatorData):  #type: (list[LocatorDatum]) -> None
     self.__locatorData = locatorData

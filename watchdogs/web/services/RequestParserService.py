@@ -3,8 +3,9 @@
 # WatchDogs Request Parser Service
 
 import re
-from watchdogs.io.parsers import FileArgs
+from collections import OrderedDict
 
+from watchdogs.io.parsers import FileArgs
 from watchdogs.base.models import AllArgs, Common
 from watchdogs.web.models import WebFile
 from watchdogs.web.parsers import RequestArgs
@@ -21,30 +22,22 @@ class RequestParserService(Common):
   NAME_REGEX = r' name="([^"]*)'
   FILENAME_REGEX = r' filename="([^"]*)'
 
-  def __init__(self, request=Request()):  #type: (Request) -> None
+  def __init__(self):  #type: () -> None
     super(RequestParserService, self).__init__()
-    self.__request = request
 
-  def getRequest(self):  #type: () -> Request
-    return self.__request
-
-  def setRequest(self, request):  #type: (Request) -> None
-    self.__request = request
-
-  def setBoundary(self, fileLine):  #type: (str) -> bool
+  def setBoundary(self, request, fileLine):  #type: (Request, str) -> bool
     matchedBoundary = re.search(RequestParserService.BOUNDARY_REGEX, fileLine)
     if (matchedBoundary):
-      self.__request.setRequestBoundary(matchedBoundary.group(1))
+      request.setRequestBoundary(matchedBoundary.group(1))
       return True
     return False
 
   def isLineFeed(self, string):  #type: (str) -> bool
     return string == LFN or string == LFR
 
-  def setFields(self, fileLines):  #type: (str) -> None
+  def setFields(self, request, fileLines):  #type: (Request, str) -> None
     fileLinesLength = len(fileLines)
     index = 0
-    request = self.__request
     rawValue = EMPTY
     isBody = False
     boundarySet = False
@@ -54,7 +47,7 @@ class RequestParserService(Common):
       isLastIndex = index + 1 == fileLinesLength
 
       if (not boundarySet):
-        boundarySet = self.setBoundary(fileLine)
+        boundarySet = self.setBoundary(request, fileLine)
       if (index == 0):
         request.setRawInfo(fileLine)
         index += 1
@@ -71,8 +64,7 @@ class RequestParserService(Common):
       rawValue += fileLine + LFN
       index += 1
 
-  def parseInfo(self, requestArgs):  #type: (RequestArgs) -> None
-    request = self.__request
+  def parseInfo(self, requestArgs, request):  #type: (RequestArgs, Request) -> None
     rawInfo = request.getRawInfo()
 
     requestInfo = request.getRequestInfo()
@@ -84,8 +76,7 @@ class RequestParserService(Common):
 
     request.setRequestInfo(requestInfo)
 
-  def parseHeaders(self):  #type: () -> None
-    request = self.__request
+  def parseHeaders(self, request):  #type: (Request) -> None
     requestHeaders = request.getRequestHeaders()
     rawHeadersSplit = request.getRawHeaders().rstrip().split(LFN)
 
@@ -104,8 +95,7 @@ class RequestParserService(Common):
 
     request.setRequestHeaders(requestHeaders)
 
-  def getRawBodyFiltered(self):  #type: () -> list[str]
-    request = self.__request
+  def getRawBodyFiltered(self, request):  #type: (Request) -> list[str]
     rawBodyLines = request.getRawBody().split(LFN)
     requestBoundary = request.getRequestBoundary()
     filteredLines = []
@@ -114,10 +104,38 @@ class RequestParserService(Common):
         filteredLines.append(rawBodyLine)
     return filteredLines
 
-  def parseBody(self, requestArgs):  #type: (RequestArgs) -> None
-    request = self.__request
+  def addWebFile(self, rawBodyLines, lineIndex, requestArgs, requestBody):
+    #type: (list[str], int, RequestArgs, OrderedDict) -> None
+    rawBodyLine = rawBodyLines[lineIndex]
+    nameValue = re.search(RequestParserService.NAME_REGEX, rawBodyLine).group(1)
+    fileNameValue = re.search(RequestParserService.FILENAME_REGEX, rawBodyLine).group(1)
+    contentTypeValue = None
+    nextLine = rawBodyLines[lineIndex + 1]
+    if (CONTENT_TYPE in nextLine):
+      contentTypeValue = re.search(RequestParserService.VALUE_REGEX, nextLine).group(1)
+    webFile = (fileNameValue, open(requestArgs.postFile, RB), contentTypeValue)
+    requestBody[nameValue] = WebFile(webFile)
+
+  def addDispositionValues(self, rawBodyLines, lineIndex, requestBody):
+    #type: (list[str], int, OrderedDict) -> None
+    rawBodyLine = rawBodyLines[lineIndex]
+    nameValue = re.search(RequestParserService.NAME_REGEX, rawBodyLine).group(1)
+    dispositionValue = EMPTY
+    nextIndex = lineIndex + 1
+    rawBodyLinesLength = len(rawBodyLines)
+    while (True):
+      dispositionValue += rawBodyLines[nextIndex] + LFN
+      nextLine = EMPTY
+      nextIndex += 1
+      if (nextIndex < rawBodyLinesLength):
+        nextLine = rawBodyLines[nextIndex]
+      if (nextIndex == rawBodyLinesLength or CONTENT_DISPOSITION in nextLine):
+        requestBody[nameValue] = dispositionValue.rstrip()
+        break
+
+  def parseBody(self, requestArgs, request):  #type: (RequestArgs, Request) -> None
     if (requestArgs.postFile):
-      rawBodyLines = self.getRawBodyFiltered()
+      rawBodyLines = self.getRawBodyFiltered(request)
       rawBodyLinesLength = len(rawBodyLines)
 
       for lineIndex in range(rawBodyLinesLength):
@@ -125,28 +143,11 @@ class RequestParserService(Common):
         requestBody = request.getRequestBody()
 
         if (FILE_NAME in rawBodyLine):
-          nameValue = re.search(RequestParserService.NAME_REGEX, rawBodyLine).group(1)
-          fileNameValue = re.search(RequestParserService.FILENAME_REGEX, rawBodyLine).group(1)
-          contentTypeValue = None
-          nextLine = rawBodyLines[lineIndex + 1]
-          if (CONTENT_TYPE in nextLine):
-            contentTypeValue = re.search(RequestParserService.VALUE_REGEX, nextLine).group(1)
-          webFile = (fileNameValue, open(requestArgs.postFile, RB), contentTypeValue)
-          requestBody[nameValue] = WebFile(webFile)
+          self.addWebFile(rawBodyLines, lineIndex, requestArgs, requestBody)
         elif (CONTENT_DISPOSITION in rawBodyLine):
-          nameValue = re.search(RequestParserService.NAME_REGEX, rawBodyLine).group(1)
-          dispositionValue = EMPTY
-          nextIndex = lineIndex + 1
-          while (True):
-            dispositionValue += rawBodyLines[nextIndex]
-            nextLine = EMPTY
-            nextIndex += 1
-            if (nextIndex < rawBodyLinesLength):
-              nextLine = rawBodyLines[nextIndex]
-            if (nextIndex == rawBodyLinesLength or CONTENT_DISPOSITION in nextLine):
-              requestBody[nameValue] = dispositionValue
-              break
+          self.addDispositionValues(rawBodyLines, lineIndex, requestBody)
         request.setRequestBody(requestBody)
+
       if (not request.getRequestBody()):
         print(
             "Could not parse the post file specified. Please ensure that the -pf flag is being used with"
@@ -156,14 +157,15 @@ class RequestParserService(Common):
     else:
       request.setRequestBody(request.getRawBody())
 
-  def parseFile(self, allArgs):  # type: (AllArgs) -> RequestParserService
+  def parseFile(self, allArgs):  # type: (AllArgs) -> Request
     requestArgs = allArgs.getArgs(RequestArgs)
     inputFile = open(allArgs.getArgs(FileArgs).getInputFile(), LR)
     inptFileLines = inputFile.readlines()
 
-    self.setFields(inptFileLines)
-    self.parseInfo(requestArgs)
-    self.parseHeaders()
-    self.parseBody(requestArgs)
+    request = Request()
+    self.setFields(request, inptFileLines)
+    self.parseInfo(requestArgs, request)
+    self.parseHeaders(request)
+    self.parseBody(requestArgs, request)
 
-    return self
+    return request

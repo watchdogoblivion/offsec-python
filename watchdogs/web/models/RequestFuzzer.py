@@ -10,7 +10,7 @@ from watchdogs.utils.Constants import EMPTY
 
 class RequestFuzzer(Common):
 
-  def __init__(self, request=Request(), variantLocators=[], fuzzSubstitutes=EMPTY):
+  def __init__(self, request=Request(), variantLocators=None, fuzzSubstitutes=EMPTY):
     #type: (Request, list[VariantLocator], str) -> None
 
     super(RequestFuzzer, self).__init__()
@@ -25,7 +25,9 @@ class RequestFuzzer(Common):
     self.__request = request
 
   def getVariantLocators(self):  #type: () -> list[VariantLocator]
-    return self.__variantLocators
+    if(not self.__variantLocators):
+      return []
+    return list(self.__variantLocators)
 
   def setVariantLocators(self, variantLocators):  #type: (list[VariantLocator]) -> None
     self.__variantLocators = variantLocators
@@ -36,7 +38,9 @@ class RequestFuzzer(Common):
   def setFuzzSubstitutes(self, substitutes):  #type: (str) -> None
     self.__fuzzSubstitutes = substitutes
 
-  def rebaseLocators(self):  #type() -> list[VariantLocator]
+  def rebaseLocators(self):  #type: () -> list[VariantLocator]
+    if(not self.__variantLocators):
+      self.__variantLocators = []
     self.__variantLocators.append(VariantLocator(isInfo=True))
     self.__variantLocators.append(VariantLocator(isHeaders=True))
     self.__variantLocators.append(VariantLocator(isBody=True))

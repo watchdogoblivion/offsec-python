@@ -8,7 +8,7 @@ from watchdogs.utils.Constants import (EMPTY)
 
 class FileArgs(Args):
 
-  def __init__(self, inputFile=EMPTY, outputFile=EMPTY, lines=[]):  #type: (str, str, list[str]) -> None
+  def __init__(self, inputFile=EMPTY, outputFile=EMPTY, lines=None):  #type: (str, str, list[str]) -> None
     super(FileArgs, self).__init__()
     self.inputFile = inputFile
     self.outputFile = outputFile
@@ -27,7 +27,9 @@ class FileArgs(Args):
     self.outputFile = outputFile
 
   def getLines(self):  #type: () -> list[str]
-    return self.lines
+    if(not self.lines):
+      return []
+    return list(self.lines)
 
   def setLines(self, lines):  #type: (list[str]) -> None
     self.lines = lines

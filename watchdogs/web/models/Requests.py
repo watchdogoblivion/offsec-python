@@ -38,9 +38,9 @@ class RequestInfo(Common):
 
 class Request(Common):
 
-  def __init__(self, rawInfo=EMPTY, rawHeaders=EMPTY, rawBody=EMPTY, requestInfo=RequestInfo(),
-               requestUrl=EMPTY, requestHeaders=OrderedDict(), requestBoundary=EMPTY,
-               requestBody=OrderedDict()):
+  def __init__(self, rawInfo=EMPTY, rawHeaders=EMPTY, rawBody=EMPTY, requestInfo=None,
+               requestUrl=EMPTY, requestHeaders=None, requestBoundary=EMPTY,
+               requestBody=None):
     #type: (str, str, str, RequestInfo, str, OrderedDict, str, OrderedDict) -> None
     super(Request, self).__init__()
     self.__rawInfo = rawInfo
@@ -74,6 +74,8 @@ class Request(Common):
     self.__rawBody = rawBody
 
   def getRequestInfo(self):  #type: () -> RequestInfo
+    if(not self.__requestInfo):
+      return RequestInfo()
     return copy.copy(self.__requestInfo)
 
   def setRequestInfo(self, requestInfo):  #type: (RequestInfo) -> None
@@ -86,6 +88,8 @@ class Request(Common):
     self.__requestUrl = requestUrl
 
   def getRequestHeaders(self):  #type: () -> OrderedDict
+    if(not self.__requestHeaders):
+      return OrderedDict()
     return OrderedDict(self.__requestHeaders)
 
   def setRequestHeaders(self, requestHeaders):  #type: (OrderedDict) -> None
@@ -98,6 +102,8 @@ class Request(Common):
     self.__requestBoundary = requestBoundary
 
   def getRequestBody(self):  #type: () -> OrderedDict
+    if(not self.__requestBody):
+      return OrderedDict()
     return OrderedDict(self.__requestBody)
 
   def setRequestBody(self, requestBody):  #type: (OrderedDict) -> None

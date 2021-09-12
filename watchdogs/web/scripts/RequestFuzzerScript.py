@@ -37,7 +37,7 @@ class RequestFuzzerScript(Common):
     allArgs = AllArgs([FuzzerArgs(), RequestArgs(), FileArgs()]).mergeAndProcess()
     fuzzerArgs = allArgs.getArgs(FuzzerArgs)
     try:
-      request = self.__requestParserService.parseFile(allArgs).getRequest()
+      request = self.__requestParserService.parseFile(allArgs)
       self.__requestResponseFuzzerService.processRequest(allArgs, RequestFuzzer(request=request))
     except ValueError as ve:
       print(ve)

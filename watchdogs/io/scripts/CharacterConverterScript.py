@@ -5,6 +5,7 @@
 import traceback
 
 from watchdogs.base.models import Common, AllArgs
+from watchdogs.io.models.File import File
 from watchdogs.io.parsers import CharacterConverterArgs, FileArgs
 from watchdogs.io.services.CharacterConverterService import CharacterConverterService
 
@@ -25,15 +26,16 @@ class CharacterConverterScript(Common):
     self.__characterConverterService = characterConverterService
 
   def run(self):  #type: (CharacterConverterScript) -> None
-    allArgs = AllArgs([CharacterConverterArgs(), FileArgs()]).mergeAndProcess()
+    allArgs = AllArgs([CharacterConverterArgs(), FileArgs()]).processAllArguments()
     cConverterArgs = allArgs.getArgs(CharacterConverterArgs)
     cConverterService = self.__characterConverterService
+    file = File()
     try:
-      cConverterService.readLines(allArgs)
+      cConverterService.readLines(allArgs, file)
       if allArgs.getArgs(FileArgs).outputFile:
-        cConverterService.writeLines(allArgs)
+        cConverterService.writeLines(allArgs, file)
       else:
-        cConverterService.printLines()
+        cConverterService.printLines(file)
     except ValueError as ve:
       print(ve)
       print(cConverterArgs.getParser().print_usage())

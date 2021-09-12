@@ -10,6 +10,7 @@ from collections import OrderedDict
 
 from watchdogs.utils import Cast
 from watchdogs.base.models import AllArgs
+from watchdogs.web.models.Requests import Request
 from watchdogs.web.models import RequestFuzzer, Response
 from watchdogs.web.models.WebFile import WebFile
 from watchdogs.web.models.Locators import (VariantLocator, LocatorDatum)
@@ -50,7 +51,7 @@ class RequestResponseFuzzerService(RequestResponseService):
       UNNUMBERED_REGEX = RequestResponseFuzzerService.UNNUMBERED_REGEX
       newValue = re.sub(UNNUMBERED_REGEX, FUZZ + SONE + REGEX_SUB, unnumberedFuzz)
       indiciesOfSubstitutes.append(1)
-      if (type(requestObject) == OrderedDict and requestKey):
+      if (isinstance(requestObject, OrderedDict) and requestKey):
         requestObject[requestKey] = newValue
       else:
         setNewValue(newValue)
@@ -71,72 +72,85 @@ class RequestResponseFuzzerService(RequestResponseService):
         elif (variantLocator.isBody()):
           locatorDatum.setBodyKey(requestKey)
 
-        variantLocator.getLocatorData().append(locatorDatum)
+        locatorData = variantLocator.getLocatorData()
+        locatorData.append(locatorDatum)
+        variantLocator.setLocatorData(locatorData)
         existingIndicies.append(locatorDatum.getIndexOfSubstitute())
+
+  def updateInfoLocator(self, request, existingIndicies, variantLocator):
+    # type: (Request, list[int], list[VariantLocator]) -> None
+    requestInfo = request.getRequestInfo()
+
+    urlHost = requestInfo.getUrlHost()
+    indiciesOfSubstitutes = self.getIndiciesOfSubstitutes(urlHost)
+    unnumberedFuzz = self.getUnnumberedFuzz(urlHost)
+    self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestInfo, requestInfo.setUrlHost)
+
+    endpoint = requestInfo.getEndpoint()
+    indiciesOfSubstitutes += self.getIndiciesOfSubstitutes(endpoint)
+    unnumberedFuzz = self.getUnnumberedFuzz(endpoint)
+    self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestInfo, requestInfo.setEndpoint)
+
+    self.updateLocatorData(indiciesOfSubstitutes, existingIndicies, variantLocator)
+    request.setRequestInfo(requestInfo)
+
+  def updateHeadersLocator(self, request, existingIndicies, variantLocator):
+    # type: (Request, list[int], list[VariantLocator]) -> None
+    requestHeaders = request.getRequestHeaders()
+
+    requestHeaderItems = OrderedDict(requestHeaders).items()
+    for requestHeaderKey, requestHeaderValue in requestHeaderItems:
+      fuzzWord = requestHeaderValue
+      indiciesOfSubstitutes = self.getIndiciesOfSubstitutes(fuzzWord)
+      unnumberedFuzz = self.getUnnumberedFuzz(fuzzWord)
+      self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestHeaders, None, requestHeaderKey)
+      self.updateLocatorData(indiciesOfSubstitutes, existingIndicies, variantLocator, requestHeaderKey)
+      request.setRequestHeaders(requestHeaders)
+
+  def updateBodyLocator(self, request, existingIndicies, variantLocator):
+    # type: (Request, list[int], list[VariantLocator]) -> None
+    requestBody = request.getRequestBody()
+
+    requestBodyItems = OrderedDict(requestBody).items()
+    for requestBodyKey, requestBodyValue in requestBodyItems:
+      fuzzWord = fileName = contentType = EMPTY
+      webFile = None
+      if (isinstance(requestBodyValue, WebFile)):
+        webFile = Cast._to(WebFile, requestBodyValue)
+        fileName = webFile.getFileName()
+        contentType = webFile.getContentType()
+      elif (isinstance(requestBodyValue, str)):
+        fuzzWord = requestBodyValue
+
+      if (fuzzWord):
+        indiciesOfSubstitutes = self.getIndiciesOfSubstitutes(fuzzWord, fileName, contentType)
+        unnumberedFuzz = self.getUnnumberedFuzz(fuzzWord, fileName, contentType)
+        self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestBody, None, requestBodyKey)
+
+      if (webFile):
+        indiciesOfSubstitutes = self.getIndiciesOfSubstitutes(fileName)
+        unnumberedFuzz = self.getUnnumberedFuzz(fileName)
+        self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestBody, webFile.setFileName)
+
+        indiciesOfSubstitutes += self.getIndiciesOfSubstitutes(contentType)
+        unnumberedFuzz = self.getUnnumberedFuzz(contentType)
+        self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestBody, webFile.setContentType)
+
+      self.updateLocatorData(indiciesOfSubstitutes, existingIndicies, variantLocator, requestBodyKey)
+      request.setRequestBody(requestBody)
 
   def updateVariantLocators(self, requestFuzzer):  # type: (RequestFuzzer) -> None
     variantLocators = requestFuzzer.rebaseLocators()
     request = requestFuzzer.getRequest()
-    indiciesOfSubstitutes = []
     existingIndicies = []
 
     for variantLocator in variantLocators:
       if (variantLocator.isInfo()):
-        requestInfo = request.getRequestInfo()
-
-        urlHost = requestInfo.getUrlHost()
-        indiciesOfSubstitutes += self.getIndiciesOfSubstitutes(urlHost)
-        unnumberedFuzz = self.getUnnumberedFuzz(urlHost)
-        self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestInfo, requestInfo.setUrlHost)
-
-        endpoint = requestInfo.getEndpoint()
-        indiciesOfSubstitutes += self.getIndiciesOfSubstitutes(endpoint)
-        unnumberedFuzz = self.getUnnumberedFuzz(endpoint)
-        self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestInfo, requestInfo.setEndpoint)
-
-        self.updateLocatorData(indiciesOfSubstitutes, existingIndicies, variantLocator)
-        request.setRequestInfo(requestInfo)
+        self.updateInfoLocator(request, existingIndicies, variantLocator)
       elif (variantLocator.isHeader()):
-        requestHeaders = request.getRequestHeaders()
-
-        requestHeaderItems = OrderedDict(requestHeaders).items()
-        for requestHeaderKey, requestHeaderValue in requestHeaderItems:
-          fuzzWord = requestHeaderValue
-          indiciesOfSubstitutes = self.getIndiciesOfSubstitutes(fuzzWord)
-          unnumberedFuzz = self.getUnnumberedFuzz(fuzzWord)
-          self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestHeaders, None, requestHeaderKey)
-          self.updateLocatorData(indiciesOfSubstitutes, existingIndicies, variantLocator, requestHeaderKey)
-          request.setRequestHeaders(requestHeaders)
+        self.updateHeadersLocator(request, existingIndicies, variantLocator)
       elif (variantLocator.isBody()):
-        requestBody = request.getRequestBody()
-
-        requestBodyItems = OrderedDict(requestBody).items()
-        for requestBodyKey, requestBodyValue in requestBodyItems:
-          fuzzWord = fileName = contentType = EMPTY
-          webFile = None
-          if (type(requestBodyValue) == WebFile):
-            webFile = Cast._to(WebFile, requestBodyValue)
-            fileName = webFile.getFileName()
-            contentType = webFile.getContentType()
-          elif (type(requestBodyValue) == str):
-            fuzzWord = requestBodyValue
-
-          if (fuzzWord):
-            indiciesOfSubstitutes = self.getIndiciesOfSubstitutes(fuzzWord, fileName, contentType)
-            unnumberedFuzz = self.getUnnumberedFuzz(fuzzWord, fileName, contentType)
-            self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestBody, None, requestBodyKey)
-
-          if (webFile):
-            indiciesOfSubstitutes = self.getIndiciesOfSubstitutes(fileName)
-            unnumberedFuzz = self.getUnnumberedFuzz(fileName)
-            self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestBody, webFile.setFileName)
-
-            indiciesOfSubstitutes += self.getIndiciesOfSubstitutes(contentType)
-            unnumberedFuzz = self.getUnnumberedFuzz(contentType)
-            self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestBody, webFile.setContentType)
-
-          self.updateLocatorData(indiciesOfSubstitutes, existingIndicies, variantLocator, requestBodyKey)
-          request.setRequestBody(requestBody)
+        self.updateBodyLocator(request, existingIndicies, variantLocator)
 
   def getAllVariantsLocatorData(self, requestFuzzer):  # type: (RequestFuzzer) -> list[LocatorDatum]
     variantLocators = requestFuzzer.getVariantLocators()

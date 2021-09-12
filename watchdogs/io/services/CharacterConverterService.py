@@ -3,6 +3,7 @@
 # WatchDogs Character Converter Service
 
 from watchdogs.base.models import AllArgs, Common
+from watchdogs.io.models import File
 from watchdogs.io.services.FileService import FileService
 from watchdogs.io.parsers import CharacterConverterArgs, FileArgs
 from watchdogs.utils.Constants import (LR, SPACE)
@@ -13,15 +14,15 @@ class CharacterConverterService(FileService, Common):
   def __init__(self):  #type: () -> None
     super(CharacterConverterService, self).__init__()
 
-  def readLines(self, allArgs):  #type: (AllArgs) -> None
+  def readLines(self, allArgs, file):  #type: (AllArgs, File) -> None
     characterConverterArgs = allArgs.getArgs(CharacterConverterArgs)
     openedFile = open(allArgs.getArgs(FileArgs).getInputFile(), LR)
     fileLines = openedFile.readlines()
-    increment = 1
-    linesRead = []
     oldChar = characterConverterArgs.getOldChar()
     newChar = characterConverterArgs.getNewChar()
     incrementWord = characterConverterArgs.isIncrementWord()
+    increment = 1
+    linesRead = []
 
     for line in fileLines:
       if (characterConverterArgs.isIncrementLine() and newChar):
@@ -39,7 +40,7 @@ class CharacterConverterService(FileService, Common):
         line = line.lower()
 
       linesRead.append(line)
-    self.getFile().setLines(linesRead)
+    file.setLines(linesRead)
 
   def swapAndIncrementWord(self, characterConverterArgs, line, increment):
     #type: (CharacterConverterArgs, str, int) -> None

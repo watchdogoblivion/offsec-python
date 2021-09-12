@@ -3,27 +3,19 @@
 # WatchDogs File Service
 
 import os
-from watchdogs.io.parsers.FileArgs import FileArgs
 
-from watchdogs.io.models.File import File
 from watchdogs.base.models import AllArgs
+from watchdogs.io.parsers.FileArgs import FileArgs
+from watchdogs.io.models.File import File
 from watchdogs.utils.Constants import (EMPTY, LFN, LW)
 
 
 class FileService(object):
 
-  def __init__(self, file=File()):  #type: (File) -> None
+  def __init__(self):  #type: () -> None
     super(FileService, self).__init__()
-    self.__file = file
 
-  def getFile(self):  #type: () -> File
-    return self.__file
-
-  def setFile(self, file):  #type: (File) -> None
-    self.__file = file
-
-  def writeLines(self, allArgs):  #type: (AllArgs) -> None
-    file = self.__file
+  def writeLines(self, allArgs, file):  #type: (AllArgs, File) -> None
     outputFile = allArgs.getArgs(FileArgs).outputFile
     if not os.path.isfile(outputFile):
       print("File does not exist. Creating file in order to perform write operation.")
@@ -31,7 +23,6 @@ class FileService(object):
     openedFile.writelines(file.getLines())
     openedFile.close()
 
-  def printLines(self):  #type: (FileService) -> None
-    file = self.__file
+  def printLines(self, file):  #type: (File) -> None
     for line in file.getLines():
       print(line.replace(LFN, EMPTY))

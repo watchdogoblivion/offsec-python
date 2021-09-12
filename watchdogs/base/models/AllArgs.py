@@ -22,7 +22,7 @@ class AllArgs(object):
 
   def getArgs(self, clazz):  #type: (Type[T]) -> T
     for arg in self.__argsList:
-      if (type(arg) == clazz):
+      if (isinstance(arg, clazz)):
         return arg
     print("Args object not found")
 
@@ -31,6 +31,24 @@ class AllArgs(object):
 
   def removeArgs(self, arg):  #type: (Args) -> None
     self.__argsList.remove(arg)
+  
+  def parseAndSetArguments(self, argsList):   #type: (list[Args]) -> None
+    for arg in argsList:
+      arg.parseArguments()
+      arg.setArguments()
+
+  def processAllArguments(self):  #type: () -> AllArgs
+    argsList = self.__argsList
+
+    for argsIndex in range(len(argsList)):
+      arg = argsList[argsIndex]
+      if (argsIndex == 0):
+        arg.defaultArguments(arg.getVersion())
+      arg.addArguments()
+
+    self.parseAndSetArguments(argsList)
+
+    return self
 
   def mergeAndProcess(self):  #type: () -> AllArgs
     argsList = self.__argsList
@@ -45,8 +63,6 @@ class AllArgs(object):
         arg.setParser(parser)
       arg.addArguments()
 
-    for arg in argsList:
-      arg.parseArguments()
-      arg.setArguments()
+    self.parseAndSetArguments(argsList)
 
     return self
