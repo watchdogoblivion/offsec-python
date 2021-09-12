@@ -68,8 +68,10 @@ class RequestResponseFuzzerService(RequestResponseService):
         if (variantLocator.isInfo()):
           locatorDatum.setIsInfo(True)
         elif (variantLocator.isHeader()):
+          locatorDatum.setIsHeaders(True)
           locatorDatum.setHeaderKey(requestKey)
         elif (variantLocator.isBody()):
+          locatorDatum.setIsBody(True)
           locatorDatum.setBodyKey(requestKey)
 
         locatorData = variantLocator.getLocatorData()
@@ -107,11 +109,19 @@ class RequestResponseFuzzerService(RequestResponseService):
       self.updateLocatorData(indiciesOfSubstitutes, existingIndicies, variantLocator, requestHeaderKey)
       request.setRequestHeaders(requestHeaders)
 
-  def updateBodyLocator(self, request, existingIndicies, variantLocator):
+  def updateStringBodyLocator(self, request, existingIndicies, variantLocator):
     # type: (Request, list[int], list[VariantLocator]) -> None
-    requestBody = request.getRequestBody()
+    requestBodyString = request.getRequestBodyString()
+    indiciesOfSubstitutes = self.getIndiciesOfSubstitutes(requestBodyString)
+    unnumberedFuzz = self.getUnnumberedFuzz(requestBodyString)
+    self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, request, request.setRequestBodyString)
+    self.updateLocatorData(indiciesOfSubstitutes, existingIndicies, variantLocator)
+    request.setRequestBodyString(requestBodyString)
 
-    requestBodyItems = OrderedDict(requestBody).items()
+  def updateDictBodyLocator(self, request, existingIndicies, variantLocator):
+    # type: (Request, list[int], list[VariantLocator]) -> None
+    requestBodyDict = request.getRequestBodyDict()
+    requestBodyItems = requestBodyDict.items()
     for requestBodyKey, requestBodyValue in requestBodyItems:
       fuzzWord = fileName = contentType = EMPTY
       webFile = None
@@ -125,19 +135,19 @@ class RequestResponseFuzzerService(RequestResponseService):
       if (fuzzWord):
         indiciesOfSubstitutes = self.getIndiciesOfSubstitutes(fuzzWord, fileName, contentType)
         unnumberedFuzz = self.getUnnumberedFuzz(fuzzWord, fileName, contentType)
-        self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestBody, None, requestBodyKey)
+        self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestBodyDict, None, requestBodyKey)
 
       if (webFile):
         indiciesOfSubstitutes = self.getIndiciesOfSubstitutes(fileName)
         unnumberedFuzz = self.getUnnumberedFuzz(fileName)
-        self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestBody, webFile.setFileName)
+        self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestBodyDict, webFile.setFileName)
 
         indiciesOfSubstitutes += self.getIndiciesOfSubstitutes(contentType)
         unnumberedFuzz = self.getUnnumberedFuzz(contentType)
-        self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestBody, webFile.setContentType)
+        self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestBodyDict, webFile.setContentType)
 
       self.updateLocatorData(indiciesOfSubstitutes, existingIndicies, variantLocator, requestBodyKey)
-      request.setRequestBody(requestBody)
+      request.setRequestBodyDict(requestBodyDict)
 
   def updateVariantLocators(self, requestFuzzer):  # type: (RequestFuzzer) -> None
     variantLocators = requestFuzzer.rebaseLocators()
@@ -150,7 +160,10 @@ class RequestResponseFuzzerService(RequestResponseService):
       elif (variantLocator.isHeader()):
         self.updateHeadersLocator(request, existingIndicies, variantLocator)
       elif (variantLocator.isBody()):
-        self.updateBodyLocator(request, existingIndicies, variantLocator)
+        if (request.getRequestBodyString()):
+          self.updateStringBodyLocator(request, existingIndicies, variantLocator)
+        elif (request.getRequestBodyDict()):
+          self.updateDictBodyLocator(request, existingIndicies, variantLocator)
 
   def getAllVariantsLocatorData(self, requestFuzzer):  # type: (RequestFuzzer) -> list[LocatorDatum]
     variantLocators = requestFuzzer.getVariantLocators()
@@ -160,6 +173,51 @@ class RequestResponseFuzzerService(RequestResponseService):
       allVariantsLocatorData += variantLocator.getLocatorData()
 
     return allVariantsLocatorData
+
+  def swapInfoFuzz(self, request, fuzzWord, substitute):
+    #type: (Request, str, str) -> None
+    requestInfo = request.getRequestInfo()
+
+    newEndpointValue = requestInfo.getEndpoint().replace(fuzzWord, substitute)
+    requestInfo.setEndpoint(newEndpointValue)
+
+    newUrlValue = requestInfo.getUrlHost().replace(fuzzWord, substitute)
+    requestInfo.setUrlHost(newUrlValue)
+
+    request.setRequestInfo(requestInfo)
+
+  def swapHeadersFuzz(self, request, locatorDatum, fuzzWord, substitute):
+    #type: (Request, LocatorDatum, str, str) -> None
+    headerKey = locatorDatum.getHeaderKey()
+    headers = request.getRequestHeaders()
+    headerValue = headers[headerKey]
+    headers[headerKey] = str(headerValue).replace(fuzzWord, substitute)
+    request.setRequestHeaders(headers)
+
+  def swapBodyFuzz(self, request, locatorDatum, fuzzWord, substitute):
+    #type: (Request, LocatorDatum, str, str) -> None
+    if (request.getRequestBodyString()):
+      requestBodyString = request.getRequestBodyString()
+      newRequestBodyString = requestBodyString.replace(fuzzWord, substitute)
+      request.setRequestBodyString(newRequestBodyString)
+    elif (request.getRequestBodyDict()):
+      bodyKey = locatorDatum.getBodyKey()
+      requestBodyDict = request.getRequestBodyDict()
+      bodyValue = requestBodyDict[bodyKey]
+      if (isinstance(bodyValue, WebFile)):
+        webFile = copy.copy(Cast._to(WebFile, bodyValue))
+        fileName = webFile.getFileName()
+        contentType = webFile.getContentType()
+        if (fuzzWord in fileName):
+          newValue = fileName.replace(fuzzWord, substitute)
+          webFile.setFileName(newValue)
+        elif (fuzzWord in contentType):
+          newValue = contentType.replace(fuzzWord, substitute)
+          webFile.setContentType(newValue)
+        requestBodyDict[bodyKey] = webFile
+      elif (isinstance(bodyValue, str)):
+        requestBodyDict[bodyKey] = str(bodyValue).replace(fuzzWord, substitute)
+      request.setRequestBodyDict(requestBodyDict)
 
   def swapFuzz(self, requestFuzzer, variantsLocatorData):
     #type: (RequestFuzzer, list[LocatorDatum]) -> None
@@ -172,42 +230,11 @@ class RequestResponseFuzzerService(RequestResponseService):
       substitute = fuzzSubstitutes[indexOfSubstitute - 1].rstrip()
 
       if (locatorDatum.isInfo()):
-        #Info
-        requestInfo = request.getRequestInfo()
-
-        newEndpointValue = str(requestInfo.getEndpoint()).replace(fuzzWord, substitute)
-        requestInfo.setEndpoint(newEndpointValue)
-
-        newUrlValue = str(requestInfo.getUrlHost()).replace(fuzzWord, substitute)
-        requestInfo.setUrlHost(newUrlValue)
-
-        request.setRequestInfo(requestInfo)
-      elif (locatorDatum.getHeaderKey()):
-        #Headers
-        headerKey = locatorDatum.getHeaderKey()
-        headers = request.getRequestHeaders()
-        headerValue = headers[headerKey]
-        headers[headerKey] = str(headerValue).replace(fuzzWord, substitute)
-        request.setRequestHeaders(headers)
-      elif (locatorDatum.getBodyKey()):
-        #Body
-        bodyKey = locatorDatum.getBodyKey()
-        requestBody = request.getRequestBody()
-        bodyValue = requestBody[bodyKey]
-        if (isinstance(bodyValue, WebFile)):
-          webFile = copy.copy(Cast._to(WebFile, bodyValue))
-          fileName = webFile.getFileName()
-          contentType = webFile.getContentType()
-          if (fuzzWord in fileName):
-            newValue = fileName.replace(fuzzWord, substitute)
-            webFile.setFileName(newValue)
-          elif (fuzzWord in contentType):
-            newValue = contentType.replace(fuzzWord, substitute)
-            webFile.setContentType(newValue)
-          requestBody[bodyKey] = webFile
-        elif (isinstance(bodyValue, str)):
-          requestBody[bodyKey] = str(bodyValue).replace(fuzzWord, substitute)
-        request.setRequestBody(requestBody)
+        self.swapInfoFuzz(request, fuzzWord, substitute)
+      elif (locatorDatum.isHeaders()):
+        self.swapHeadersFuzz(request, locatorDatum, fuzzWord, substitute)
+      elif (locatorDatum.isBody()):
+        self.swapBodyFuzz(request, locatorDatum, fuzzWord, substitute)
 
   def printResponse(self, allArgs, requestFuzzer, response):
     #type: (AllArgs, RequestFuzzer, Response) -> None
@@ -241,11 +268,12 @@ class RequestResponseFuzzerService(RequestResponseService):
     fuzzSubstitutesLines = fuzzSubstitutesFile.readlines()
 
     for fuzzSubstitutesLine in fuzzSubstitutesLines:
-      fuzzSubstitutes = fuzzSubstitutesLine.split(fuzzerArgs.substitutesDelimiter)
+      fuzzSubstitutes = fuzzSubstitutesLine.rstrip().split(fuzzerArgs.substitutesDelimiter)
       requestFuzzer.setFuzzSubstitutes(fuzzSubstitutes)
       self.swapFuzz(requestFuzzer, allVariantsLocatorData)
       response = self.sendRequest(allArgs, request)
-      self.handleResponse(allArgs, requestFuzzer, response)
+      if(not response == None):
+        self.handleResponse(allArgs, requestFuzzer, response)
       request.resetRequestValues()
 
   def processRequest(self, allArgs, requestFuzzer):  #type: (AllArgs, RequestFuzzer) -> None
@@ -257,4 +285,5 @@ class RequestResponseFuzzerService(RequestResponseService):
     else:
       print("Sending Request")
       response = self.sendRequest(allArgs, requestFuzzer.getRequest())
-      self.handleResponse(allArgs, requestFuzzer, response)
+      if(not response == None):
+        self.handleResponse(allArgs, requestFuzzer, response)

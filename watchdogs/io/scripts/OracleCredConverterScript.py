@@ -36,8 +36,8 @@ class OracleCredConverterScript(Common):
         oCredConverterService.writeLines(allArgs, file)
       else:
         oCredConverterService.printLines(file)
-    except ValueError as ve:
-      print(ve)
+    except ValueError:
+      print(traceback.format_exc())
       print(oracleCredConverterArgs.getParser().print_usage())
     except Exception:
       print(traceback.format_exc())

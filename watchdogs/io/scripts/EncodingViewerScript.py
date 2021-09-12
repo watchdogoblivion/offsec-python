@@ -30,8 +30,8 @@ class EncodingViewerScript(Common):
     eViewerService = EncodingViewerService()
     try:
       eViewerService.outputEncoding(allArgs)
-    except ValueError as ve:
-      print(ve)
+    except ValueError:
+      print(traceback.format_exc())
       print(eViewerArgs.getParser().print_usage())
     except Exception:
       print(traceback.format_exc())

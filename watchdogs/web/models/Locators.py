@@ -8,11 +8,14 @@ from watchdogs.utils.Constants import (EMPTY)
 
 class LocatorDatum(Common):
 
-  def __init__(self, indexOfSubstitute=-1, isInfo=False, headerKey=EMPTY, bodyKey=EMPTY):
-    #type: (int, bool, str, str) -> None
+  def __init__(self, indexOfSubstitute=-1, isInfo=False, isHeaders=False, isBody=False, headerKey=EMPTY,
+               bodyKey=EMPTY):
+    #type: (int, bool, bool, bool, str, str) -> None
     super(LocatorDatum, self).__init__()
     self.__indexOfSubstitute = indexOfSubstitute
     self.__isInfo = isInfo
+    self.__isHeaders = isHeaders
+    self.__isBody = isBody
     self.__headerKey = headerKey
     self.__bodyKey = bodyKey
 
@@ -27,6 +30,18 @@ class LocatorDatum(Common):
 
   def setIsInfo(self, isInfo):  #type: (bool) -> None
     self.__isInfo = isInfo
+
+  def isHeaders(self):  #type: () -> bool
+    return self.__isHeaders
+
+  def setIsHeaders(self, isHeaders):  #type: (bool) -> None
+    self.__isHeaders = isHeaders
+
+  def isBody(self):  #type: () -> bool
+    return self.__isBody
+
+  def setIsBody(self, isBody):  #type: (bool) -> None
+    self.__isBody = isBody
 
   def getHeaderKey(self):  #type: () -> str
     return self.__headerKey
@@ -52,7 +67,7 @@ class VariantLocator(Common):
     self.__isBody = isBody
 
   def getLocatorData(self):  #type: () -> list[LocatorDatum]
-    if(not self.__locatorData):
+    if (not self.__locatorData):
       return []
     return list(self.__locatorData)
 

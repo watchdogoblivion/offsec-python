@@ -36,8 +36,8 @@ class FileEncoderScript(Common):
         fEncoderService.writeLines(allArgs, file)
       else:
         fEncoderService.printLines(file)
-    except ValueError as ve:
-      print(ve)
+    except ValueError:
+      print(traceback.format_exc())
       print(fEncoderArgs.getParser().print_usage())
     except Exception:
       print(traceback.format_exc())

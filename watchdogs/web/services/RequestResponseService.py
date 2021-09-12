@@ -33,10 +33,10 @@ class RequestResponseService(Common):
       headers.append(format.format(headersKey, headersValue))
 
     body = []
-    if (isinstance(request.getRequestBody(), str)):
-      body.append(request.getRequestBody())
+    if (request.getRequestBodyString()):
+      body.append(request.getRequestBodyString())
     else:
-      for k, v in request.getRequestBody().items():
+      for k, v in request.getRequestBodyDict().items():
         body.append(format.format(k, v))
 
     print('{}{}{}{}{}{}{}{}{}{}{}'.format(LFRN, '-----------Request Start-----------',
@@ -54,15 +54,16 @@ class RequestResponseService(Common):
         protocol = HTTPS_PROTOCOL
       return "{}{}{}".format(protocol, host, endpoint)
 
-  def getRequestBody(self, requestArgs, request):  #type: (RequestArgs, Request) -> OrderedDict | str
-    requestBodyDict = request.getRequestBody()
-    if (requestArgs.postFile):
+  def getRequestBody(self, request):  #type: (Request) -> OrderedDict | str
+    if (request.getRequestBodyString()):
+      return request.getRequestBodyString()
+    elif (request.getRequestBodyDict()):
+      requestBodyDict = request.getRequestBodyDict()
       for requestBodyKey in requestBodyDict:
         requestBodyValue = requestBodyDict[requestBodyKey]
         if (isinstance(requestBodyValue, WebFile)):
           requestBodyDict[requestBodyKey] = Cast._to(WebFile, requestBodyValue).getWebFile()
       return MultipartEncoder(fields=requestBodyDict, boundary=request.getRequestBoundary())
-    return requestBodyDict
 
   def getProxies(self, requestArgs):  #type: (RequestArgs) -> dict
     proxies = {}
@@ -88,9 +89,9 @@ class RequestResponseService(Common):
     responseStatus = response.getResponseStatus()
     responseLength = response.getResponseLength()
     shouldReturn = False
-    if (requestArgs.filterLength and responseLength in requestArgs.filterLength):
+    if (requestArgs.filterLength and responseLength and responseLength in requestArgs.filterLength):
       shouldReturn = True
-    if (requestArgs.filterStatus and not str(responseStatus) in requestArgs.filterStatus):
+    if (requestArgs.filterStatus and responseStatus and not str(responseStatus) in requestArgs.filterStatus):
       shouldReturn = True
     if (requestArgs.filterIn and not requestArgs.filterIn.lower() in responseSoup.lower()):
       shouldReturn = True
@@ -104,8 +105,11 @@ class RequestResponseService(Common):
     responseLength = EMPTY
     try:
       responseLength = response.headers.get(CONTENT_LENGTH)
+      if(responseLength == None):
+        responseLength = 0
     except:
       print("An exception occurred trying to retrieve header {}".format(CONTENT_LENGTH))
+      responseLength = 0
 
     return Response(response, responseSoup, responseStatus, responseLength)
 
@@ -122,7 +126,7 @@ class RequestResponseService(Common):
     requestArgs = allArgs.getArgs(RequestArgs)
     requestInfo = request.getRequestInfo()
     requestHeaders = request.getRequestHeaders()
-    requestBody = self.getRequestBody(requestArgs, request)
+    requestBody = self.getRequestBody(request)
     requestUrl = self.getUrl(requestInfo.getUrlHost(), requestArgs.secure, requestInfo.getEndpoint())
     request.setRequestUrl(requestUrl)
 
@@ -131,5 +135,21 @@ class RequestResponseService(Common):
     session = requests.Session()
     session.proxies = self.getProxies(requestArgs)
     session.verify = not requestArgs.disableVerification
-
-    return session.send(preparedRequest, timeout=requestArgs.readTimeout)
+    response = requests.models.Response()
+    try:
+      return session.send(preparedRequest, timeout=requestArgs.readTimeout)
+    except requests.exceptions.HTTPError:
+      response.status_code = 500
+      return response
+    except requests.exceptions.ConnectionError:
+      response.status_code = 502
+      return response
+    except requests.exceptions.Timeout:
+      response.status_code = 504
+      return response
+    except requests.exceptions.RequestException:
+      response.status_code = 500
+      return response
+    except Exception as e:
+      print("An exception while retrieving the response:\n", e)
+      return None

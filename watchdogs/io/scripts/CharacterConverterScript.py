@@ -36,8 +36,8 @@ class CharacterConverterScript(Common):
         cConverterService.writeLines(allArgs, file)
       else:
         cConverterService.printLines(file)
-    except ValueError as ve:
-      print(ve)
+    except ValueError:
+      print(traceback.format_exc())
       print(cConverterArgs.getParser().print_usage())
     except Exception:
       print(traceback.format_exc())

@@ -10,7 +10,7 @@ from watchdogs.base.models import AllArgs, Common
 from watchdogs.web.models import WebFile
 from watchdogs.web.parsers import RequestArgs
 from watchdogs.web.models.Requests import Request
-from watchdogs.utils.Constants import (EMPTY, LFN, LFR, LR, SPACE, CONTENT_DISPOSITION, CONTENT_TYPE,
+from watchdogs.utils.Constants import (EMPTY, HTTP, LFN, LFR, LR, SPACE, CONTENT_DISPOSITION, CONTENT_TYPE,
                                        FILE_NAME, RB)
 
 
@@ -49,7 +49,11 @@ class RequestParserService(Common):
       if (not boundarySet):
         boundarySet = self.setBoundary(request, fileLine)
       if (index == 0):
-        request.setRawInfo(fileLine)
+        if (HTTP.upper() not in fileLine):
+          print("Please check file format and ensure that the first line contains the method,"
+                " endpoint and protocol.")
+          raise Exception("Illegal file format")
+        request.setRawInfo(fileLine.strip())
         index += 1
         continue
       elif ((self.isLineFeed(fileLine) and not isBody) or (isLastIndex and not isBody)):
@@ -140,22 +144,22 @@ class RequestParserService(Common):
 
       for lineIndex in range(rawBodyLinesLength):
         rawBodyLine = rawBodyLines[lineIndex]
-        requestBody = request.getRequestBody()
+        requestBody = request.getRequestBodyDict()
 
         if (FILE_NAME in rawBodyLine):
           self.addWebFile(rawBodyLines, lineIndex, requestArgs, requestBody)
         elif (CONTENT_DISPOSITION in rawBodyLine):
           self.addDispositionValues(rawBodyLines, lineIndex, requestBody)
-        request.setRequestBody(requestBody)
+        request.setRequestBodyDict(requestBody)
 
-      if (not request.getRequestBody()):
+      if (not request.getRequestBodyDict()):
         print(
             "Could not parse the post file specified. Please ensure that the -pf flag is being used with"
             " a proper file upload request. If the attempted request is not a file upload, then remove the -pf"
             " flag to send JSON or standard form data.")
         exit()
     else:
-      request.setRequestBody(request.getRawBody())
+      request.setRequestBodyString(request.getRawBody())
 
   def parseFile(self, allArgs):  # type: (AllArgs) -> Request
     requestArgs = allArgs.getArgs(RequestArgs)

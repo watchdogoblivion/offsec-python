@@ -39,8 +39,8 @@ class RequestFuzzerScript(Common):
     try:
       request = self.__requestParserService.parseFile(allArgs)
       self.__requestResponseFuzzerService.processRequest(allArgs, RequestFuzzer(request=request))
-    except ValueError as ve:
-      print(ve)
+    except ValueError:
+      print(traceback.format_exc())
       print(fuzzerArgs.getParser().print_usage())
     except Exception:
       print(traceback.format_exc())
