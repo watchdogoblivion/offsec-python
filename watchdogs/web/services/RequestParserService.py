@@ -117,7 +117,7 @@ class RequestParserService(Common):
     nextLine = rawBodyLines[lineIndex + 1]
     if (CONTENT_TYPE in nextLine):
       contentTypeValue = re.search(RequestParserService.VALUE_REGEX, nextLine).group(1)
-    webFile = (fileNameValue, open(requestArgs.postFile, RB), contentTypeValue)
+    webFile = (fileNameValue, open(requestArgs.postFile, RB).read(), contentTypeValue)
     requestBody[nameValue] = WebFile(webFile)
 
   def addDispositionValues(self, rawBodyLines, lineIndex, requestBody):

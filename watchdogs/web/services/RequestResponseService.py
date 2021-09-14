@@ -2,6 +2,7 @@
 # description: TODO
 # WatchDogs Request Response Service
 
+import io
 import requests
 from bs4 import BeautifulSoup
 from collections import OrderedDict
@@ -62,7 +63,9 @@ class RequestResponseService(Common):
       for requestBodyKey in requestBodyDict:
         requestBodyValue = requestBodyDict[requestBodyKey]
         if (isinstance(requestBodyValue, WebFile)):
-          requestBodyDict[requestBodyKey] = Cast._to(WebFile, requestBodyValue).getWebFile()
+          webFile = Cast._to(WebFile, requestBodyValue)
+          postFileIO = io.BytesIO(webFile.getContent())
+          requestBodyDict[requestBodyKey] = (webFile.getFileName(), postFileIO, webFile.getContentType())
       return MultipartEncoder(fields=requestBodyDict, boundary=request.getRequestBoundary())
 
   def getProxies(self, requestArgs):  #type: (RequestArgs) -> dict
