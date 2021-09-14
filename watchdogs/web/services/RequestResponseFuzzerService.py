@@ -119,28 +119,33 @@ class RequestResponseFuzzerService(RequestResponseService):
     request.setRequestBodyString(requestBodyString)
 
   def updateDictBodyLocator(self, request, existingIndicies, variantLocator):
-    # type: (Request, list[int], list[VariantLocator]) -> None
+    # type: (Request, list[int], VariantLocator) -> None
     requestBodyDict = request.getRequestBodyDict()
     requestBodyItems = requestBodyDict.items()
     for requestBodyKey, requestBodyValue in requestBodyItems:
-      fuzzWord = fileName = contentType = EMPTY
+      fuzzWord = fileName = content = contentType = EMPTY
       webFile = None
       if (isinstance(requestBodyValue, WebFile)):
         webFile = Cast._to(WebFile, requestBodyValue)
         fileName = webFile.getFileName()
+        content = webFile.getContent()
         contentType = webFile.getContentType()
       elif (isinstance(requestBodyValue, str)):
         fuzzWord = requestBodyValue
 
       if (fuzzWord):
-        indiciesOfSubstitutes = self.getIndiciesOfSubstitutes(fuzzWord, fileName, contentType)
-        unnumberedFuzz = self.getUnnumberedFuzz(fuzzWord, fileName, contentType)
+        indiciesOfSubstitutes = self.getIndiciesOfSubstitutes(fuzzWord)
+        unnumberedFuzz = self.getUnnumberedFuzz(fuzzWord)
         self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestBodyDict, None, requestBodyKey)
 
       if (webFile):
         indiciesOfSubstitutes = self.getIndiciesOfSubstitutes(fileName)
         unnumberedFuzz = self.getUnnumberedFuzz(fileName)
         self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestBodyDict, webFile.setFileName)
+
+        indiciesOfSubstitutes += self.getIndiciesOfSubstitutes(content)
+        unnumberedFuzz = self.getUnnumberedFuzz(content)
+        self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, requestBodyDict, webFile.setContent)
 
         indiciesOfSubstitutes += self.getIndiciesOfSubstitutes(contentType)
         unnumberedFuzz = self.getUnnumberedFuzz(contentType)
@@ -207,10 +212,14 @@ class RequestResponseFuzzerService(RequestResponseService):
       if (isinstance(bodyValue, WebFile)):
         webFile = copy.copy(Cast._to(WebFile, bodyValue))
         fileName = webFile.getFileName()
+        content = webFile.getContent()
         contentType = webFile.getContentType()
         if (fuzzWord in fileName):
           newValue = fileName.replace(fuzzWord, substitute)
           webFile.setFileName(newValue)
+        elif (fuzzWord in content):
+          newValue = str(content).replace(fuzzWord, substitute).encode()
+          webFile.setContent(newValue)
         elif (fuzzWord in contentType):
           newValue = contentType.replace(fuzzWord, substitute)
           webFile.setContentType(newValue)
