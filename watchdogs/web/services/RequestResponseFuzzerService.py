@@ -2,11 +2,12 @@
 # description: TODO
 # WatchDogs Request Response Fuzzer Service
 
+
+from __future__ import division
 import re
 import copy
 import time
 import requests
-from __future__ import division
 from typing import Any, Callable
 from collections import OrderedDict
 from pathos.multiprocessing import ProcessingPool
