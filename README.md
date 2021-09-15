@@ -17,6 +17,7 @@
                 python -m pip install requests
                 python -m pip install beautifulsoup4
                 python -m pip install typing
+                python -m pip install pythos
 
         To remove:
             Delete directory offsec-python and remove added export line from files above.
@@ -25,6 +26,7 @@
                     python -m pip uninstall requests
                     python -m pip uninstall beautifulsoup4
                     python -m pip uninstall typing
+                    python -m pip uninstall pythos
 
 #### PIP Install and Uninstall
 
@@ -40,7 +42,8 @@
             Then run:
                     python -m pip uninstall requests
                     python -m pip uninstall beautifulsoup4
-                    python -m pip uninstall beautifulsoup4
+                    python -m pip uninstall typing
+                    python -m pip uninstall pythos
 
 #### Execute from anywhere
 

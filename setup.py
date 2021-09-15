@@ -7,7 +7,7 @@ setup(
     author="WatchDogOblivion",
     license="BSD 2-clause",
     packages=["watchdogs"],
-    install_requires=["requests", "beautifulsoup4", "typing"],
+    install_requires=["requests", "beautifulsoup4", "typing", "pathos"],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Information Technology",

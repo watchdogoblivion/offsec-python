@@ -4,11 +4,14 @@
 
 import re
 import copy
+import time
 import requests
+from __future__ import division
 from typing import Any, Callable
 from collections import OrderedDict
+from pathos.multiprocessing import ProcessingPool
 
-from watchdogs.utils import Cast
+from watchdogs.utils import Cast, ListUtility
 from watchdogs.base.models import AllArgs
 from watchdogs.web.models.Requests import Request
 from watchdogs.web.models import RequestFuzzer, Response
@@ -228,12 +231,10 @@ class RequestResponseFuzzerService(RequestResponseService):
         requestBodyDict[bodyKey] = str(bodyValue).replace(fuzzWord, substitute)
       request.setRequestBodyDict(requestBodyDict)
 
-  def swapFuzz(self, requestFuzzer, variantsLocatorData):
-    #type: (RequestFuzzer, list[LocatorDatum]) -> None
-    fuzzSubstitutes = requestFuzzer.getFuzzSubstitutes()
-    request = requestFuzzer.getRequest()
+  def swapFuzz(self, request, fuzzSubstitutes, allLocatorData):
+    #type: (Request, list[str], list[LocatorDatum]) -> None
 
-    for locatorDatum in variantsLocatorData:
+    for locatorDatum in allLocatorData:
       indexOfSubstitute = locatorDatum.getIndexOfSubstitute()
       fuzzWord = FUZZ + str(indexOfSubstitute)
       substitute = fuzzSubstitutes[indexOfSubstitute - 1].rstrip()
@@ -268,31 +269,57 @@ class RequestResponseFuzzerService(RequestResponseService):
 
     self.printResponse(allArgs, requestFuzzer, finalResponse)
 
-  def fuzzRequest(self, allArgs, requestFuzzer, allVariantsLocatorData):
+  def swapAndFuzzRequest(self, allArgs, requestFuzzer, allLocatorData, fuzzSubstitutesLines):
+    #type: (AllArgs, RequestFuzzer, list[LocatorDatum], list[str]) -> None
+    for fuzzSubstitutesLine in fuzzSubstitutesLines:
+      fuzzerArgs = allArgs.getArgs(FuzzerArgs)
+      request = copy.deepcopy(requestFuzzer.getRequest())
+      request.updateOriginalValues()
+      fuzzSubstitutes = fuzzSubstitutesLine.rstrip().split(fuzzerArgs.substitutesDelimiter)
+      requestFuzzer.setFuzzSubstitutes(fuzzSubstitutes)
+      self.swapFuzz(request, fuzzSubstitutes, allLocatorData)
+      response = self.sendRequest(allArgs, request)
+      if (not response == None):
+        self.handleResponse(allArgs, requestFuzzer, response)
+      request.resetRequestValues()
+
+  def prepareFuzzRequests(self, allArgs, requestFuzzer, allLocatorData):
     #type: (AllArgs, RequestFuzzer, list[LocatorDatum]) -> None
     fuzzerArgs = allArgs.getArgs(FuzzerArgs)
-    request = requestFuzzer.getRequest()
-    request.updateOriginalValues()
     fuzzSubstitutesFile = open(fuzzerArgs.substitutesFile, LR)
     fuzzSubstitutesLines = fuzzSubstitutesFile.readlines()
 
-    for fuzzSubstitutesLine in fuzzSubstitutesLines:
-      fuzzSubstitutes = fuzzSubstitutesLine.rstrip().split(fuzzerArgs.substitutesDelimiter)
-      requestFuzzer.setFuzzSubstitutes(fuzzSubstitutes)
-      self.swapFuzz(requestFuzzer, allVariantsLocatorData)
-      response = self.sendRequest(allArgs, request)
-      if(not response == None):
-        self.handleResponse(allArgs, requestFuzzer, response)
-      request.resetRequestValues()
+    pool = ProcessingPool(fuzzerArgs.poolSize)
+    groups = ListUtility.group(fuzzSubstitutesLines, fuzzerArgs.groupSize)
+    substituesLength = len(groups)
+    allArgsArray = []
+    requestFuzzerArray = []
+    allLocatorDataArray = []
+    index = 0
+
+    while index < substituesLength:
+      allArgsArray.append(allArgs)
+      requestFuzzerArray.append(requestFuzzer)
+      allLocatorDataArray.append(allLocatorData)
+      index += 1
+
+    start = time.time()
+    pool.map(self.swapAndFuzzRequest, allArgsArray, requestFuzzerArray, allLocatorDataArray, groups)
+    end = time.time()
+    totalTime = end - start
+    if (totalTime > 60):
+      print("Fuzzing completed. Total time: {} minutes".format(round(totalTime / 60, 2)))
+    else:
+      print("Fuzzing completed. Total time: {} seconds".format(totalTime))
 
   def processRequest(self, allArgs, requestFuzzer):  #type: (AllArgs, RequestFuzzer) -> None
     self.updateVariantLocators(requestFuzzer)
     allVariantsLocatorData = self.getAllVariantsLocatorData(requestFuzzer)
     if (len(allVariantsLocatorData) > 0):
-      print("Fuzzing Request")
-      self.fuzzRequest(allArgs, requestFuzzer, allVariantsLocatorData)
+      print("Fuzzing Request. Please wait...")
+      self.prepareFuzzRequests(allArgs, requestFuzzer, allVariantsLocatorData)
     else:
       print("Sending Request")
       response = self.sendRequest(allArgs, requestFuzzer.getRequest())
-      if(not response == None):
+      if (not response == None):
         self.handleResponse(allArgs, requestFuzzer, response)

@@ -25,21 +25,21 @@ class RequestFuzzer(Common):
     self.__request = request
 
   def getVariantLocators(self):  #type: () -> list[VariantLocator]
-    if(not self.__variantLocators):
+    if (not self.__variantLocators):
       return []
     return list(self.__variantLocators)
 
   def setVariantLocators(self, variantLocators):  #type: (list[VariantLocator]) -> None
     self.__variantLocators = variantLocators
 
-  def getFuzzSubstitutes(self):  #type: () -> str
+  def getFuzzSubstitutes(self):  #type: () -> list[str]
     return self.__fuzzSubstitutes
 
-  def setFuzzSubstitutes(self, substitutes):  #type: (str) -> None
+  def setFuzzSubstitutes(self, substitutes):  #type: (list[str]) -> None
     self.__fuzzSubstitutes = substitutes
 
   def rebaseLocators(self):  #type: () -> list[VariantLocator]
-    if(not self.__variantLocators):
+    if (not self.__variantLocators):
       self.__variantLocators = []
     self.__variantLocators.append(VariantLocator(isInfo=True))
     self.__variantLocators.append(VariantLocator(isHeaders=True))
