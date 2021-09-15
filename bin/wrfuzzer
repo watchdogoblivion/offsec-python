@@ -1,0 +1,14 @@
+#!/usr/bin/python
+
+# author: WatchDogOblivion
+# description: TODO
+# WatchDogs Request Fuzzer a.k.a wrfuzzer
+
+from watchdogs.web.scripts import RequestFuzzerScript
+
+
+def __main__():  #type: () -> None
+  RequestFuzzerScript().run()
+
+
+__main__()

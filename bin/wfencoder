@@ -1,0 +1,14 @@
+#!/usr/bin/python
+
+# author: WatchDogOblivion
+# description: TODO
+# WatchDogs File Encoder a.k.a wfencoder
+
+from watchdogs.io.scripts import FileEncoderScript
+
+
+def __main__():  #type: () -> None
+  FileEncoderScript().run()
+
+
+__main__()

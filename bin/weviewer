@@ -1,24 +1,14 @@
 #!/usr/bin/python
 
-# author: WatchDogOdin
+# author: WatchDogOblivion
 # description: TODO
 # WatchDogs Encoding Viewer a.k.a eviewer
 
-import traceback;
+from watchdogs.io.scripts import EncodingViewerScript
 
-from watchdogs.io import EncodingViewer;
 
-def __main__():
-    ev = EncodingViewer();
-    try:
-        ev.parseArgs();
-        ev.setArguments();
-        ev.outputEncoding();
-    except ValueError as ve:
-        print(ve);
-        print(ev.parser.print_usage());
-    except Exception as e:
-        print(traceback.format_exc());
-        print(ev.parser.print_usage());
+def __main__():  #type: () -> None
+  EncodingViewerScript().run()
 
-__main__();
+
+__main__()

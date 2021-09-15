@@ -1,0 +1,162 @@
+{
+  "configurations": [
+    {
+      "name": "wrfuzzer-upload",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/wrfuzzer",
+      "console": "internalConsole",
+      "args": [
+        "-rh",
+        "10.10.10.93",
+        "-if",
+        "${env:TEST_DATA}/test_upload.txt",
+        "-pf",
+        "${env:TEST_DATA}/web.config",
+        "-sf",
+        "${env:TEST_DATA}/substitutesUpload.txt",
+        "-hp",
+        "http://127.0.0.1:8080",
+        "-ss"
+      ]
+    },
+    {
+      "name": "wrfuzzer-login",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/wrfuzzer",
+      "console": "internalConsole",
+      "args": [
+        "-rh",
+        "10.10.10.95:8080",
+        "-if",
+        "${env:TEST_DATA}/test_ECreds.txt",
+        "-sf",
+        "${env:TEST_DATA}/substitutesECreds.txt",
+        "-hp",
+        "http://127.0.0.1:8080",
+        "-ss"
+      ]
+    },
+    {
+      "name": "wrfuzzer-reqres",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/wrfuzzer",
+      "console": "internalConsole",
+      "args": [
+        "-rh",
+        "https://reqres.in",
+        "-if",
+        "${env:TEST_DATA}/test_reqres.txt",
+        "-sf",
+        "${env:TEST_DATA}/substitutesCreds.txt",
+        "-sp",
+        "http://127.0.0.1:8080",
+        "-dv"
+      ]
+    },
+    {
+      "name": "wrfuzzer-ports",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/wrfuzzer",
+      "console": "internalConsole",
+      "args": [
+        "-rh",
+        "10.10.10.55:60000",
+        "-if",
+        "${env:TEST_DATA}/test_ports.txt",
+        "-sf",
+        "${env:TEST_DATA}/substitutesPorts.txt",
+        "-hp",
+        "http://127.0.0.1:8080",
+        "-rt",
+        "3",
+        "-fs",
+        "200",
+        "-fl",
+        "2",
+        "-ss"
+      ]
+    },
+    {
+      "name": "wrfuzzer-domains",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/wrfuzzer",
+      "console": "internalConsole",
+      "args": [
+        "-rh",
+        "FUZZ.schooled.htb",
+        "-if",
+        "${env:TEST_DATA}/test_domains.txt",
+        "-sf",
+        "${env:TEST_DATA}/substitutesDomains.txt",
+        "-hp",
+        "http://127.0.0.1:8080",
+        "-fl",
+        "1555",
+        "-ss"
+      ]
+    },
+    {
+      "name": "wsetjava",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/wsetjava",
+      "console": "integratedTerminal",
+      "args": ["-s", "java8"],
+      "sudo": true
+    },
+    {
+      "name": "wrtcpb",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/wrtcpb",
+      "console": "internalConsole",
+      "args": ["-lh", "10.10.12.21", "-lp", "4443", "-s", "/bin/sh"]
+    },
+    {
+      "name": "woraclecc",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/woraclecc",
+      "console": "internalConsole",
+      "args": ["-if", "${env:TEST_DATA}/oracle.txt", "-c", "ll"]
+    },
+    {
+      "name": "wfencoder",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/wfencoder",
+      "console": "internalConsole",
+      "args": ["-if", "${env:TEST_DATA}/fuzzFileE.txt", "-be", "-ue", "v1"]
+    },
+    {
+      "name": "weviewer",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/weviewer",
+      "console": "internalConsole",
+      "args": ["-if", "${env:TEST_DATA}/out.file", "-ef", "67", "-et", "85"]
+    },
+    {
+      "name": "wcharc",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/wcharc",
+      "console": "internalConsole",
+      "args": [
+        "-if",
+        "${env:TEST_DATA}/i.txt",
+        "-l",
+        "-oc",
+        "*",
+        "-nc",
+        "u",
+        "-il"
+      ]
+    }
+  ]
+}
