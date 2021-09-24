@@ -43,3 +43,67 @@ class StringUtility(object):
       else:
         specificationArray.append(s)
     return specificationArray
+
+  @staticmethod
+  def toHexFormat(string): #type:(str) -> str
+    hexString = ""
+    hexFormat = "0x{:02x}"
+    for charachter in string:
+      unicodeNumber = ord(charachter)
+      hexString += hexFormat.format(unicodeNumber)
+    return hexString
+
+  @staticmethod
+  def charsToHex(string, assembly=False):  #type:(str,bool)->str
+    hexString = ""
+    for charachter in string:
+      unicodeNumber = ord(charachter)
+      hexString += hex(unicodeNumber)
+    if (assembly):
+      hexString = hexString.replace("0x", "\\x")
+    return hexString
+
+  @staticmethod
+  def charsToDeci(charString):  #type:(str) -> str
+    newDelimiter = ":"
+    decimalString = ""
+    for character in charString:
+      decimalString += str(ord(character)) + newDelimiter
+    return decimalString.rstrip(newDelimiter)
+
+  @staticmethod
+  def hexToChars(hexString, delimiter="0x"):  #type:(str, str) -> str
+    hexArray = hexString.split(delimiter)
+    charsString = ""
+    for hex in hexArray:
+      if (hex):
+        unicodeNumber = int(hex, 16)
+        charsString += chr(unicodeNumber)
+    return charsString
+
+  @staticmethod
+  def hexToDeci(hexString, delimiter="0x"):  #type:(str, str) -> str
+    hexArray = hexString.split(delimiter)
+    newDelimiter = ":"
+    decimalString = ""
+    for hex in hexArray:
+      if (hex):
+        unicodeNumber = int(hex, 16)
+        decimalString += str(unicodeNumber) + newDelimiter
+    return decimalString.rstrip(newDelimiter)
+
+  @staticmethod
+  def deciToChars(deciString, delimiter=":"):  #type:(str, str) -> str
+    deciArray = deciString.split(delimiter)
+    charsString = ""
+    for decimal in deciArray:
+      charsString += chr(int(decimal))
+    return charsString
+
+  @staticmethod
+  def deciToHex(deciString, delimiter=":"):  #type:(str, str) -> str
+    deciArray = deciString.split(delimiter)
+    hexString = ""
+    for decimal in deciArray:
+      hexString += hex(int(decimal))
+    return hexString

@@ -44,7 +44,7 @@ class WReverseTCPB:
 
     print(WReverseTCPB.USAGE)
     print("Optional arguments:")
-    print("  {}   {}     : {}".format(FLAGS.H, FLAGS.LOCAL_HOST, LH_HELP))
+    print("  {}   {}     : {}".format(FLAGS.LH, FLAGS.LOCAL_HOST, LH_HELP))
     print("  {}, {}     : {}".format(FLAGS.LP, FLAGS.LOCAL_PORT, LP_HELP))
     print("  {},  {}          : {}.".format(FLAGS.S, FLAGS.SHELL, S_HELP))
     print("  {},  {}        : {}.".format(FLAGS.V, FLAGS.VERSION, V_HELP))
