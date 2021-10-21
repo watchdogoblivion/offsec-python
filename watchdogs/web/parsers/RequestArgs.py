@@ -49,7 +49,7 @@ class RequestArgs(Args):
     SR_HELP = "Shows the response body"
 
     parser = self.getParser()
-    required = parser.add_argument_group("Required arguments")
+    required = parser.add_argument_group("Required request arguments")
     required.add_argument("-rh", "--remote-host", required=True, help=RH_HELP, type=str, metavar="127.0.0.1")
     parser.add_argument("-s", "--secure", action="store_true", help=S_HELP)
     parser.add_argument("-pf", "--post-file", help=PF_HELP, type=str, metavar=EMPTY)

@@ -2,8 +2,8 @@
 # description: TODO
 # WatchDogs Args
 
-import argparse
-from argparse import ArgumentParser, Namespace
+from watchdogs.external import argparse
+from watchdogs.external.argparse import ArgumentParser, Namespace
 
 from watchdogs.utils import StringUtility
 
@@ -35,8 +35,8 @@ class Args(object):
 
   def __repr__(self):  #type: () -> str
     return str(vars(self))
-  
-  def getVersion(self): #type: () -> str
+
+  def getVersion(self):  #type: () -> str
     """Override this method to specify a version for the module"""
     return "No version specified"
 
