@@ -24,9 +24,17 @@
   "python.linting.pylintPath": "pylint",
   "python.linting.pylintEnabled": true,
   "python.formatting.yapfArgs": [
-    "--style={BASED_ON_STYLE: google, COLUMN_LIMIT: 110, INDENT_WIDTH: 2, , SPLIT_BEFORE_NAMED_ASSIGNS= False}"
+    "--style={BASED_ON_STYLE: google, COLUMN_LIMIT: 110, INDENT_WIDTH: 2, SPLIT_BEFORE_NAMED_ASSIGNS: False}"
+  ],
+  "python.linting.pylintArgs": [
+    "--indent-string='  '",
+    "--max-line-length=110",
+    "--disable=missing-function-docstring,missing-module-docstring,missing-docstring,wrong-import-order,superfluous-parens,consider-using-f-string,redefined-outer-name,broad-except,invalid-name"
   ],
   "[markdown]": {
-    "editor.defaultFormatter": "yzhang.markdown-all-in-one"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }

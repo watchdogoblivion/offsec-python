@@ -1,0 +1,7 @@
+#!/usr/bin/bash
+
+PIDS=("$@")
+for PID in ${PIDS[@]};
+do
+    kill -9 $PID
+done

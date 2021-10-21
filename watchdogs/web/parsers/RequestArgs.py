@@ -10,14 +10,15 @@ class RequestArgs(Args):
 
   VERSION = "Request version: 1.0"
 
-  def __init__(self, remoteHost=EMPTY, secure=False, postFile=EMPTY, httpProxy=EMPTY, httpsProxy=EMPTY,
-               disableVerification=False, readTimeout=None, filterLength=EMPTY, filterStatus=EMPTY,
-               filterIn=EMPTY, filterOut=EMPTY, showResponse=False):
-    #type: (str, bool, str, str, str, bool, int, str, str, str, str, bool) -> None
+  def __init__(self, remoteHost=EMPTY, secure=False, postFile=EMPTY, multiPart=False, httpProxy=EMPTY,
+               httpsProxy=EMPTY, disableVerification=False, readTimeout=None, filterLength=EMPTY,
+               filterStatus=EMPTY, filterIn=EMPTY, filterOut=EMPTY, showResponse=False):
+    #type: (str, bool, str, bool, str, str, bool, int, str, str, str, str, bool) -> None
     super(RequestArgs, self).__init__()
     self.remoteHost = remoteHost
     self.secure = secure
     self.postFile = postFile
+    self.multiPart = multiPart
     self.httpProxy = httpProxy
     self.httpsProxy = httpsProxy
     self.disableVerification = disableVerification
@@ -36,6 +37,7 @@ class RequestArgs(Args):
     S_HELP = "Specifies https."
     PF_HELP = ("Specify a file to send in a POST request."
                "\nThis flag is for file uploads only and should not be used for other POST requests")
+    MP_HELP = ("Specify this when the request is sending multipart data")
     HP_HELP = "Specify a proxy."
     SP_HELP = "Specify an ssl proxy"
     DV_HELP = "For https proxies, this flag will disable cert verification."
@@ -51,6 +53,7 @@ class RequestArgs(Args):
     required.add_argument("-rh", "--remote-host", required=True, help=RH_HELP, type=str, metavar="127.0.0.1")
     parser.add_argument("-s", "--secure", action="store_true", help=S_HELP)
     parser.add_argument("-pf", "--post-file", help=PF_HELP, type=str, metavar=EMPTY)
+    parser.add_argument("-mp", "--multi-part", action="store_true", help=MP_HELP)
     parser.add_argument("-hp", "--http-proxy", help=HP_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-sp", "--https-proxy", help=SP_HELP, type=str, metavar=EMPTY)
     parser.add_argument("-dv", "--disable-verification", action="store_true", help=DV_HELP, default=False)
