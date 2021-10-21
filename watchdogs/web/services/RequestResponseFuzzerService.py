@@ -120,7 +120,7 @@ class RequestResponseFuzzerService(RequestResponseService):
     unnumberedFuzz = self.getUnnumberedFuzz(requestBodyString)
     self.handleUnnumbered(unnumberedFuzz, indiciesOfSubstitutes, request, request.setRequestBodyString)
     self.updateLocatorData(indiciesOfSubstitutes, existingIndicies, variantLocator)
-    request.setRequestBodyString(requestBodyString)
+    request.setRequestBodyString(request.getRequestBodyString())
 
   def updateDictBodyLocator(self, request, existingIndicies, variantLocator):
     # type: (Request, list[int], VariantLocator) -> None

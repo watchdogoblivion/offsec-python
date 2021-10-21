@@ -138,7 +138,7 @@ class RequestParserService(Common):
         break
 
   def parseBody(self, requestArgs, request):  #type: (RequestArgs, Request) -> None
-    if (requestArgs.postFile):
+    if (requestArgs.postFile or requestArgs.multiPart):
       rawBodyLines = self.getRawBodyFiltered(request)
       rawBodyLinesLength = len(rawBodyLines)
 
