@@ -33,8 +33,22 @@ USC = "_"
 V1 = "v1"
 V2 = "v2"
 V3 = "v3"
+VERSION = "version"
 
-########## Delimiters ##########
+########## SQL ##########
+# MySQL: [#, --], MS SQL: [--], MS Access: [%00], Oracle: [--]
+SQL_COMMENTS = ["--", "#", "%00"]
+SQL_DELIMITERS = [" ", "/**/"]
+SQL_SCHEMATA = "information_schema.SCHEMATA"
+SQL_TABLES = "information_schema.tables"
+SQL_SCHEMA_NAME = "SCHEMA_NAME"
+SQL_TABLE_NAME = "table_name"
+SQL_COLUMN_NAME = "column_name"
+COUNT = "COUNT"
+LENGTH = "LENGTH"
+VALUE = "VALUE"
+
+########## General delimiters ##########
 D1 = ' : '
 D2 = ' :: '
 D3 = ' ::: '

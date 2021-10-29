@@ -157,6 +157,29 @@
         "u",
         "-il"
       ]
+    },
+    {
+      "name": "wbsql",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/wbsql",
+      "console": "integratedTerminal",
+      "args": [
+        "-rh",
+        "10.11.1.251",
+        "-if",
+        "${env:TEST_DATA}/burpRequest.txt",
+        "-t",
+        "t')",
+        "-wd",
+        "/**/",
+        "-co",
+        "#",
+        "-hp",
+        "127.0.0.1:8080",
+        "-pps",
+        "11"
+      ]
     }
   ]
 }
