@@ -15,15 +15,15 @@ from watchdogs.utils.Constants import (SQL_COLUMN_NAME, SQL_SCHEMA_NAME, SQL_SCH
 
 class BlindSQLRRView(object):
 
-  def start(self, allArgs, request, blindSQLRRService, helper):# pylint: disable=too-many-branches
+  def start(self, allArgs, request, blindSQLRRService, helper):# pylint: disable=too-many-branches,too-many-statements
     # type: (AllArgs, Request, BlindSQLRRService, BlindSQLRRHelper) -> None
     print("Options:\r\n")
-    print("1: Get database version")
-    print("2: Get current database name")
+    print("1: List database version")
+    print("2: List current database name")
     print("3: List all databases")
     print("4: List tables from database")
     print("5: List columns from a table")
-    print("6: Get row values for a column from a table from a database")
+    print("6: List row values for a column")
     print("Type 'exit' to exit")
 
     print("\r\n")
