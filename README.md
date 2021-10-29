@@ -69,9 +69,12 @@ These modules were built with Kali and python. Any os command will rely on linux
 "wrfuzzer" is the most used module.
 
 [Request Fuzzer module samples](docs/wrfuzzer.md)\
+[Blind SQL module samples](docs/wbsql.md)\
 [Set Java module samples](docs/wsetjava.md)\
 [Reverse TCP Basic module samples](docs/wrtcpb.md)\
 [Oracle Character Converter module samples](docs/woraclecc.md)\
 [File encoder module samples](docs/wfencoder.md)\
 [Encoding viewer module samples](docs/weviewer.md)\
 [Character Converter module samples](docs/wcharc.md)
+
+There are also [other](other/) scripts that may be little interest. The libraries they reference are quite useful.
