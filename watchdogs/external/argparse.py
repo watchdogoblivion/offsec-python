@@ -106,6 +106,14 @@ REMAINDER = '...'
 _UNRECOGNIZED_ARGS_ATTR = '_unrecognized_args'
 
 # =============================
+# FIX Argparse error
+# =============================
+try:
+  basestring
+except NameError:
+  basestring = str
+
+# =============================
 # Utility functions and classes
 # =============================
 
