@@ -2,14 +2,14 @@
 # description: TODO
 
 param (
-    [string]$LHost = "192.168.119.133",
+    [string]$LHost = "192.168.0.1",
     [string]$LPort = "80",
     [string]$File = "ipwsh.ps1",
-    [string]$RHost = "10.11.1.122",
+    [string]$RHost = "10.10.10.10",
 
     [switch]$WMIExec = $false,
-    [string]$User = "daisy",
-    [string]$Hash = "f6084ca1a4905c45747d4bdcc1fcab84",
+    [string]$User = "donny",
+    [string]$Hash = "b0bf81363146f9af0c636ef45d22b79d",
 
     [switch]$UAC = $false,
     [string]$Method = "oobe"

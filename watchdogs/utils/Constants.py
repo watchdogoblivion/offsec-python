@@ -47,6 +47,8 @@ SQL_COLUMN_NAME = "column_name"
 COUNT = "COUNT"
 LENGTH = "LENGTH"
 VALUE = "VALUE"
+DATABASE_TYPES = ["MSSQL", "MYSQL", "ORACLE", "PostgreSQL"]
+INJECTION_TYPES = ["SELECT", "INSERT", "UPDATE"]
 
 ########## General delimiters ##########
 D1 = ' : '

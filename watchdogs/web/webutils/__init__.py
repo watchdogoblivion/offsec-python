@@ -1,1 +1,2 @@
 from .BlindSQLRRQueries import BlindSQLRRQueries
+from .ErrorSQLIRRQueries import ErrorSQLIRRQueries

@@ -1,1 +1,2 @@
 from .RequestFuzzerScript import RequestFuzzerScript
+from .ErrorSQLIRRScript import ErrorSQLIRRScript

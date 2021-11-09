@@ -1,0 +1,14 @@
+#!/usr/bin/python
+
+# author: WatchDogOblivion
+# description: TODO
+# WatchDogs Error SQL Request Response a.k.a wbsql
+
+from watchdogs.web.scripts import ErrorSQLIRRScript
+
+def __main__():
+  # type: () -> None
+  ErrorSQLIRRScript().run()
+
+
+__main__()
