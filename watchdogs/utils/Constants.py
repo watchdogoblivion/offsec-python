@@ -34,6 +34,7 @@ V1 = "v1"
 V2 = "v2"
 V3 = "v3"
 VERSION = "version"
+VERSION_1_0 = "1.0"
 
 ########## SQL ##########
 # MySQL: [#, --], MS SQL: [--], MS Access: [%00], Oracle: [--]
@@ -72,6 +73,9 @@ APPLICATION_XHTML_XML = 'application/xhtml+xml'
 APPLICATION_XML = 'application/xml'
 WILDCARD = '*'
 MULTIPART_FORM_DATA = 'multipart/form-data'
+HTML = 'html'
+PLAIN = 'plain'
+XML = 'xml'
 TEXT_HTML = 'text/html'
 TEXT_PLAIN = 'text/plain'
 TEXT_XML = 'text/xml'
@@ -101,7 +105,12 @@ PUT = 'PUT'
 PATCH = 'PATCH'
 DELETE = 'DELETE'
 REQUEST_METHODS = [HEAD, OPTIONS, TRACE, CONNECT, GET, POST, PUT, PATCH, DELETE]
-
+FROM = 'From'
+TO = 'To'
+SUBJECT = 'Subject'
+ASCII = 'ascii'
+MIME_VERSION = "MIME-Version"
+ATTACHMENT = 'attachment'
 ########## Lowercase Alphabet ##########
 LA = 'a'
 LB = 'b'
