@@ -2,7 +2,7 @@
 
 # author: WatchDogOblivion
 # description: TODO
-# WatchDogs Error SQL Request Response a.k.a wbsql
+# WatchDogs Error SQL Request Response a.k.a wesqli
 
 from watchdogs.web.scripts import ErrorSQLIRRScript
 

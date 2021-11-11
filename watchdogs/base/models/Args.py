@@ -3,7 +3,7 @@
 # WatchDogs Args
 
 from watchdogs.external import argparse
-from watchdogs.external.argparse import ArgumentParser, Namespace
+from watchdogs.external.argparse import ArgumentParser, Namespace  # pylint: disable=unused-import
 
 from watchdogs.utils import StringUtility
 
@@ -51,7 +51,7 @@ class Args(object):
 
   def addArguments(self):  #type: () ->  Args
     """
-      Override and use this method to add arguments to the arg parser. It will be reused 
+      Override and use this method to add arguments to the arg parser. It will be reused
       in the combineArguments method to gather all the arguments needed into a single object
     """
     return self
