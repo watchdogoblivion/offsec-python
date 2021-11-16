@@ -5,7 +5,7 @@
     we are not allowed to use automation tools on the OSCP.
     Therefore, I created this custom module for my own usage.
 
-    #### Sample module wesqli
+#### Sample module wesqli
     wesqli -rh 10.11.1.229 -if burp.txt -t "1'" -sr -hp 127.0.0.1:8080 -o "DESC"
     Options:
 

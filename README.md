@@ -69,6 +69,7 @@ These modules were built with Kali and python. Any os command will rely on linux
 "wrfuzzer" is the most used module.
 
 [Request Fuzzer module samples](docs/wrfuzzer.md)\
+[TFTP module samples](docs/wtftp.md)\
 [SMTP module samples](docs/wsmtp.md)\
 [Blind SQL module samples](docs/wbsqli.md)\
 [Error SQL module samples](docs/wesqli.md)\

@@ -39,8 +39,11 @@ class FileArgs(Args):
     OF_HELP = "Specify the output file to write to."
 
     parser = self.getParser()
+
     required = parser.add_argument_group("Required file arguments")
     required.add_argument("-if", "--input-file", required=True, help=IF_HELP, type=str, metavar=EMPTY)
-    parser.add_argument("-of", "--output-file", help=OF_HELP, type=str, metavar=EMPTY)
+
+    optional = parser.add_argument_group("Optional file arguments")
+    optional.add_argument("-of", "--output-file", help=OF_HELP, type=str, metavar=EMPTY)
 
     return self

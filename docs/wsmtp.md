@@ -2,7 +2,7 @@
 
     This module is for sending smtp messages
 
-    #### Sample module wsmtp
+#### Sample module wsmtp
     wsmtp -rh 10.11.1.229 -n "sender" -p "spoiler" -se "sender@thinc.local" -re "reciever@thinc.local" -s "Updates" -b '
         Hey Reciever,
 

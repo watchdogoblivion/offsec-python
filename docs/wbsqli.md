@@ -5,7 +5,7 @@
     we are not allowed to use automation tools on the OSCP.
     Therefore, I created this custom module for my own usage.
 
-    #### Sample module wbsql
+#### Sample module wbsql
     wbsql -rh 10.11.1.251 -if burpRequest.txt -t "t')" -wd "/**/" -co "#" -hp 127.0.0.1:8080 -pps 11
     Options:
 

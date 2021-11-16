@@ -3,14 +3,16 @@
 # WatchDogs String Utility
 
 import re
-from typing import Any
+from typing import Any # pylint: disable=unused-import
 
 from watchdogs.utils.Constants import (EMPTY, USC)
+from watchdogs.utils.Constants import (FS, BS) # pylint: disable=unused-import
 
 class StringUtility(object):
 
   @staticmethod
-  def strTobool(string, truthyArray=["yes", "y", "true", "t"]):  #type: (str, list[str]) -> bool
+  def strTobool(string, truthyArray=["yes", "y", "true", "t"]): # pylint: disable=dangerous-default-value
+    #type: (str, list[str]) -> bool
     return string.lower() in truthyArray
 
   @staticmethod
@@ -107,3 +109,21 @@ class StringUtility(object):
     for decimal in deciArray:
       hexString += hex(int(decimal))
     return hexString
+
+  @staticmethod
+  def getFileName(name, repl=None):
+    #type:(str, str) -> str
+    fileName = name
+    if (FS in name):
+      if(repl):
+        fileName = name.replace(FS, repl)
+      else:
+        index = name.rfind(FS)
+        fileName = name[index + 1:]
+    if (BS in name):
+      if(repl):
+        fileName = name.replace(BS, repl)
+      else:
+        index = name.rfind(BS)
+        fileName = name[index + 1:]
+    return fileName
