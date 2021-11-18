@@ -1,0 +1,65 @@
+#!/bin/bash
+# author: WatchDogOblivion
+# description: TODO
+# WatchDogs Port Scan a.k.a wpscan
+
+host=10.5.5.11
+minPort=1
+maxPort=5
+specificPorts=()
+
+parseArgs(){
+    USAGE='usage: -ht 10.5.5.11 -mip 1 -mxp 5\n'
+    USAGE+='       -ht[--host] -mip [--minport] -mxp [--maxport] -sp [specificports] -h[--help]'
+
+    args=("$@")
+    for ((i = 0 ; i < $# ; i+=2)); do
+        arg=${args[i]}
+        value=${args[i+1]}
+        case $arg in
+            -ht|--host)
+            host=$value
+            ;;
+            -mip|--minport)
+            minPort=$value
+            ;;
+            -mxp|--maxport)
+            maxPort=$value
+            ;;
+            -sp|--specifyports)
+            specificPorts=($(echo $value | sed 's/,/ /g'))
+            ;;
+            -h|--help)
+            printf -- "$USAGE"
+            exit 0
+            ;;
+            *)
+            printf "\nUnknown option $arg\n"
+            printf "$USAGE"
+            exit 1
+            ;;
+        esac
+    done
+}
+
+scanPorts(){
+    for port in $(seq $minPort $maxPort); do
+        timeout .1 bash -c "echo >/dev/tcp/$host/$port" 2>/dev/null && echo "port $port is open"
+    done
+}
+
+scanSpecificPorts(){
+    specificPorts=("$@")
+    for port in "${specificPorts[@]}"; do
+        timeout .1 bash -c "echo >/dev/tcp/$host/$port" 2>/dev/null && echo "port $port is open"
+    done
+}
+
+parseArgs $@
+if (( ${#specificPorts[@]} == 0 )); then
+    scanPorts
+else
+    scanSpecificPorts ${specificPorts[@]}
+fi
+
+echo "Done"

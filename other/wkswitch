@@ -1,0 +1,10 @@
+#!/bin/bash
+# author: WatchDogOblivion
+# description: Simple script to kill miltiple processes quickly on linux
+# WatchDogs Kill switch a.k.a wkswitch
+
+PIDS=("$@")
+for PID in ${PIDS[@]};
+do
+    kill -9 $PID
+done
