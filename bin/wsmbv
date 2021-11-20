@@ -1,0 +1,114 @@
+#!/bin/bash
+# author: WatchDogOblivion
+# description:TODO
+# WatchDogs SMB/Samba version a.k.a wsmbv
+
+# tcpdump variables
+interface=''
+packetCount=10
+rHost="10.11.1.115"
+rPort=139
+filter="src $rHost and port $rPort"
+
+# xargs variables
+tcpdDelimiter='\n'
+
+# sed variables
+rSamba='[sS][aA][mM][bB][aA]\s*([0-9\.]+[a-ep0-9])'
+sedArg="s;.*$rSamba.*;\1;"
+
+# smbclient variables - Can leave these blank for anonymous check
+username=''
+password=''
+
+# File descriptor variables for stderr and stdout debugging
+debugLevel=0
+fd1='&1'
+NULL='/dev/null'
+tcpdOutput="1>$fd1 2>$NULL"
+smbcOutput="1>$NULL 2>$NULL"
+
+parseArgs() {
+    USAGE='usage: -rh 10.11.1.115 -rp 139 -u user -p pass -i tun0 -pc 10 -f port 139 \n'
+    USAGE+='       -rh[--remotehost] -rp[--remoteport] -u[--username] -p[--password] 
+       -i[--interface] -pc [--packetcount] -f [--filter] -dl [--debuglevel]
+       -h[--help]'
+
+    args=("$@")
+    for ((i = 0; i < $#; i += 2)); do
+        arg=${args[i]}
+        value=${args[i + 1]}
+        case $arg in
+        -i | --interface)
+            interface=$value
+            ;;
+        -pc | --packetcount)
+            packetcount=$value
+            ;;
+        -rh | --remotehost)
+            remoteHost=$value
+            ;;
+        -rp | --remoteport)
+            remotePort=$value
+            ;;
+        -f | --filter)
+            filter=$value
+            ;;
+        -u | --username)
+            username=$value
+            ;;
+        -p | --password)
+            password=$value
+            ;;
+        -dl | --debuglevel)
+            debugLevel=$value
+            ;;
+        -h | --help)
+            printf -- "$USAGE"
+            exit 0
+            ;;
+        *)
+            printf "\nUnknown option $arg\n"
+            printf "$USAGE"
+            exit 1
+            ;;
+        esac
+    done
+}
+
+setOutput() {
+    if [ $debugLevel -eq 1 ]; then
+        tcpdOutput="1>$fd1 2>$fd1"
+    elif [ $debugLevel -eq 2 ]; then
+        smbcOutput="1>$fd1 2>$fd1"
+    elif [ $debugLevel -eq 3 ]; then
+        tcpdOutput="1>$fd1 2>$fd1"
+        smbcOutput="1>$fd1 2>$fd1"
+    fi
+}
+
+# Note: I wrapped command args with a single quote for safe eval execution
+main() {
+    tcpdCommand="tcpdump -i '$interface' -n -A -c '$packetCount' -s0 '$filter' $tcpdOutput &"
+    smbcCommand="smbclient -L '$rHost' -U '$username'%'$password' $smbcOutput"
+
+    tcpd=$(
+        eval $tcpdCommand
+        eval $smbcCommand
+        wait
+    )
+    smbVersion=$(echo "$tcpd" | xargs -d "$tcpdDelimiter" | sed -E "$sedArg")
+
+    errorIndicator=$(echo $smbVersion | sed -E 's;.*([^0-9a-ep\.]).*;;')
+    if [ -z "$smbVersion" ]; then
+        echo "Version could not be obtained. Try checking 'help' or enabling debugging. i.e 'wsmbv -h or wsmbv -dl 3'"
+    elif [ -z "$errorIndicator" ]; then
+        echo "An error occured - $smbVersion"
+    else
+        echo "The SMB/Samba version for host $rHost is: $smbVersion"
+    fi
+}
+
+parseArgs $@
+setOutput
+main
