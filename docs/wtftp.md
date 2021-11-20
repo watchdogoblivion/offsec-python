@@ -22,3 +22,5 @@
         ...
         ('ASPNET_schema.xml\n', 'ASPNET_schema.xml\n')
         ('applicationHost.config', 'applicationHost.config')
+
+##### _All modules have helper flags -h and --help for more assistance._

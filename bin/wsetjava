@@ -142,8 +142,8 @@ class WSetJava():
     JAVAC = WSetJava.JAVAC
     JAVA_PATH = WSetJava.JAVA_PATHS[javaVersion].java
     JAVAC_PATH = WSetJava.JAVA_PATHS[javaVersion].javac
-    UPDATE_ALTS_INSTALL = "sudo update-alternatives --install "
-    UPDATE_ALTS_SET = "sudo update-alternatives --set "
+    UPDATE_ALTS_INSTALL = "update-alternatives --install "
+    UPDATE_ALTS_SET = "update-alternatives --set "
 
     installJava = "{}'/usr/bin/java' '{}' '{}' 0".format(UPDATE_ALTS_INSTALL, JAVA, JAVA_PATH)
     installJavac = "{}'/usr/bin/javac' '{}' '{}' 0".format(UPDATE_ALTS_INSTALL, JAVAC, JAVAC_PATH)

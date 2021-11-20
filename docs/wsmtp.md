@@ -42,3 +42,5 @@
         reply: retcode (250); Msg: Queued (0.032 seconds)
         data: (250, 'Queued (0.032 seconds)')
         Successfully sent email
+
+##### _All modules have helper flags -h and --help for more assistance._

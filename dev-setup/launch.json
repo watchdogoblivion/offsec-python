@@ -106,8 +106,7 @@
       "request": "launch",
       "program": "${workspaceFolder}/bin/wsetjava",
       "console": "integratedTerminal",
-      "args": ["-s", "java8"],
-      "sudo": true
+      "args": ["-s", "java8"]
     },
     {
       "name": "wrtcpb",

@@ -141,3 +141,5 @@
 
 
     Select an option (numerical value): exit
+
+##### _All modules have helper flags -h and --help for more assistance._

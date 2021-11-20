@@ -106,3 +106,5 @@
     username
     user_id
     email
+
+##### _All modules have helper flags -h and --help for more assistance._
