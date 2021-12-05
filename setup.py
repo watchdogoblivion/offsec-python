@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name="offsec-python",
+    name="watchdogs-offsec",
     version="0.0.1",
     description="A watchdogs python library",
     author="WatchDogOblivion",

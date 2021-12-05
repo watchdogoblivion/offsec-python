@@ -1,0 +1,13 @@
+#!/usr/bin/python
+
+# author: WatchDogOblivion
+# description: TODO
+# WatchDogs SMTP Script a.k.a wsmtp
+
+from watchdogs.mail.scripts import SMTPScript
+
+def __main__():  #type: () -> None
+  SMTPScript().run()
+
+
+__main__()

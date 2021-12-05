@@ -1,0 +1,14 @@
+#!/usr/bin/python
+
+# author: WatchDogOblivion
+# description: TODO
+# WatchDogs TFTP Script a.k.a wtftp
+
+from watchdogs.io.scripts import TFTPScript
+
+
+def __main__():  #type: () -> None
+  TFTPScript().run()
+
+
+__main__()

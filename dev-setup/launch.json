@@ -106,8 +106,7 @@
       "request": "launch",
       "program": "${workspaceFolder}/bin/wsetjava",
       "console": "integratedTerminal",
-      "args": ["-s", "java8"],
-      "sudo": true
+      "args": ["-s", "java8"]
     },
     {
       "name": "wrtcpb",
@@ -159,10 +158,10 @@
       ]
     },
     {
-      "name": "wbsql",
+      "name": "wbsqli",
       "type": "python",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/wbsql",
+      "program": "${workspaceFolder}/bin/wbsqli",
       "console": "integratedTerminal",
       "args": [
         "-rh",
@@ -179,6 +178,25 @@
         "127.0.0.1:8080",
         "-pps",
         "11"
+      ]
+    },
+    {
+      "name": "wesqli",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/wesqli",
+      "console": "integratedTerminal",
+      "args": [
+        "-rh",
+        "10.11.1.229",
+        "-if",
+        "${env:TEST_DATA}/burp.txt",
+        "-t",
+        "1'",
+        "-hp",
+        "127.0.0.1:8080",
+        "-o",
+        "DESC"
       ]
     }
   ]

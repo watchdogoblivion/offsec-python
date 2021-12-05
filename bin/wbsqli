@@ -2,7 +2,7 @@
 
 # author: WatchDogOblivion
 # description: TODO
-# WatchDogs Blind SQL Request Response a.k.a wbsql
+# WatchDogs Blind SQL Request Response a.k.a wbsqli
 
 from watchdogs.web.scripts.BlindSQLRRScript import BlindSQLRRScript
 

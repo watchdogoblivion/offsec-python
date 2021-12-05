@@ -25,17 +25,17 @@
 
     wsetjava -s java11
         Setting version: java11
-        Executing comand: sudo update-alternatives --install '/usr/bin/java'
+        Executing comand: update-alternatives --install '/usr/bin/java'
         'java' '/usr/lib/jvm/java-11-openjdk-amd64/bin/java' 0
 
-        Executing comand: sudo update-alternatives --install '/usr/bin/javac'
+        Executing comand: update-alternatives --install '/usr/bin/javac'
         'javac' '/usr/lib/jvm/java-11-openjdk-amd64/bin/javac' 0
 
-        Executing comand: sudo update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+        Executing comand: update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
         update-alternatives: using /usr/lib/jvm/java-11-openjdk-amd64/bin/java to provide /usr/bin/java
         (java) in manual mode
 
-        Executing comand: sudo update-alternatives --set javac /usr/lib/jvm/java-11-openjdk-amd64/bin/javac
+        Executing comand: update-alternatives --set javac /usr/lib/jvm/java-11-openjdk-amd64/bin/javac
         update-alternatives: using /usr/lib/jvm/java-11-openjdk-amd64/bin/javac to provide /usr/bin/javac
         (javac) in manual mode
 

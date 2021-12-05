@@ -5,6 +5,7 @@
 param (
     [switch]$Services = $false,
     [switch]$Terminals = $false,
+    [switch]$All = $false,
     [switch]$Groups = $false,
     [switch]$SPN = $false,
     [string]$SPNString = "*http*"
@@ -19,7 +20,7 @@ $Searcher = New-Object System.DirectoryServices.DirectorySearcher([ADSI]$SearchS
 $Entry = New-Object System.DirectoryServices.DirectoryEntry
 $Searcher.SearchRoot = $Entry
 
-if ($Services -or $Terminals) {
+if ($Services -or $Terminals -or $All) {
     if ($Services) {
         $Searcher.filter = "samAccountType=805306368"
     }

@@ -2,10 +2,10 @@
 # description: TODO
 # WatchDogs AllArgs
 
-from typing import Type, Any
+from typing import Type, Any  # pylint: disable=unused-import
 
-from watchdogs.utils.Constants import T
-from watchdogs.base.models import Args
+from watchdogs.utils.Constants import T  # pylint: disable=unused-import
+from watchdogs.base.models import Args  # pylint: disable=unused-import
 
 
 class AllArgs(object):
@@ -31,7 +31,7 @@ class AllArgs(object):
 
   def removeArgs(self, arg):  #type: (Args) -> None
     self.__argsList.remove(arg)
-  
+
   def parseAndSetArguments(self, argsList):   #type: (list[Args]) -> None
     for arg in argsList:
       arg.parseArguments()
@@ -40,7 +40,7 @@ class AllArgs(object):
   def processAllArguments(self):  #type: () -> AllArgs
     argsList = self.__argsList
 
-    for argsIndex in range(len(argsList)):
+    for argsIndex in range(len(argsList)):  # pylint: disable=consider-using-enumerate
       arg = argsList[argsIndex]
       if (argsIndex == 0):
         arg.defaultArguments(arg.getVersion())
@@ -54,7 +54,7 @@ class AllArgs(object):
     argsList = self.__argsList
     parser = None
 
-    for argsIndex in range(len(argsList)):
+    for argsIndex in range(len(argsList)):  # pylint: disable=consider-using-enumerate
       arg = argsList[argsIndex]
       if (argsIndex == 0):
         parser = arg.getParser()
