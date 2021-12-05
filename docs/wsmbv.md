@@ -16,6 +16,8 @@
             An error occured - tcpdump: tun0: You don't have permission to capture on that device (socket: Operation not permitted)
         sudo wsmbv -dl 1
             An error occured - tcpdump: : No such device exists (SIOCGIFHWADDR: No such device)
+    protocol negotiation failed: NT_STATUS_CONNECTION_DISCONNECTED
+    address sudo issue
 
 
 ##### _All modules have helper flags -h and --help for more assistance._

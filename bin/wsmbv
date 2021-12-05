@@ -8,7 +8,8 @@ interface=''
 packetCount=10
 rHost="10.11.1.115"
 rPort=139
-filter="src $rHost and port $rPort"
+filter=""
+timeout="15s"
 
 # xargs variables
 tcpdDelimiter='\n'
@@ -32,12 +33,16 @@ parseArgs() {
     USAGE='usage: -rh 10.11.1.115 -rp 139 -u user -p pass -i tun0 -pc 10 -f port 139 \n'
     USAGE+='       -rh[--remotehost] -rp[--remoteport] -u[--username] -p[--password] 
        -i[--interface] -pc [--packetcount] -f [--filter] -dl [--debuglevel]
-       -h[--help]'
+       -t[--timeout] -h[--help]'
 
     args=("$@")
     for ((i = 0; i < $#; i += 2)); do
         arg=${args[i]}
         value=${args[i + 1]}
+        if [ "${value:0:1}" == "-" ]; then
+            ((i = i - 1))
+            value=''
+        fi
         case $arg in
         -i | --interface)
             interface=$value
@@ -52,7 +57,20 @@ parseArgs() {
             remotePort=$value
             ;;
         -f | --filter)
-            filter=$value
+            if [ "$filter" == "default" ]; then
+                filter="src $remoteHost and port $remotePort"
+            else
+                filter=$value
+                nextValue=${args[i + 2]}
+                while [[ ! -z "${nextValue:0:1}" ]] && [[ "${nextValue:0:1}" != "-" ]] && [[ i -lt $# ]]; do
+                    filter="$filter $nextValue"
+                    ((i = i + 1))
+                    nextValue=${args[i + 2]}
+                done
+            fi
+            ;;
+        -t | --timeout)
+            timeout=$value
             ;;
         -u | --username)
             username=$value
@@ -74,6 +92,7 @@ parseArgs() {
             ;;
         esac
     done
+
 }
 
 setOutput() {
@@ -89,9 +108,10 @@ setOutput() {
 
 # Note: I wrapped command args with a single quote for safe eval execution
 main() {
-    tcpdCommand="tcpdump -i '$interface' -n -A -c '$packetCount' -s0 '$filter' $tcpdOutput &"
-    smbcCommand="smbclient -L '$rHost' -U '$username'%'$password' $smbcOutput"
-
+    tcpdCommand="timeout $timeout tcpdump -i '$interface' -n -A -c '$packetCount' -s0 '$filter' $tcpdOutput &"
+    echo "$tcpdCommand"
+    smbcCommand="smbclient -L '$remoteHost' -U '$username'%'$password' $smbcOutput"
+    echo "$smbcCommand"
     tcpd=$(
         eval $tcpdCommand
         eval $smbcCommand

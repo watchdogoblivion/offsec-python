@@ -7,6 +7,7 @@ from collections import OrderedDict
 
 from watchdogs.io.parsers import FileArgs
 from watchdogs.base.models import AllArgs, Common
+from watchdogs.utils.StringUtility import StringUtility
 from watchdogs.web.models import WebFile
 from watchdogs.web.parsers import RequestArgs
 from watchdogs.web.models.Requests import Request
@@ -159,7 +160,7 @@ class RequestParserService(Common):
             " flag to send JSON or standard form data.")
         exit()
     else:
-      request.setRequestBodyString(request.getRawBody())
+      request.setRequestBodyString(StringUtility.stringDoublePrefix(request.getRawBody()))
 
   def parseFile(self, allArgs):  # type: (AllArgs) -> Request
     requestArgs = allArgs.getArgs(RequestArgs)

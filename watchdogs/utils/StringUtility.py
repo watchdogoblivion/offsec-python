@@ -3,15 +3,16 @@
 # WatchDogs String Utility
 
 import re
-from typing import Any # pylint: disable=unused-import
+from typing import Any  # pylint: disable=unused-import
 
 from watchdogs.utils.Constants import (EMPTY, USC)
-from watchdogs.utils.Constants import (FS, BS) # pylint: disable=unused-import
+from watchdogs.utils.Constants import (FS, BS, LFN, LFR, LFRN)  # pylint: disable=unused-import
+
 
 class StringUtility(object):
 
   @staticmethod
-  def strTobool(string, truthyArray=["yes", "y", "true", "t"]): # pylint: disable=dangerous-default-value
+  def strTobool(string, truthyArray=["yes", "y", "true", "t"]):  # pylint: disable=dangerous-default-value
     #type: (str, list[str]) -> bool
     return string.lower() in truthyArray
 
@@ -47,7 +48,7 @@ class StringUtility(object):
     return specificationArray
 
   @staticmethod
-  def toHexFormat(string): #type:(str) -> str
+  def toHexFormat(string):  #type:(str) -> str
     hexString = ""
     hexFormat = "0x{:02x}"
     for charachter in string:
@@ -115,15 +116,24 @@ class StringUtility(object):
     #type:(str, str) -> str
     fileName = name
     if (FS in name):
-      if(repl):
+      if (repl):
         fileName = name.replace(FS, repl)
       else:
         index = name.rfind(FS)
         fileName = name[index + 1:]
     if (BS in name):
-      if(repl):
+      if (repl):
         fileName = name.replace(BS, repl)
       else:
         index = name.rfind(BS)
         fileName = name[index + 1:]
     return fileName
+
+  @staticmethod
+  def stringDoublePrefix(string):
+    #type:(str) -> str
+    doubles = [LFN + LFN, LFN + LFR, LFR + LFR, LFR + LFN, LFRN + LFRN]
+    for double in doubles:
+      if (string.startswith(double)):
+        string = string = string[2:]
+    return string
